@@ -8,6 +8,8 @@ Agent-first setup and onboarding instructions are documented in [`AGENTS_README.
 
 Release automation and distribution notes are documented in [`docs/releasing.md`](docs/releasing.md).
 
+[![asciicast](https://asciinema.org/a/o2D10e4PL6Qb6JvQ.svg)](https://asciinema.org/a/o2D10e4PL6Qb6JvQ)
+
 ## Why
 
 Most agent tools only read skill folders at the first level of their skills directory. That works for a few skills, but it becomes messy once you want to group them by source or topic.
