@@ -1,0 +1,226 @@
+scripts/release-common.sh
+  b8004d8caac07f82 1-100
+VERSION
+  b8004d8caac07f82 1
+internal/config/registry_test.go
+  b8004d8caac07f82 1-60
+.github/workflows/release.yml
+  b8004d8caac07f82 1-33
+internal/config/path_test.go
+  b8004d8caac07f82 1-60
+internal/watch/watch_test.go
+  b8004d8caac07f82 10-36
+packages/npm/scripts/postinstall.js
+  b8004d8caac07f82 5-142
+cmd/prompt.go
+  b8004d8caac07f82 8-62
+internal/sync/sync_test.go
+  b8004d8caac07f82 1-97
+cmd/watched.go
+  b8004d8caac07f82 16-141
+openspec/config.yaml
+  b8004d8caac07f82 1-20
+release-please-config.alpha.json
+  b8004d8caac07f82 1-28
+packages/npm/package.json
+  b8004d8caac07f82 3
+openspec/changes/build-skill-organizer-cli/tasks.md
+  b8004d8caac07f82 9-13
+cmd/move_unmanaged.go
+  b8004d8caac07f82 5-157
+internal/mover/mover.go
+  b8004d8caac07f82 1-59
+.goreleaser.yaml
+  b8004d8caac07f82 60-79
+cmd/status_render.go
+  b8004d8caac07f82 20-107
+.opencode/commands/opsx-apply.md
+  b8004d8caac07f82 1-149
+internal/sync/sync.go
+  b8004d8caac07f82 1-166
+cmd/logo.go
+  84d8ebb04e0058d8 1-3,12-14,23,29,35-36
+  b8004d8caac07f82 4,6-11,15-22,24-28,30-34,37-183
+internal/config/discovery.go
+  b8004d8caac07f82 15-73
+openspec/changes/build-skill-organizer-cli/specs/skill-status-and-control/spec.md
+  b8004d8caac07f82 1-30
+internal/skills/frontmatter.go
+  b8004d8caac07f82 1-249
+internal/service/service.go
+  b8004d8caac07f82 21
+.github/workflows/publish-npm.yml
+  b8004d8caac07f82 1-44
+.opencode/skills/openspec-explore/SKILL.md
+  b8004d8caac07f82 1-288
+scripts/release-stable.sh
+  b8004d8caac07f82 1-15
+internal/config/path.go
+  b8004d8caac07f82 1-51
+internal/logging/logging.go
+  b8004d8caac07f82 1-158
+cmd/service.go
+  b8004d8caac07f82 22-108
+cmd/root.go
+  b8004d8caac07f82 21-36,44-45
+  84d8ebb04e0058d8 42
+cmd/about.go
+  b8004d8caac07f82 16
+  84d8ebb04e0058d8 1-15,17-18,23-29
+  h_a4417d1a5d273e 19-22
+internal/skills/scanner_test.go
+  b8004d8caac07f82 1-76
+.gitignore
+  b8004d8caac07f82 8
+packages/npm/bin/skill-organizer.js
+  b8004d8caac07f82 1-22
+docs/releasing.md
+  b8004d8caac07f82 15-251
+packages/npm/README.md
+  84d8ebb04e0058d8 5-6
+cmd/status.go
+  b8004d8caac07f82 1-27
+.github/workflows/ci.yml
+  b8004d8caac07f82 12-21
+internal/watch/watch_reload_test.go
+  b8004d8caac07f82 39-48
+CHANGELOG.md
+  b8004d8caac07f82 1-7
+AGENTS_README.md
+  84d8ebb04e0058d8 1-53,55-129
+  b8004d8caac07f82 54,130
+cmd/edit.go
+  b8004d8caac07f82 17-64
+openspec/changes/build-skill-organizer-cli/specs/location-configuration/spec.md
+  b8004d8caac07f82 3-19
+internal/config/registry.go
+  b8004d8caac07f82 1-140
+cmd/onboard.go
+  h_a4417d1a5d273e 35
+  b8004d8caac07f82 12-28,31,56-217
+  84d8ebb04e0058d8 30
+internal/status/status.go
+  b8004d8caac07f82 36-186
+openspec/changes/build-skill-organizer-cli/design.md
+  b8004d8caac07f82 12-66
+.opencode/commands/opsx-propose.md
+  b8004d8caac07f82 1-103
+cmd/enable.go
+  b8004d8caac07f82 1-41
+.opencode/skills/openspec-archive-change/SKILL.md
+  b8004d8caac07f82 1-114
+openspec/changes/build-skill-organizer-cli/specs/managed-skill-sync/spec.md
+  b8004d8caac07f82 1-37
+internal/watch/watch.go
+  b8004d8caac07f82 55-250
+cmd/add.go
+  b8004d8caac07f82 16-69
+.github/workflows/release-please.yml
+  b8004d8caac07f82 15-45
+cmd/project.go
+  b8004d8caac07f82 1-16
+README.md
+  b8004d8caac07f82 25-168
+  84d8ebb04e0058d8 7-8
+internal/config/registry_roundtrip_test.go
+  b8004d8caac07f82 1-95
+internal/mover/mover_test.go
+  b8004d8caac07f82 1-59
+internal/sync/manifest.go
+  b8004d8caac07f82 1-84
+cmd/context.go
+  b8004d8caac07f82 22
+main.go
+  b8004d8caac07f82 1-15
+scripts/release-beta.sh
+  b8004d8caac07f82 1-14
+openspec/changes/build-skill-organizer-cli/.openspec.yaml
+  b8004d8caac07f82 1-2
+.opencode/commands/opsx-archive.md
+  b8004d8caac07f82 1-154
+release-please-manifest.json
+  b8004d8caac07f82 2
+cmd/remove.go
+  b8004d8caac07f82 16-49
+internal/config/config.go
+  b8004d8caac07f82 16-22
+release-please-config.stable.json
+  b8004d8caac07f82 1-24
+openspec/changes/build-skill-organizer-cli/proposal.md
+  b8004d8caac07f82 3-35
+cmd/sync.go
+  b8004d8caac07f82 24
+openspec/changes/build-skill-organizer-cli/specs/watched-location-registry/spec.md
+  b8004d8caac07f82 4-26
+internal/status/status_test.go
+  b8004d8caac07f82 26-71
+.opencode/skills/openspec-propose/SKILL.md
+  b8004d8caac07f82 1-110
+docs/homebrew-formula-template.md
+  b8004d8caac07f82 1-22
+cmd/skill.go
+  h_a4417d1a5d273e 8
+  b8004d8caac07f82 1-7,9-16
+internal/skills/scanner.go
+  b8004d8caac07f82 1-142
+go.mod
+  b8004d8caac07f82 1-28
+.opencode/skills/openspec-apply-change/SKILL.md
+  b8004d8caac07f82 1-156
+cmd/disable.go
+  b8004d8caac07f82 1-41
+release-please-config.beta.json
+  b8004d8caac07f82 1-28
+scripts/release-alpha.sh
+  b8004d8caac07f82 1-14
+cmd/watch.go
+  b8004d8caac07f82 15-32
+internal/skills/frontmatter_test.go
+  b8004d8caac07f82 1-97
+.opencode/commands/opsx-explore.md
+  b8004d8caac07f82 1-170
+UBIQUITOUS_LANGUAGE.md
+  b8004d8caac07f82 10-62
+cmd/assets/ascii-text-art.txt
+  b8004d8caac07f82 1-6
+internal/config/discovery_test.go
+  b8004d8caac07f82 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a72955fb06a73d31ed34a97e94000e783d168707",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 204,
+      "total_deletions": 0,
+      "accepted_lines": 168,
+      "overriden_lines": 4
+    },
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 4600,
+      "total_deletions": 482,
+      "accepted_lines": 4363,
+      "overriden_lines": 2
+    }
+  },
+  "humans": {
+    "h_a4417d1a5d273e": {
+      "author": "Sergio Carracedo"
+    }
+  }
+}
