@@ -1,0 +1,27 @@
+release-please-config.beta.json
+  84d8ebb04e0058d8 10
+release-please-config.alpha.json
+  84d8ebb04e0058d8 10
+release-please-config.stable.json
+  84d8ebb04e0058d8 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "2ca4d0450dc641ec72608fbadc4660f9a8feb330",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 12,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
