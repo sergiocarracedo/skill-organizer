@@ -6,7 +6,7 @@ This project uses:
 - [Release Please](https://github.com/googleapis/release-please) for version bumps, changelog, and release PRs
 - [GoReleaser](https://goreleaser.com/) for cross-platform GitHub release binaries
 
-The current phase is **alpha**.
+The current phase supports `alpha`, `beta`, and stable releases, with `main` used for stable tags.
 
 ## Versioning
 
@@ -69,9 +69,9 @@ Current repository automation supports separate release tracks:
 
 1. Merge conventional-commit changes into `alpha`.
 2. Release Please opens or updates a release PR.
-3. Merge the release PR.
+3. CI passes on the release PR and the repository auto-merges it.
 4. Release Please creates a tag and GitHub prerelease.
-5. The release workflow runs GoReleaser and uploads binaries.
+5. The release workflow runs GoReleaser, uploads binaries, and publishes npm.
 
 For a local pre-flight check on the `alpha` branch, you can run:
 
@@ -88,15 +88,15 @@ This helper validates:
 - `go build ./...`
 - npm wrapper script syntax
 
-It also warns if `NPM_TOKEN` is not set in the current environment.
+It does not require `NPM_TOKEN` for CI publishing because npm uses trusted publishing.
 
 ### Beta releases
 
 1. Merge stabilization changes into `beta`.
 2. Release Please opens or updates a beta release PR.
-3. Merge the release PR.
+3. CI passes on the release PR and the repository auto-merges it.
 4. Release Please creates a beta tag and GitHub prerelease.
-5. The release workflow runs GoReleaser and uploads binaries.
+5. The release workflow runs GoReleaser, uploads binaries, and publishes npm.
 
 For a local pre-flight check on the `beta` branch, you can run:
 
@@ -112,9 +112,9 @@ This helper validates the same shared checks as alpha, but requires:
 ### Stable releases
 
 1. Merge release-ready changes into `main`.
-2. Merge the Release Please release PR.
+2. CI passes on the Release Please PR and the repository auto-merges it.
 3. Release Please creates the stable tag and GitHub release.
-4. GoReleaser uploads release artifacts.
+4. GoReleaser uploads release artifacts, updates Homebrew, and publishes npm.
 
 For a local pre-flight check on the `main` branch, you can run:
 
@@ -127,9 +127,8 @@ This helper validates the same shared checks, but requires:
 - current branch is `main`
 - current version is stable with no prerelease suffix
 
-It also warns if either of these environment variables are missing:
+It also warns if this environment variable is missing:
 
-- `NPM_TOKEN`
 - `HOMEBREW_TAP_GITHUB_TOKEN`
 
 ## GitHub Actions
@@ -166,7 +165,8 @@ packages/npm
 ```
 
 The npm package downloads the matching prebuilt GitHub Release binary during `postinstall`.
-It also verifies the archive against the published `checksums.txt` file before extraction.
+It verifies the archive against the published `checksums.txt` file before extraction.
+Publishing uses GitHub Actions trusted publishing instead of an `NPM_TOKEN`.
 
 Recommended tags:
 
@@ -185,9 +185,9 @@ npm i -g skill-organizer
 What you need to do:
 
 1. Reserve the npm package name.
-2. Add an `NPM_TOKEN` secret to GitHub Actions.
+2. Configure npm trusted publishing for this repository.
 3. Confirm the `name`, `homepage`, `repository`, and `bugs` fields in `packages/npm/package.json`.
-4. Publish by pushing a release tag or merging a Release Please PR that creates one.
+4. Publish by letting the release workflow run from the tag created by Release Please.
 
 The publish workflow determines the dist-tag automatically:
 
@@ -217,6 +217,7 @@ What you need to do:
 1. Create the tap repository.
 2. Add a token with permission to push formula updates to the tap repo.
 3. Review the generated brew metadata in `.goreleaser.yaml`.
+4. Let stable release tags on `main` drive formula updates automatically.
 
 The repository already includes a stable-only GoReleaser `brews` section. Because it uses `skip_upload: auto`, prerelease tags are ignored automatically.
 

@@ -45,3 +45,18 @@ jobs:
 
       - name: Publish package
         run: npm publish --tag "${{ steps.meta.outputs.dist_tag }}" --access public
+
+      - name: Verify published package
+        run: |
+          for attempt in 1 2 3 4 5; do
+            PUBLISHED_VERSION=$(npm view skill-organizer version)
+            if [[ "$PUBLISHED_VERSION" == "${{ steps.meta.outputs.version }}" ]]; then
+              break
+            fi
+            if [[ "$attempt" -eq 5 ]]; then
+              echo "expected npm version ${{ steps.meta.outputs.version }}, got $PUBLISHED_VERSION"
+              exit 1
+            fi
+            sleep 5
+          done
+          npm view skill-organizer dist-tags --json

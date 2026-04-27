@@ -10,6 +10,47 @@ Release automation and distribution notes are documented in [`docs/releasing.md`
 
 [![asciicast](https://asciinema.org/a/o2D10e4PL6Qb6JvQ.svg)](https://asciinema.org/a/o2D10e4PL6Qb6JvQ)
 
+## Table Of Contents
+
+- [Getting Started](#getting-started)
+- [Why](#why)
+- [Organized Source To Flat Target](#organized-source-to-flat-target)
+- [How It Works](#how-it-works)
+- [Layout](#layout)
+- [Commands](#commands)
+- [Disable Skills Without Deleting Them](#disable-skills-without-deleting-them)
+- [Example Demo Flow](#example-demo-flow)
+- [Example Status Output](#example-status-output)
+
+## Getting Started
+
+Install `skill-organizer` using one of the supported distribution channels:
+
+```bash
+npm i -g skill-organizer
+brew tap sergiocarracedo/tap
+brew install skill-organizer
+```
+
+If you prefer a direct binary download, use the GitHub Releases page:
+
+- https://github.com/sergiocarracedo/skill-organizer/releases
+
+Then verify the CLI is available:
+
+```bash
+skill-organizer --version
+```
+
+For a first-time setup, use the interactive onboarding flow:
+
+```bash
+skill-organizer onboard
+skill-organizer status
+```
+
+If you want agent-oriented setup guidance for `.agents`, Claude Code, Codex, or Antigravity, see [`AGENTS_README.md`](AGENTS_README.md).
+
 ## Why
 
 Most agent tools only read skill folders at the first level of their skills directory. That works for a few skills, but it becomes messy once you want to group them by source or topic.
