@@ -1,0 +1,29 @@
+docs/asciinema-install-move-demo.cast
+  b8004d8caac07f82 1-112
+scripts/asciinema-install-move-demo.sh
+  b8004d8caac07f82 9-12,25,30-34
+internal/skills/scanner.go
+  b8004d8caac07f82 101-108
+internal/skills/scanner_test.go
+  b8004d8caac07f82 67-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "2cfb036a80c54258588bf62d9e77702eed37ec9c",
+  "prompts": {
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 145,
+      "total_deletions": 103,
+      "accepted_lines": 145,
+      "overriden_lines": 0
+    }
+  }
+}
