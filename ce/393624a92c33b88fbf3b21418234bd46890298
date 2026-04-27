@@ -1,0 +1,29 @@
+.github/workflows/publish-npm.yml
+  84d8ebb04e0058d8 48-62
+README.md
+  84d8ebb04e0058d8 13-53
+docs/releasing.md
+  84d8ebb04e0058d8 9,72,74,91,97,99,115,117,130,168-169,188,190,220
+packages/npm/README.md
+  84d8ebb04e0058d8 13-18,22,24-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "ce393624a92c33b88fbf3b21418234bd46890298",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 87,
+      "total_deletions": 18,
+      "accepted_lines": 82,
+      "overriden_lines": 0
+    }
+  }
+}
