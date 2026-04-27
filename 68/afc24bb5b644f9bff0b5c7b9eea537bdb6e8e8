@@ -1,0 +1,44 @@
+cmd/status_render.go
+  84d8ebb04e0058d8 30
+internal/config/discovery_test.go
+  84d8ebb04e0058d8 48-99
+cmd/prompt.go
+  84d8ebb04e0058d8 5,7,9,11,47-126,176-351
+cmd/context_test.go
+  84d8ebb04e0058d8 1-103
+cmd/root.go
+  84d8ebb04e0058d8 30-31
+cmd/move_unmanaged.go
+  84d8ebb04e0058d8 5,8,10-11,95-96,118-121,123,128-139,143-169,208-285
+cmd/context.go
+  84d8ebb04e0058d8 4,7,12-18,20,25,29-33,36-42,44-47,49-61,65-73,78
+cmd/prompt_test.go
+  84d8ebb04e0058d8 1-71
+internal/config/discovery.go
+  84d8ebb04e0058d8 95,114-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "68afc24bb5b644f9bff0b5c7b9eea537bdb6e8e8",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 752,
+      "total_deletions": 101,
+      "accepted_lines": 703,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_a4417d1a5d273e": {
+      "author": "Sergio Carracedo"
+    }
+  }
+}
