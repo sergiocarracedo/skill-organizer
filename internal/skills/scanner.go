@@ -98,7 +98,14 @@ func ResolveSourceSkill(locationRoot, input string) (Skill, error) {
 		return Skill{}, fmt.Errorf("resolve source root: %w", err)
 	}
 
-	path, err := configpkg.ResolvePath(input)
+	path := strings.TrimSpace(input)
+	if path == "" {
+		return Skill{}, fmt.Errorf("source path cannot be empty")
+	}
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(locationRoot, path)
+	}
+	path, err = configpkg.ResolvePath(path)
 	if err != nil {
 		return Skill{}, fmt.Errorf("resolve source path: %w", err)
 	}

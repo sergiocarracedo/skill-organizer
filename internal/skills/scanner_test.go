@@ -64,6 +64,21 @@ func TestResolveSourceSkill(t *testing.T) {
 	}
 }
 
+func TestResolveSourceSkillUsesConfiguredSourceRootForRelativePaths(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "thirdparty", "asciinema", "asciinema-recorder")
+	createSkill(t, dir, "asciinema-recorder")
+
+	skill, err := ResolveSourceSkill(root, "thirdparty/asciinema/asciinema-recorder")
+	if err != nil {
+		t.Fatalf("ResolveSourceSkill() error = %v", err)
+	}
+
+	if skill.RelativePath != "thirdparty/asciinema/asciinema-recorder" {
+		t.Fatalf("ResolveSourceSkill() relative path = %q, want %q", skill.RelativePath, "thirdparty/asciinema/asciinema-recorder")
+	}
+}
+
 func createSkill(t *testing.T, dir string, name string) {
 	t.Helper()
 	if err := os.MkdirAll(dir, 0o755); err != nil {
