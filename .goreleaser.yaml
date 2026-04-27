@@ -18,9 +18,14 @@ builds:
       - darwin
       - windows
     goarch:
+      - arm
       - amd64
       - arm64
     ignore:
+      - goos: darwin
+        goarch: arm
+      - goos: windows
+        goarch: arm
       - goos: windows
         goarch: arm64
     ldflags:
