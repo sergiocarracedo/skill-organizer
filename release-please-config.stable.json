@@ -5,14 +5,11 @@
       "release-type": "simple",
       "include-component-in-tag": false,
       "include-v-in-tag": true,
+      "version-file": "VERSION",
       "pull-request-title-pattern": "chore: release ${version}",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "extra-files": [
-        {
-          "type": "plain-text",
-          "path": "VERSION"
-        },
         {
           "type": "json",
           "path": "packages/npm/package.json",
