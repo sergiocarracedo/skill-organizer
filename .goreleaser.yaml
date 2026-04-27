@@ -59,6 +59,7 @@ changelog:
 release:
   prerelease: auto
   make_latest: false
+  replace_existing_artifacts: true
 
 snapshot:
   version_template: "{{ .Version }}-next"
