@@ -2,9 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
+	"atomicgo.dev/keyboard"
+	"atomicgo.dev/keyboard/keys"
 	"github.com/pterm/pterm"
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	"github.com/spf13/cobra"
@@ -88,29 +92,8 @@ func chooseUnmanagedMovesWithDefaults(location configpkg.Location, moves []mover
 	for _, name := range defaultSelected {
 		selected[name] = true
 	}
-	options := make([]string, 0, len(moves)+1)
-	options = append(options, toggleAllOption)
-	for _, move := range moves {
-		options = append(options, move.Name)
-	}
-
-	for {
-		defaults := selectedMoveNames(selected)
-		choices, err := selectMultiple(fmt.Sprintf("Select unmanaged target entries to move (%d found)", len(moves)), options, defaults)
-		if err != nil {
-			return nil, err
-		}
-
-		if includesOption(choices, toggleAllOption) {
-			setAllSelections(selected, moves, !allMovesSelected(selected, moves))
-			continue
-		}
-
-		selected = make(map[string]bool, len(moves))
-		for _, choice := range choices {
-			selected[choice] = true
-		}
-		break
+	if err := selectUnmanagedMoves(fmt.Sprintf("Select unmanaged target entries to move (%d found)", len(moves)), moves, selected); err != nil {
+		return nil, err
 	}
 
 	filtered := make([]mover.Move, 0, len(selected))
@@ -132,13 +115,56 @@ func promptUnmanagedMoveTarget(location configpkg.Location, move mover.Move) (mo
 	if err != nil {
 		return mover.Move{}, fmt.Errorf("compute default move target for %q: %w", move.Name, err)
 	}
+	defaultParent := filepath.ToSlash(filepath.Dir(defaultTarget))
+	if defaultParent == "." {
+		defaultParent = ""
+	}
 
-	value, err := promptText(fmt.Sprintf("Destination for %s (relative to source root)", move.Name), defaultTarget)
+	suggestions, err := sourceFolderSuggestions(location.Source)
 	if err != nil {
 		return mover.Move{}, err
 	}
 
+	prompt := fmt.Sprintf("Parent destination for %s (skill folder name is kept)", move.Name)
+	value, err := promptTextWithSuggestionsBelow(prompt, defaultParent, suggestions)
+	if err != nil {
+		return mover.Move{}, err
+	}
+	value = strings.TrimSpace(value)
+	if value == "" {
+		value = move.Name
+	} else {
+		value = filepath.ToSlash(filepath.Join(value, move.Name))
+	}
+
 	return mover.SetRelativeTarget(location, move, value)
+}
+
+func sourceFolderSuggestions(sourceRoot string) ([]string, error) {
+	entries := []string{""}
+	err := filepath.WalkDir(sourceRoot, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		if filepath.Clean(path) == filepath.Clean(sourceRoot) {
+			return nil
+		}
+		rel, err := filepath.Rel(sourceRoot, path)
+		if err != nil {
+			return err
+		}
+		entries = append(entries, filepath.ToSlash(rel))
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("list source folders: %w", err)
+	}
+
+	sort.Strings(entries)
+	return entries, nil
 }
 
 func selectedMoveNames(selected map[string]bool) []string {
@@ -154,15 +180,6 @@ func selectedMoveNames(selected map[string]bool) []string {
 	}
 	sort.Strings(result)
 	return result
-}
-
-func includesOption(options []string, target string) bool {
-	for _, option := range options {
-		if option == target {
-			return true
-		}
-	}
-	return false
 }
 
 func allMovesSelected(selected map[string]bool, moves []mover.Move) bool {
@@ -186,5 +203,85 @@ func setAllSelections(selected map[string]bool, moves []mover.Move, enabled bool
 	}
 	for _, move := range moves {
 		selected[move.Name] = true
+	}
+}
+
+func selectUnmanagedMoves(prompt string, moves []mover.Move, selected map[string]bool) error {
+	if _, err := fmt.Fprintln(os.Stdout, prompt); err != nil {
+		return fmt.Errorf("print prompt: %w", err)
+	}
+
+	index := 0
+	renderUnmanagedSelection(index, moves, selected)
+
+	err := keyboard.Listen(func(key keys.Key) (bool, error) {
+		switch key.Code {
+		case keys.CtrlC:
+			_, _ = fmt.Fprintln(os.Stdout)
+			return true, fmt.Errorf("interrupted")
+		case keys.Enter:
+			_, _ = fmt.Fprintln(os.Stdout)
+			return true, nil
+		case keys.Up:
+			if index > 0 {
+				index--
+				renderUnmanagedSelection(index, moves, selected)
+			}
+			return false, nil
+		case keys.Down:
+			if index < len(moves) {
+				index++
+				renderUnmanagedSelection(index, moves, selected)
+			}
+			return false, nil
+		case keys.Space:
+			if index == 0 {
+				enable := !allMovesSelected(selected, moves)
+				setAllSelections(selected, moves, enable)
+			} else {
+				name := moves[index-1].Name
+				selected[name] = !selected[name]
+			}
+			renderUnmanagedSelection(index, moves, selected)
+			return false, nil
+		default:
+			return false, nil
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("select unmanaged moves: %w", err)
+	}
+
+	return nil
+}
+
+func renderUnmanagedSelection(index int, moves []mover.Move, selected map[string]bool) {
+	lines := []string{"> " + toggleAllOption + "  (space: toggle all, enter: continue)"}
+	for _, move := range moves {
+		marker := "[ ]"
+		if selected[move.Name] {
+			marker = "[x]"
+		}
+		lines = append(lines, fmt.Sprintf("  %s %s", marker, move.Name))
+	}
+
+	for i := range lines {
+		prefix := "  "
+		if i == index {
+			prefix = "> "
+		}
+		line := strings.TrimPrefix(lines[i], "> ")
+		lines[i] = prefix + line
+	}
+
+	fmt.Print("\r\033[J")
+	for i, line := range lines {
+		if i > 0 {
+			fmt.Print("\n")
+		}
+		fmt.Print(line)
+	}
+	if len(lines) > 0 {
+		fmt.Printf("\033[%dA\r", len(lines)-1-index)
 	}
 }

@@ -27,8 +27,8 @@ func Execute() error {
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a project config file")
-	rootCmd.Version = fmt.Sprintf("%s (commit %s, built %s)", version, commit, date)
-	rootCmd.SetVersionTemplate("{{printf \"%s\\n\" .Version}}")
+	rootCmd.Version = version
+	rootCmd.SetVersionTemplate(fmt.Sprintf("%s\n%s\ncommit %s, built %s\n", cliLogo(), version, commit, date))
 	defaultHelpFunc := rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		_, _ = fmt.Fprintln(cmd.OutOrStdout(), cliHelpHeader())

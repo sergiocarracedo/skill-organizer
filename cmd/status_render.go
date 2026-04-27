@@ -27,7 +27,7 @@ func printSyncResult(configFile string, result syncpkg.Result) {
 
 func printStatusReport(configFile string, location configpkg.Location, report statuspkg.Report) error {
 	pterm.DefaultSection.Println("Project")
-	pterm.Println(configFile)
+	pterm.Println("Config: " + configFile)
 	pterm.Println("Source: " + location.Source)
 	pterm.Println("Target: " + location.Target)
 

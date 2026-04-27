@@ -92,11 +92,7 @@ func ConfigPathForTarget(target string) string {
 
 func CandidateTargets(root string) ([]string, error) {
 	var matches []string
-	patterns := []string{
-		".agents/skills",
-		".claude/skills",
-		".opencode/skills",
-	}
+	patterns := candidateTargetPatterns()
 
 	for _, pattern := range patterns {
 		candidate := filepath.Join(root, pattern)
@@ -114,4 +110,36 @@ func CandidateTargets(root string) ([]string, error) {
 
 	sort.Strings(matches)
 	return matches, nil
+}
+
+func HomeFallbackTarget() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("resolve home directory: %w", err)
+	}
+
+	for _, pattern := range candidateTargetPatterns() {
+		candidate := filepath.Join(home, pattern)
+		info, err := os.Stat(candidate)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return "", fmt.Errorf("stat home fallback target: %w", err)
+		}
+		if info.IsDir() {
+			return candidate, nil
+		}
+	}
+
+	return "", ErrConfigNotFound
+}
+
+func candidateTargetPatterns() []string {
+	return []string{
+		".agents/skills",
+		".claude/skills",
+		".codex/skills",
+		".agent/skills",
+	}
 }
