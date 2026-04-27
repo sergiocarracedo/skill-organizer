@@ -1,0 +1,29 @@
+.github/workflows/release-please.yml
+  84d8ebb04e0058d8 19,31,43
+.github/workflows/publish-npm.yml
+  84d8ebb04e0058d8 20,25
+.github/workflows/ci.yml
+  84d8ebb04e0058d8 26,29
+.github/workflows/release.yml
+  84d8ebb04e0058d8 17,22,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "e41fec1066d568f91f4676c162216f6c55371590",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 10,
+      "total_deletions": 10,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  }
+}
