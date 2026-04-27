@@ -1,16 +1,16 @@
-name: publish-npm
+name: Publish to npm
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_call:
   workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
+    name: Publish to npm
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -18,12 +18,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
+
+      - name: Update npm for Trusted Publishing
+        run: npm install -g npm@latest
 
       - name: Determine dist-tag
         id: meta
@@ -40,5 +45,3 @@ jobs:
 
       - name: Publish package
         run: npm publish --tag "${{ steps.meta.outputs.dist_tag }}" --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
