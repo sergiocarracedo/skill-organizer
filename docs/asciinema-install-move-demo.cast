@@ -1,4 +1,4 @@
-{"version": 2, "width": 80, "height": 24, "timestamp": 1777311462, "env": {"SHELL": "/usr/bin/zsh", "TERM": null}, "title": "skill-organizer install move disable demo"}
+{"version": 2, "width": 80, "height": 24, "timestamp": 1777311462, "env": {"SHELL": "/usr/bin/zsh", "TERM": "xterm-256color"}, "title": "skill-organizer install move disable demo"}
 [0.009297, "o", "\r\n$ rm -rf \"/home/sergio/.agents/skills/asciinema-recorder\" \"/home/sergio/.agents/skills/thirdparty--asciinema--asciinema-recorder\" \"/home/sergio/.agents/skills-organized/thirdparty/asciinema/asciinema-recorder\" \"/home/sergio/.agents/skills/3rdparty--asciinema--asciinema-recorder\" \"/home/sergio/.agents/skills-organized/3rdparty/asciinema/asciinema-recorder\"\r\n"]
 [2.01962, "o", "\r\n$ cd \"/home/sergio/.agents\" && pwd\r\n"]
 [3.023438, "o", "/home/sergio/.agents\r\n"]

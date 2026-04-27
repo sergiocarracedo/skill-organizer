@@ -207,6 +207,92 @@ Then show:
 - `IMPORTANT.md` is still present in the generated folder
 - `skill-organizer status` is clean after the move
 
+Recorded example:
+
+- Asciinema: https://asciinema.org/a/o2D10e4PL6Qb6JvQ
+
+## Example Status Output
+
+Real `status` output after installing `asciinema-recorder`, moving it into `thirdparty/asciinema/asciinema-recorder`, and then disabling it:
+
+```text
+# Project
+
+/home/sergio/.agents/.skill-organizer.yml
+Source: /home/sergio/.agents/skills-organized
+Target: /home/sergio/.agents/skills
+
+# Skills
+
+├─┬3rdparty
+│ ├─┬agent-tools
+│ │ ├──agent-browser -> 3rdparty--agent-tools--agent-browser [synced]
+│ │ ├──mcp-builder -> 3rdparty--agent-tools--mcp-builder [synced]
+│ │ └──skill-judge -> 3rdparty--agent-tools--skill-judge [synced]
+│ ├──brainstorming -> 3rdparty--brainstorming [synced]
+│ ├─┬coding
+│ │ ├──ai-sdk -> 3rdparty--coding--ai-sdk [synced]
+│ │ ├──allium -> 3rdparty--coding--allium [synced]
+│ │ ├──create-pr -> 3rdparty--coding--create-pr [synced]
+│ │ ├──frontend-design -> 3rdparty--coding--frontend-design [synced]
+│ │ ├──mermaid-diagrams -> 3rdparty--coding--mermaid-diagrams [synced]
+│ │ ├──nanostack -> 3rdparty--coding--nanostack [synced]
+│ │ ├──pterm-go-cli -> 3rdparty--coding--pterm-go-cli [synced]
+│ │ ├──requesting-code-review -> 3rdparty--coding--requesting-code-review [synced]
+│ │ └──shaders-com -> 3rdparty--coding--shaders-com [synced]
+│ ├─┬coral
+│ │ ├──coral -> 3rdparty--coral--coral [synced]
+│ │ └──coral-create-source-spec -> 3rdparty--coral--coral-create-source-spec [synced]
+│ ├──hevy-api -> 3rdparty--hevy-api [synced]
+│ ├─┬mattpocock
+│ │ ├──design-an-interface -> 3rdparty--mattpocock--design-an-interface [synced]
+│ │ ├──github-triage -> 3rdparty--mattpocock--github-triage [synced]
+│ │ ├──grill-me -> 3rdparty--mattpocock--grill-me [synced]
+│ │ ├──improve-codebase-architecture -> 3rdparty--mattpocock--improve-codebase-architecture [synced]
+│ │ ├──prd-to-issues -> 3rdparty--mattpocock--prd-to-issues [synced]
+│ │ ├──prd-to-plan -> 3rdparty--mattpocock--prd-to-plan [synced]
+│ │ ├──qa -> 3rdparty--mattpocock--qa [synced]
+│ │ ├──request-refactor-plan -> 3rdparty--mattpocock--request-refactor-plan [synced]
+│ │ ├──tdd -> 3rdparty--mattpocock--tdd [synced]
+│ │ ├──ubiquitous-language -> 3rdparty--mattpocock--ubiquitous-language [synced]
+│ │ └──write-a-prd -> 3rdparty--mattpocock--write-a-prd [synced]
+│ └─┬react
+│   ├──react-useeffect -> 3rdparty--react--react-useeffect [synced]
+│   └──vercel-react-best-practices -> 3rdparty--react--vercel-react-best-practices [synced]
+├─┬personal
+│ ├──agent-tasks -> personal--agent-tasks [synced]
+│ ├─┬apis
+│ │ ├──hevy-api -> personal--apis--hevy-api [synced]
+│ │ └──home-assistant-api -> personal--apis--home-assistant-api [synced]
+│ ├─┬coding
+│ │ ├──frontend-project-bootstrap -> personal--coding--frontend-project-bootstrap [synced]
+│ │ └──shaders-com -> personal--coding--shaders-com [synced]
+│ ├─┬react
+│ │ ├──react-component -> personal--react--react-component [synced]
+│ │ └──react-project-bootstrap -> personal--react--react-project-bootstrap [synced]
+│ ├──skill-creator -> personal--skill-creator [synced]
+│ └──text-correction -> personal--text-correction [synced]
+└─┬thirdparty
+  └─┬asciinema
+    └──asciinema-recorder -> thirdparty--asciinema--asciinema-recorder [disabled]
+
+
+# Unmanaged target entries
+
+None
+
+# Summary
+
+Total skills:     39
+Managed skills:   38
+Unmanaged skills: 0
+Synced:           38
+Disabled:         1
+Missing target:   0
+Broken link:      0
+Drifted:          0
+```
+
 ### Watch Registry
 
 ```bash
