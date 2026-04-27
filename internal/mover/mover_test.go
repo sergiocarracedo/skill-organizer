@@ -47,6 +47,37 @@ func TestPlanAndApplyMovesUnmanagedEntries(t *testing.T) {
 	}
 }
 
+func TestSetRelativeTargetOverridesDefaultDestination(t *testing.T) {
+	location := configpkg.Location{
+		Source: filepath.Join(t.TempDir(), ".agents", "skills-organized"),
+		Target: filepath.Join(t.TempDir(), ".agents", "skills"),
+	}
+	move := Move{
+		Name:   "manual-skill",
+		Source: filepath.Join(location.Target, "manual-skill"),
+		Target: filepath.Join(location.Source, "manual-skill"),
+	}
+
+	updated, err := SetRelativeTarget(location, move, "3rdparty/asciinema/asciinema-recorder")
+	if err != nil {
+		t.Fatalf("SetRelativeTarget() error = %v", err)
+	}
+
+	want := filepath.Join(location.Source, "3rdparty", "asciinema", "asciinema-recorder")
+	if updated.Target != want {
+		t.Fatalf("SetRelativeTarget() target = %q, want %q", updated.Target, want)
+	}
+}
+
+func TestSetRelativeTargetRejectsEscapingSourceRoot(t *testing.T) {
+	location := configpkg.Location{Source: filepath.Join(t.TempDir(), ".agents", "skills-organized")}
+	move := Move{Name: "manual-skill"}
+
+	if _, err := SetRelativeTarget(location, move, "../outside"); err == nil {
+		t.Fatalf("SetRelativeTarget() error = nil, want error")
+	}
+}
+
 func createSkill(t *testing.T, dir string, name string) {
 	t.Helper()
 	if err := os.MkdirAll(dir, 0o755); err != nil {

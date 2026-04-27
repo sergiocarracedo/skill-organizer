@@ -15,7 +15,7 @@ Use a tool-specific folder only when the user explicitly uses that tool.
 Install the CLI if it is not already available:
 
 ```bash
-npm i -g skill-organizer@alpha
+npm i -g skill-organizer
 ```
 
 Then verify:

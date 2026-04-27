@@ -7,7 +7,7 @@ Agent-first install and onboarding instructions are documented in [`../../AGENTS
 ## Install
 
 ```bash
-npm i -g skill-organizer@alpha
+npm i -g skill-organizer
 ```
 
 ## Notes

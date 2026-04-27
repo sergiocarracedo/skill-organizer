@@ -200,7 +200,7 @@ func moveOnboardUnmanagedSkills(project configpkg.Location) error {
 		defaultSelected = append(defaultSelected, move.Name)
 	}
 
-	selectedMoves, err := chooseUnmanagedMovesWithDefaults(moves, defaultSelected)
+	selectedMoves, err := chooseUnmanagedMovesWithDefaults(project, moves, defaultSelected)
 	if err != nil {
 		return err
 	}

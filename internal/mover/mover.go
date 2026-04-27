@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	statuspkg "github.com/sergiocarracedo/skill-organizer/cli/internal/status"
@@ -36,6 +37,28 @@ func Plan(location configpkg.Location) ([]Move, error) {
 	})
 
 	return planned, nil
+}
+
+func SetRelativeTarget(location configpkg.Location, move Move, relativePath string) (Move, error) {
+	relativePath = strings.TrimSpace(relativePath)
+	if relativePath == "" {
+		return Move{}, fmt.Errorf("move target path cannot be empty")
+	}
+
+	cleaned := filepath.Clean(relativePath)
+	if cleaned == "." {
+		return Move{}, fmt.Errorf("move target path cannot be current directory")
+	}
+	if filepath.IsAbs(cleaned) {
+		return Move{}, fmt.Errorf("move target path must be relative to the source root")
+	}
+	if cleaned == ".." || strings.HasPrefix(cleaned, ".."+string(filepath.Separator)) {
+		return Move{}, fmt.Errorf("move target path cannot escape the source root")
+	}
+
+	updated := move
+	updated.Target = filepath.Join(location.Source, cleaned)
+	return updated, nil
 }
 
 func Apply(moves []Move) error {
