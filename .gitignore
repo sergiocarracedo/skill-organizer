@@ -1,0 +1,34 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+skill-organizer
+dist/
+
+# Go test binaries and coverage
+*.test
+*.out
+coverage.out
+
+# Go workspace files
+vendor/
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# macOS and Windows metadata
+.DS_Store
+Thumbs.db
+
+# OpenCode dependencies
+.opencode/node_modules/
+
+
+# Frontend environment files
+.env
+.env.*
+!.env.example

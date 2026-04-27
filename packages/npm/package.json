@@ -1,0 +1,36 @@
+{
+  "name": "skill-organizer",
+  "version": "0.0.1-alpha.1",
+  "description": "Install the skill-organizer CLI from GitHub Releases",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/sergiocarracedo/skill-organizer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergiocarracedo/skill-organizer.git",
+    "directory": "cli/packages/npm"
+  },
+  "bugs": {
+    "url": "https://github.com/sergiocarracedo/skill-organizer/issues"
+  },
+  "keywords": [
+    "cli",
+    "skills",
+    "agent",
+    "tooling"
+  ],
+  "preferGlobal": true,
+  "bin": {
+    "skill-organizer": "bin/skill-organizer.js"
+  },
+  "files": [
+    "bin",
+    "scripts",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

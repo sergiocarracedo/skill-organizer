@@ -1,0 +1,79 @@
+version: 2
+
+project_name: skill-organizer
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: skill-organizer
+    main: ./main.go
+    binary: skill-organizer
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/sergiocarracedo/skill-organizer/cli/cmd.version={{ .Version }}
+      - -X github.com/sergiocarracedo/skill-organizer/cli/cmd.commit={{ .Commit }}
+      - -X github.com/sergiocarracedo/skill-organizer/cli/cmd.date={{ .Date }}
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    files:
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github-native
+
+release:
+  prerelease: auto
+  make_latest: false
+
+snapshot:
+  version_template: "{{ .Version }}-next"
+
+brews:
+  - name: skill-organizer
+    ids:
+      - default
+    repository:
+      owner: sergiocarracedo
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: skill-organizer-bot
+      email: actions@users.noreply.github.com
+    directory: Formula
+    homepage: "https://github.com/sergiocarracedo/skill-organizer"
+    description: "Organize structured skill trees into flat tool-readable targets"
+    license: "UNLICENSED"
+    test: |
+      system "#{bin}/skill-organizer", "--version"
+    skip_upload: auto

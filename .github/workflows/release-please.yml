@@ -1,0 +1,46 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+      - alpha
+      - beta
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-alpha:
+    if: github.ref_name == 'alpha'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          target-branch: ${{ github.ref_name }}
+          config-file: release-please-config.alpha.json
+          manifest-file: release-please-manifest.json
+
+  release-beta:
+    if: github.ref_name == 'beta'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          target-branch: ${{ github.ref_name }}
+          config-file: release-please-config.beta.json
+          manifest-file: release-please-manifest.json
+
+  release-stable:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          target-branch: ${{ github.ref_name }}
+          config-file: release-please-config.stable.json
+          manifest-file: release-please-manifest.json
