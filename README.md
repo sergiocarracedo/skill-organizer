@@ -197,12 +197,12 @@ skill-organizer skill move-unmanaged --config ~/.agents/.skill-organizer.yml
 Move `asciinema-recorder` into:
 
 ```text
-3rdparty/asciinema/asciinema-recorder
+thirdparty/asciinema/asciinema-recorder
 ```
 
 Then show:
 
-- the source now lives under `~/.agents/skills-organized/3rdparty/asciinema/asciinema-recorder`
+- the source now lives under `~/.agents/skills-organized/thirdparty/asciinema/asciinema-recorder`
 - the flat target contains the generated entry
 - `IMPORTANT.md` is still present in the generated folder
 - `skill-organizer status` is clean after the move
@@ -279,21 +279,9 @@ The top-level `name` is rewritten during `sync` so it matches the flattened fold
 
 Other frontmatter fields are preserved.
 
-## Legacy Script Compatibility
+## Sync Behavior
 
-Legacy scripts:
-
-- `/home/sergio/.agents/scripts/sync-organized-skills.sh`
-- `/home/sergio/.agents/scripts/watch-organized-skills.sh`
-
-Equivalent CLI flow:
-
-1. Create a project config with `skill-organizer project add`.
-2. Run `skill-organizer sync` to replace the one-off sync script.
-3. Register the config with `watched add` or choose watch registration during `project add`.
-4. Run `skill-organizer watch` for foreground watching or `skill-organizer service install` plus `start` for background watching.
-
-Behavior preserved from the shell implementation:
+Behavior guarantees:
 
 - terminal skill discovery stops at the first `SKILL.md` on a branch
 - flattening uses `/ -> --`

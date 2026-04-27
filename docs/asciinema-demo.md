@@ -25,7 +25,7 @@ skill-organizer skill move-unmanaged --config ~/.agents/.skill-organizer.yml
 Move the skill to:
 
 ```text
-3rdparty/asciinema/asciinema-recorder
+thirdparty/asciinema/asciinema-recorder
 ```
 
 Then continue with:
@@ -37,10 +37,10 @@ ls skills-organized/thirdparty/asciinema
 ls skills | grep asciinema
 ls skills
 
-skill-organizer skill disable 3rdparty/asciinema/asciinema-recorder --config ~/.agents/.skill-organizer.yml
+skill-organizer skill disable thirdparty/asciinema/asciinema-recorder --config ~/.agents/.skill-organizer.yml
 skill-organizer status --config ~/.agents/.skill-organizer.yml
 
-skill-organizer skill enable 3rdparty/asciinema/asciinema-recorder --config ~/.agents/.skill-organizer.yml
+skill-organizer skill enable thirdparty/asciinema/asciinema-recorder --config ~/.agents/.skill-organizer.yml
 skill-organizer status --config ~/.agents/.skill-organizer.yml
 ```
 
