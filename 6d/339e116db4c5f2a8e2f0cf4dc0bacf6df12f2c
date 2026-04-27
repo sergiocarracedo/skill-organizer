@@ -1,0 +1,27 @@
+release-please-manifest.json
+  84d8ebb04e0058d8 2
+packages/npm/package.json
+  84d8ebb04e0058d8 3
+VERSION
+  84d8ebb04e0058d8 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6d339e116db4c5f2a8e2f0cf4dc0bacf6df12f2c",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 7,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
