@@ -1,0 +1,57 @@
+README.md
+  h_a4417d1a5d273e 33-34,37-41
+  46f2f593c3a7f452 3-6
+docs/asciinema-demo.md
+  b8004d8caac07f82 5-6,52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "dba0125f88bc76c4d04d56c740dc5bc59d43b6db",
+  "prompts": {
+    "46f2f593c3a7f452": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_22f159ed3ffe0cF6F3zb0DsD0k",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 8942,
+      "total_deletions": 0,
+      "accepted_lines": 8953,
+      "overriden_lines": 0
+    },
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_a4417d1a5d273e": {
+      "author": "Sergio Carracedo"
+    }
+  }
+}
