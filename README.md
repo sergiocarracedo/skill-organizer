@@ -172,6 +172,10 @@ watched:
 
 service:
   log-level: info
+
+overlap:
+  default-agent-tool: claude
+  acknowledged-external-tool-costs: true
 ```
 
 ## Commands
@@ -198,12 +202,29 @@ skill-organizer status
 skill-organizer skill enable <source-path>
 skill-organizer skill disable <source-path>
 skill-organizer skill move-unmanaged
+skill-organizer skill overlap
 ```
 
 - `sync` scans the source tree, rewrites source skill frontmatter, creates or repairs managed symlinks in the target, removes stale managed symlinks, and updates the hidden target manifest.
 - `status` reports source skills, flattened names, disabled skills, target drift, and unmanaged target entries.
 - `skill enable` and `skill disable` update `metadata.skill-organizer.disabled` in the source `SKILL.md`.
 - `skill move-unmanaged` previews moves from unmanaged target entries into the source tree and applies them after confirmation, or immediately with `--yes`.
+- `skill overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, or `--tool <id>` to choose one explicitly.
+- `skill overlap --print-prompt` prints the generated analysis prompt without invoking any external CLI. This bypasses tool selection and the one-time cost notice.
+
+### Overlap Analysis
+
+```bash
+skill-organizer skill overlap
+skill-organizer skill overlap --choose-tool
+skill-organizer skill overlap --tool codex
+skill-organizer skill overlap --include-disabled
+skill-organizer skill overlap --print-prompt
+```
+
+On first use, `skill overlap` detects installed agent tools such as Claude Code, Codex, OpenCode, Cursor, and Antigravity, then asks which one to use. The selected tool is saved in the global app config and reused on later runs unless you pass `--choose-tool`.
+
+Before the first direct invocation, the CLI shows a one-time notice that the selected external agent tool may use a paid account, API credits, or other metered usage depending on your setup. That acknowledgment is persisted in the same global config file.
 
 ## Disable Skills Without Deleting Them
 

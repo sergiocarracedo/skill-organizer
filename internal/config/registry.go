@@ -116,6 +116,31 @@ func SaveServiceConfig(path string, service ServiceConfig) error {
 	return SaveAppConfig(path, cfg)
 }
 
+func LoadOverlapConfig(path string) (OverlapConfig, error) {
+	cfg, err := LoadAppConfig(path)
+	if err != nil {
+		return OverlapConfig{}, err
+	}
+	return cfg.Overlap, nil
+}
+
+func LoadOverlapConfigOrDefault(path string) (OverlapConfig, error) {
+	cfg, err := LoadAppConfigOrDefault(path)
+	if err != nil {
+		return OverlapConfig{}, err
+	}
+	return cfg.Overlap, nil
+}
+
+func SaveOverlapConfig(path string, overlap OverlapConfig) error {
+	cfg, err := LoadAppConfigOrDefault(path)
+	if err != nil {
+		return err
+	}
+	cfg.Overlap = overlap
+	return SaveAppConfig(path, cfg)
+}
+
 func (r *WatchRegistry) Add(path string) {
 	r.Watched = append(r.Watched, path)
 	r.Normalize()

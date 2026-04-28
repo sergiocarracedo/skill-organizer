@@ -128,3 +128,35 @@ Follow this decision order:
 - `skill-organizer` manages target entries through symlinks and a hidden manifest in the target folder.
 - Source skills are edited in `skills-organized`, not directly in the flat target folder.
 - If the target already contains manual directories, move them with `skill-organizer skill move-unmanaged` before relying on regular sync.
+
+## Evaluate Skill Overlap
+
+Use this command when the user wants to detect duplicated or overlapping skills in the organized source tree:
+
+```bash
+skill-organizer skill overlap
+```
+
+Default behavior:
+
+1. Scans the configured source tree.
+2. Uses enabled skills only by default.
+3. Detects installed supported agent tools.
+4. Prompts once for which tool to use, then saves that choice in the global app config.
+5. Invokes the selected tool directly and prints the overlap report.
+
+Useful flags:
+
+```bash
+skill-organizer skill overlap --choose-tool
+skill-organizer skill overlap --tool claude
+skill-organizer skill overlap --include-disabled
+skill-organizer skill overlap --print-prompt
+```
+
+Important:
+
+- `skill overlap` invokes an external agent CLI.
+- Depending on the selected tool and the user's account, that tool may incur charges, API usage, or other metered costs.
+- The CLI shows a one-time acknowledgment notice before the first direct invocation and persists that acknowledgment in the global app config.
+- `--print-prompt` is the no-invocation fallback. It prints the generated overlap-analysis prompt and does not require selecting or invoking any external tool.

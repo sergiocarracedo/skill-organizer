@@ -11,6 +11,7 @@ func newSkillCommand() *cobra.Command {
 	cmd.AddCommand(newEnableCommand())
 	cmd.AddCommand(newDisableCommand())
 	cmd.AddCommand(newMoveUnmanagedCommand())
+	cmd.AddCommand(newOverlapCommand())
 
 	return cmd
 }

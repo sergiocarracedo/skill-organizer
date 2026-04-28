@@ -88,6 +88,13 @@ func (d *Document) Name() string {
 	return ""
 }
 
+func (d *Document) Description() string {
+	if node := mappingValue(d.mapping(), "description"); node != nil {
+		return node.Value
+	}
+	return ""
+}
+
 func (d *Document) ManagedMetadata() ManagedMetadata {
 	metadata := ManagedMetadata{}
 	root := d.mapping()
