@@ -18,6 +18,7 @@ Release automation and distribution notes are documented in [`docs/releasing.md`
 - [How It Works](#how-it-works)
 - [Layout](#layout)
 - [Commands](#commands)
+- [Shell Completion](#shell-completion)
 - [Disable Skills Without Deleting Them](#disable-skills-without-deleting-them)
 - [Example Demo Flow](#example-demo-flow)
 - [Example Status Output](#example-status-output)
@@ -183,12 +184,17 @@ overlap:
 ### Setup
 
 ```bash
+skill-organizer completion bash
+skill-organizer completion zsh
+skill-organizer completion fish
+skill-organizer completion powershell
 skill-organizer onboard
 skill-organizer project add
 skill-organizer project edit
 skill-organizer project remove
 ```
 
+- `completion` prints shell-completion scripts for bash, zsh, fish, and PowerShell so you can wire command and flag completion into your shell profile.
 - `onboard` guides first-time global setup for supported tools such as generic `.agents` setups, Claude Code, Codex, and Antigravity. It creates the project config, can move existing target skills into `skills-organized`, can register the project for watching, optionally installs and starts the background service, and finishes by showing `status`.
 - `project add` interactively chooses a target skills folder, proposes the sibling `skills-organized` source, writes the project config, and can register it for watching.
 - `project edit` updates the active project config discovered from `--config` or the nearest `.skill-organizer.yml`.
@@ -202,29 +208,66 @@ skill-organizer status
 skill-organizer skill enable <source-path>
 skill-organizer skill disable <source-path>
 skill-organizer skill move-unmanaged
-skill-organizer skill overlap
+skill-organizer skill check-overlap
 ```
 
 - `sync` scans the source tree, rewrites source skill frontmatter, creates or repairs managed symlinks in the target, removes stale managed symlinks, and updates the hidden target manifest.
 - `status` reports source skills, flattened names, disabled skills, target drift, and unmanaged target entries.
 - `skill enable` and `skill disable` update `metadata.skill-organizer.disabled` in the source `SKILL.md`.
 - `skill move-unmanaged` previews moves from unmanaged target entries into the source tree and applies them after confirmation, or immediately with `--yes`.
-- `skill overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, or `--tool <id>` to choose one explicitly.
-- `skill overlap --print-prompt` prints the generated analysis prompt without invoking any external CLI. This bypasses tool selection and the one-time cost notice.
+- `skill check-overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only and shows only `partial` and `duplicate` overlap groups. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, `--tool <id>` to choose one explicitly, `--min-overlap-type` to include weaker matches, or `--no-ask-to-apply` to skip the follow-up planning prompt.
+- `skill check-overlap --print-prompt` prints the generated analysis prompt without invoking any external CLI. This bypasses tool selection and the one-time cost notice.
 
 ### Overlap Analysis
 
 ```bash
-skill-organizer skill overlap
-skill-organizer skill overlap --choose-tool
-skill-organizer skill overlap --tool codex
-skill-organizer skill overlap --include-disabled
-skill-organizer skill overlap --print-prompt
+skill-organizer skill check-overlap
+skill-organizer skill check-overlap --choose-tool
+skill-organizer skill check-overlap --tool codex
+skill-organizer skill check-overlap --include-disabled
+skill-organizer skill check-overlap --min-overlap-type adjacent
+skill-organizer skill check-overlap --min-overlap-type 1
+skill-organizer skill check-overlap --no-ask-to-apply
+skill-organizer skill check-overlap --print-prompt
 ```
 
-On first use, `skill overlap` detects installed agent tools such as Claude Code, Codex, OpenCode, Cursor, and Antigravity, then asks which one to use. The selected tool is saved in the global app config and reused on later runs unless you pass `--choose-tool`.
+On first use, `skill check-overlap` detects installed agent tools such as Claude Code, Codex, OpenCode, Cursor, and Antigravity, then asks which one to use. The selected tool is saved in the global app config and reused on later runs unless you pass `--choose-tool`.
 
 Before the first direct invocation, the CLI shows a one-time notice that the selected external agent tool may use a paid account, API credits, or other metered usage depending on your setup. That acknowledgment is persisted in the same global config file.
+
+When the CLI invokes an external tool, it shows a spinner and updates it with any intermediate status lines emitted by that tool. The final overlap report is rendered with wrapped output, colored labels, colored skill names, and overlap scores from `0` to `100` where higher scores indicate stronger overlap.
+
+After printing the report, the CLI branches based on the selected tool. When the tool supports verified interactive plan mode, the CLI asks whether it should open that tool in plan mode to prepare a plan for applying the recommendations, then warns that the user should review the worktree and consider creating a backup or commit first. The tool is opened with a plan-only prompt that asks it not to modify files or execute changes. For tools without a verified interactive plan-mode launch path, the CLI emits a capability warning, asks whether it should generate a prompt to apply the recommendations, saves that prompt to `plans/skill-overlap-fix-[YYYYDDMM]-[HHmmss].md`, and prints the absolute path.
+
+`--min-overlap-type` accepts either text or numbers:
+
+- `adjacent` or `1`
+- `partial` or `2`
+- `duplicate` or `3`
+
+The default is `partial`, which hides `adjacent` groups unless you ask for them explicitly.
+
+## Shell Completion
+
+Generate shell completion scripts with:
+
+```bash
+skill-organizer completion bash
+skill-organizer completion zsh
+skill-organizer completion fish
+skill-organizer completion powershell
+```
+
+Common usage examples:
+
+```bash
+skill-organizer completion bash > ~/.local/share/bash-completion/completions/skill-organizer
+skill-organizer completion zsh > ~/.zsh/completions/_skill-organizer
+skill-organizer completion fish > ~/.config/fish/completions/skill-organizer.fish
+skill-organizer completion powershell > skill-organizer.ps1
+```
+
+Use `--no-descriptions` on any shell subcommand when you want a shorter completion script without command descriptions.
 
 ## Disable Skills Without Deleting Them
 

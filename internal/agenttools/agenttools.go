@@ -13,6 +13,7 @@ type Tool struct {
 	Binaries    []string
 	Description string
 	Args        func(prompt string) []string
+	PlanArgs    func(prompt string) []string
 }
 
 type InstalledTool struct {
@@ -29,6 +30,9 @@ var supportedTools = []Tool{
 		Args: func(prompt string) []string {
 			return []string{"-p", prompt}
 		},
+		PlanArgs: func(prompt string) []string {
+			return []string{"--permission-mode", "plan", prompt}
+		},
 	},
 	{
 		ID:          "codex",
@@ -38,6 +42,7 @@ var supportedTools = []Tool{
 		Args: func(prompt string) []string {
 			return []string{"exec", prompt}
 		},
+		PlanArgs: nil,
 	},
 	{
 		ID:          "opencode",
@@ -47,6 +52,7 @@ var supportedTools = []Tool{
 		Args: func(prompt string) []string {
 			return []string{"run", prompt}
 		},
+		PlanArgs: nil,
 	},
 	{
 		ID:          "cursor",
@@ -56,6 +62,7 @@ var supportedTools = []Tool{
 		Args: func(prompt string) []string {
 			return []string{"-p", prompt}
 		},
+		PlanArgs: nil,
 	},
 	{
 		ID:          "antigravity",
@@ -65,6 +72,7 @@ var supportedTools = []Tool{
 		Args: func(prompt string) []string {
 			return []string{prompt}
 		},
+		PlanArgs: nil,
 	},
 }
 
@@ -146,4 +154,8 @@ func detectToolBinary(tool Tool) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func SupportsInteractivePlan(tool InstalledTool) bool {
+	return tool.Tool.PlanArgs != nil
 }
