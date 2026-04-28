@@ -8,6 +8,8 @@ This project uses:
 
 This document also serves as a lightweight release-process reference for repository maintenance changes.
 
+Small documentation-only merges can be used to force a fresh `main` push when validating release automation behavior.
+
 The current phase supports `alpha`, `beta`, and stable releases, with `main` used for stable tags.
 
 ## Versioning
