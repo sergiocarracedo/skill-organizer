@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.3...v0.0.4) (2026-04-28)
+
+
+### Features
+
+* polish command output and selector UX ([9f656de](https://github.com/sergiocarracedo/skill-organizer/commit/9f656de88b7828f685bb0207c4a4fb8e14adafe7))
+* polish command output and selector UX ([009165f](https://github.com/sergiocarracedo/skill-organizer/commit/009165fc111ad333292d9de6a94ebb351a514aa2))
+* polish command output and selector UX ([c888384](https://github.com/sergiocarracedo/skill-organizer/commit/c8883842e84347bcee5bfb2eedd9fc73affe1405))
+
 ## [0.0.3](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.2...v0.0.3) (2026-04-27)
 
 
