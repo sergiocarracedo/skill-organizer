@@ -1,0 +1,51 @@
+cmd/skill_overlap_test.go
+  5a6dc4a967d6dc99 4,6-7,11,137,146,151-445
+README.md
+  5a6dc4a967d6dc99 21,187-190,197,211,218-219,224-231,234,238-271
+cmd/root.go
+  5a6dc4a967d6dc99 4,7-8,28-30,48
+internal/overlap/process_unix.go
+  5a6dc4a967d6dc99 1-23
+internal/overlap/overlap_test.go
+  5a6dc4a967d6dc99 4,7,10,53,69-73,83,85-104,110-113,117-227
+internal/agenttools/agenttools.go
+  5a6dc4a967d6dc99 16,33-35,45,55,65,75,158-160
+internal/overlap/process_windows.go
+  5a6dc4a967d6dc99 1-14
+cmd/completion.go
+  5a6dc4a967d6dc99 1-92
+AGENTS_README.md
+  5a6dc4a967d6dc99 27-37,148,162-168,173,177-180
+internal/overlap/overlap.go
+  5a6dc4a967d6dc99 4,6-7,9,13,28-44,94-111,129-188,201-290,292-301,304-331,333-348,359-364
+cmd/skill_overlap.go
+  5a6dc4a967d6dc99 5-7,9-11,22-27,30-35,42,48-75,78,80,82,128-132,148-152,156-166,169-174,178,180-214,222-223,281,288-289,291-301,303-308,311-540
+  h_a4417d1a5d273e 175-177,179
+cmd/skill.go
+  5a6dc4a967d6dc99 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "3d1a3fd90bef3e29b4d820d8449bcabd6dd37e83",
+  "prompts": {
+    "5a6dc4a967d6dc99": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_22b851239ffeY1sI0SS7rYPZoX",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 1591,
+      "total_deletions": 363,
+      "accepted_lines": 1402,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_a4417d1a5d273e": {
+      "author": "Sergio Carracedo"
+    }
+  }
+}
