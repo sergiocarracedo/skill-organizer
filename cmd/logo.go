@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/png"
+	"io"
 	"math"
 	"os"
 	"strings"
@@ -36,6 +37,12 @@ func cliHeader() string {
 
 func cliHelpHeader() string {
 	return fmt.Sprintf("%s\n%s\ncommit %s, built %s\n", cliLogo(), cliHeader(), commit, date)
+}
+
+func printCLIHeader(writer io.Writer) {
+	_, _ = fmt.Fprintln(writer, cliLogo())
+	_, _ = fmt.Fprintln(writer, cliHeader())
+	_, _ = fmt.Fprintf(writer, "commit %s, built %s\n\n", commit, date)
 }
 
 func decodeLogoImage() (image.Image, error) {
