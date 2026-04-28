@@ -12,8 +12,6 @@ func newAboutCommand() *cobra.Command {
 		Use:   "about",
 		Short: "Show project and build information",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			pterm.Println(cliLogo())
-			pterm.Println(cliHeader())
 			pterm.Println("Organize structured skill trees into flat tool-readable targets")
 			pterm.Println()
 			pterm.Println("GitHub: https://github.com/sergiocarracedo/skill-organizer")

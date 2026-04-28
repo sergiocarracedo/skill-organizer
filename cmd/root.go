@@ -29,6 +29,15 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a project config file")
 	rootCmd.Version = version
 	rootCmd.SetVersionTemplate(fmt.Sprintf("%s\n%s\ncommit %s, built %s\n", cliLogo(), version, commit, date))
+	rootCmd.PersistentPreRun = func(cmd *cobra.Command, _ []string) {
+		if cmd == rootCmd {
+			return
+		}
+		if cmd.Name() == "completion" || cmd.Name() == "help" {
+			return
+		}
+		printCLIHeader(cmd.OutOrStdout())
+	}
 	defaultHelpFunc := rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		_, _ = fmt.Fprintln(cmd.OutOrStdout(), cliHelpHeader())

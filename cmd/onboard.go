@@ -27,8 +27,6 @@ func newOnboardCommand() *cobra.Command {
 		Use:   "onboard",
 		Short: "Guide first-time setup for a global skills project",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			pterm.Println(cliLogo())
-			pterm.Println(cliHeader())
 			pterm.DefaultSection.Println("Welcome")
 			pterm.Println("skill-organizer keeps your tool's flat skills folder in sync with a source folder that you actually edit.")
 			pterm.Println("Manage skills in the source folder, usually a sibling like skills-organized, and let sync/watch update the target folder for the selected tool.")
