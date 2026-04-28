@@ -1,5 +1,9 @@
 # Skill Organizer
 
+<p align="center">
+  <img src="./logo_color2.png" alt="Skill Organizer logo" width="220" />
+</p>
+
 `skill-organizer` lets you keep `SKILL.md` directories organized in nested folders while exposing the flat first-level skills folder that agent tools expect.
 
 It uses an organized source tree such as `skills-organized/` as the source of truth and generates a flat target folder of symlinks such as `.agents/skills/`, `.claude/skills/`, or `.codex/skills/`. This makes it easy to separate your own skills, third-party skills, company skills, and experiments without manually copying folders around.
@@ -26,8 +30,15 @@ Release automation and distribution notes are documented in [`docs/releasing.md`
 
 Install `skill-organizer` using one of the supported distribution channels:
 
+### Using NPM
+
 ```bash
 npm i -g skill-organizer
+```
+
+### Using homebrew
+
+```bash
 brew tap sergiocarracedo/tap
 brew install skill-organizer
 ```

@@ -2,6 +2,8 @@
 
 Suggested recording flow for a short `skill-organizer` demo.
 
+Recorded example: https://asciinema.org/a/o2D10e4PL6Qb6JvQ
+
 ## Goal
 
 Show how a skill added directly to `~/.agents/skills` is detected as unmanaged, then moved into the organized source tree and exposed again as a generated flattened target entry.
@@ -39,9 +41,6 @@ ls skills
 
 skill-organizer skill disable thirdparty/asciinema/asciinema-recorder --config ~/.agents/.skill-organizer.yml
 skill-organizer status --config ~/.agents/.skill-organizer.yml
-
-skill-organizer skill enable thirdparty/asciinema/asciinema-recorder --config ~/.agents/.skill-organizer.yml
-skill-organizer status --config ~/.agents/.skill-organizer.yml
 ```
 
 ## What To Highlight
@@ -50,4 +49,5 @@ skill-organizer status --config ~/.agents/.skill-organizer.yml
 - The real source of truth is `skills-organized/`.
 - `move-unmanaged` brings manual or third-party skills under organized management.
 - Disabling a skill hides it from the target without deleting its real files.
+- After disabling, the skill stays in `skills-organized/` but disappears from `skills/`.
 - The generated folder still contains `IMPORTANT.md` to signal that it should not be edited directly.
