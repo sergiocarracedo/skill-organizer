@@ -6,6 +6,8 @@ This project uses:
 - [Release Please](https://github.com/googleapis/release-please) for version bumps, changelog, and release PRs
 - [GoReleaser](https://goreleaser.com/) for cross-platform GitHub release binaries
 
+This document also serves as a lightweight release-process reference for repository maintenance changes.
+
 The current phase supports `alpha`, `beta`, and stable releases, with `main` used for stable tags.
 
 ## Versioning
