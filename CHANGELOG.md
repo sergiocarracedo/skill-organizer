@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.4...v0.0.5) (2026-04-29)
+
+
+### Features
+
+* add skill overlap analysis workflow ([f11bf8d](https://github.com/sergiocarracedo/skill-organizer/commit/f11bf8db3e4cf36e8a6c4eba2f5c6282ea828593))
+* expand overlap workflows and shell completion ([3d1a3fd](https://github.com/sergiocarracedo/skill-organizer/commit/3d1a3fd90bef3e29b4d820d8449bcabd6dd37e83))
+
 ## [0.0.4](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.3...v0.0.4) (2026-04-28)
 
 
