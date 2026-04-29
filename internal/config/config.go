@@ -33,9 +33,15 @@ type ServiceConfig struct {
 	LogLevel string `yaml:"log-level"`
 }
 
+type OverlapConfig struct {
+	DefaultAgentTool              string `yaml:"default-agent-tool,omitempty"`
+	AcknowledgedExternalToolCosts bool   `yaml:"acknowledged-external-tool-costs,omitempty"`
+}
+
 type AppConfig struct {
 	Watched []string      `yaml:"watched"`
 	Service ServiceConfig `yaml:"service"`
+	Overlap OverlapConfig `yaml:"overlap,omitempty"`
 }
 
 func (r *WatchRegistry) Normalize() {
@@ -65,6 +71,7 @@ func (c *AppConfig) Normalize() {
 	registry.Normalize()
 	c.Watched = registry.Watched
 	c.Service.Normalize()
+	c.Overlap.Normalize()
 }
 
 func (c AppConfig) WatchRegistry() WatchRegistry {
@@ -77,11 +84,19 @@ func (c *AppConfig) SetWatchRegistry(registry WatchRegistry) {
 	registry.Normalize()
 	c.Watched = append([]string{}, registry.Watched...)
 	c.Service.Normalize()
+	c.Overlap.Normalize()
 }
 
 func (c *ServiceConfig) Normalize() {
 	if !IsValidLogLevel(c.LogLevel) {
 		c.LogLevel = DefaultLogLevel
+	}
+}
+
+func (c *OverlapConfig) Normalize() {
+	c.DefaultAgentTool = filepath.Clean(c.DefaultAgentTool)
+	if c.DefaultAgentTool == "." {
+		c.DefaultAgentTool = ""
 	}
 }
 

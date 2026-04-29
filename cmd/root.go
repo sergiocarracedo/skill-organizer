@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +25,9 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() error {
-	return rootCmd.Execute()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	return rootCmd.ExecuteContext(ctx)
 }
 
 func init() {
@@ -49,6 +54,7 @@ func init() {
 	rootCmd.AddCommand(newSyncCommand())
 	rootCmd.AddCommand(newStatusCommand())
 	rootCmd.AddCommand(newAboutCommand())
+	rootCmd.AddCommand(newCompletionCommand())
 	rootCmd.AddCommand(newOnboardCommand())
 	rootCmd.AddCommand(newProjectCommand())
 	rootCmd.AddCommand(newSkillCommand())

@@ -24,6 +24,17 @@ Then verify:
 skill-organizer --version
 ```
 
+If shell completion helps the user, generate it with:
+
+```bash
+skill-organizer completion zsh
+skill-organizer completion bash
+skill-organizer completion fish
+skill-organizer completion powershell
+```
+
+Use `--no-descriptions` on the shell subcommand when the user prefers shorter completion output.
+
 ## Choose The Target Folder
 
 Use these targets:
@@ -128,3 +139,42 @@ Follow this decision order:
 - `skill-organizer` manages target entries through symlinks and a hidden manifest in the target folder.
 - Source skills are edited in `skills-organized`, not directly in the flat target folder.
 - If the target already contains manual directories, move them with `skill-organizer skill move-unmanaged` before relying on regular sync.
+
+## Evaluate Skill Overlap
+
+Use this command when the user wants to detect duplicated or overlapping skills in the organized source tree:
+
+```bash
+skill-organizer skill check-overlap
+```
+
+Default behavior:
+
+1. Scans the configured source tree.
+2. Uses enabled skills only by default.
+3. Detects installed supported agent tools.
+4. Prompts once for which tool to use, then saves that choice in the global app config.
+5. Invokes the selected tool directly and prints the overlap report.
+
+Useful flags:
+
+```bash
+skill-organizer skill check-overlap --choose-tool
+skill-organizer skill check-overlap --tool claude
+skill-organizer skill check-overlap --include-disabled
+skill-organizer skill check-overlap --min-overlap-type adjacent
+skill-organizer skill check-overlap --min-overlap-type 1
+skill-organizer skill check-overlap --no-ask-to-apply
+skill-organizer skill check-overlap --print-prompt
+```
+
+Important:
+
+- `skill check-overlap` invokes an external agent CLI.
+- Depending on the selected tool and the user's account, that tool may incur charges, API usage, or other metered costs.
+- The CLI shows a one-time acknowledgment notice before the first direct invocation and persists that acknowledgment in the global app config.
+- `--print-prompt` is the no-invocation fallback. It prints the generated overlap-analysis prompt and does not require selecting or invoking any external tool.
+- `--min-overlap-type` accepts `adjacent|partial|duplicate` or `1|2|3`. The default is `partial`, so adjacent-only matches are hidden unless explicitly requested.
+- By default, after rendering the overlap report, the CLI branches based on the selected tool. Use `--no-ask-to-apply` to skip the follow-up entirely.
+- If the selected tool supports verified interactive plan mode, the CLI asks whether it should open that tool in plan mode to prepare a plan for applying the recommendations, then shows a short safety warning before launching it.
+- If the selected tool does not yet have a verified interactive plan-mode launch path, the CLI emits a capability warning, asks whether it should generate a prompt to apply the recommendations, saves that prompt to `plans/skill-overlap-fix-[YYYYDDMM]-[HHmmss].md`, and prints the absolute path.
