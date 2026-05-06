@@ -20,6 +20,15 @@ func RegistryPath() (string, error) {
 	return filepath.Join(base, appDirName, "skill-organizer.yml"), nil
 }
 
+func AppDir() (string, error) {
+	base, err := os.UserConfigDir()
+	if err != nil {
+		return "", fmt.Errorf("resolve user config dir: %w", err)
+	}
+
+	return filepath.Join(base, appDirName), nil
+}
+
 func LoadAppConfig(path string) (AppConfig, error) {
 	var cfg AppConfig
 

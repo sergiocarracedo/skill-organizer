@@ -11,11 +11,23 @@ import (
 )
 
 const managedMetadataKey = "skill-organizer"
+const remoteMetadataKey = "organized-skills"
 
 type ManagedMetadata struct {
 	OriginalName       string
 	SourceRelativePath string
 	Disabled           bool
+}
+
+type RemoteMetadata struct {
+	Provider      string
+	Source        string
+	ID            string
+	Version       string
+	Date          string
+	Hash          string
+	InstalledAt   string
+	RepoSkillPath string
 }
 
 type Document struct {
@@ -114,6 +126,40 @@ func (d *Document) ManagedMetadata() ManagedMetadata {
 	return metadata
 }
 
+func (d *Document) RemoteMetadata() RemoteMetadata {
+	metadata := RemoteMetadata{}
+	root := d.mapping()
+	metadataNode := ensureMapping(root, "metadata")
+	organizerNode := ensureMapping(metadataNode, remoteMetadataKey)
+
+	if node := mappingValue(organizerNode, "provider"); node != nil {
+		metadata.Provider = node.Value
+	}
+	if node := mappingValue(organizerNode, "source"); node != nil {
+		metadata.Source = node.Value
+	}
+	if node := mappingValue(organizerNode, "id"); node != nil {
+		metadata.ID = node.Value
+	}
+	if node := mappingValue(organizerNode, "version"); node != nil {
+		metadata.Version = node.Value
+	}
+	if node := mappingValue(organizerNode, "date"); node != nil {
+		metadata.Date = node.Value
+	}
+	if node := mappingValue(organizerNode, "hash"); node != nil {
+		metadata.Hash = node.Value
+	}
+	if node := mappingValue(organizerNode, "installed-at"); node != nil {
+		metadata.InstalledAt = node.Value
+	}
+	if node := mappingValue(organizerNode, "repo-skill-path"); node != nil {
+		metadata.RepoSkillPath = node.Value
+	}
+
+	return metadata
+}
+
 func (d *Document) SetManagedFields(flattenedName string, metadata ManagedMetadata, rename bool) {
 	root := d.mapping()
 	if rename {
@@ -126,6 +172,21 @@ func (d *Document) SetManagedFields(flattenedName string, metadata ManagedMetada
 	setScalar(organizerNode, "original-name", metadata.OriginalName)
 	setScalar(organizerNode, "source-relative-path", metadata.SourceRelativePath)
 	setBool(organizerNode, "disabled", metadata.Disabled)
+}
+
+func (d *Document) SetRemoteMetadata(metadata RemoteMetadata) {
+	root := d.mapping()
+	metadataNode := ensureMapping(root, "metadata")
+	organizerNode := ensureMapping(metadataNode, remoteMetadataKey)
+
+	setScalar(organizerNode, "provider", metadata.Provider)
+	setScalar(organizerNode, "source", metadata.Source)
+	setScalar(organizerNode, "id", metadata.ID)
+	setScalar(organizerNode, "version", metadata.Version)
+	setScalar(organizerNode, "date", metadata.Date)
+	setScalar(organizerNode, "hash", metadata.Hash)
+	setScalar(organizerNode, "installed-at", metadata.InstalledAt)
+	setScalar(organizerNode, "repo-skill-path", metadata.RepoSkillPath)
 }
 
 func (d Document) WriteTo(path string) error {
@@ -252,5 +313,15 @@ func RewriteManagedFields(skill Skill, rename bool, disabled bool) error {
 	metadata.Disabled = disabled
 
 	doc.SetManagedFields(skill.FlattenedName, metadata, rename)
+	return doc.WriteTo(skill.SkillFile)
+}
+
+func RewriteRemoteMetadata(skill Skill, metadata RemoteMetadata) error {
+	doc, err := LoadDocument(skill.SkillFile)
+	if err != nil {
+		return err
+	}
+
+	doc.SetRemoteMetadata(metadata)
 	return doc.WriteTo(skill.SkillFile)
 }

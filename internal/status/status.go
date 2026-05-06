@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
+	"github.com/sergiocarracedo/skill-organizer/cli/internal/remote"
 	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
 )
@@ -26,6 +27,8 @@ type SkillStatus struct {
 	State      SkillState
 	LinkPath   string
 	LinkTarget string
+	Remote     skills.RemoteMetadata
+	Update     *remote.UpdateInfo
 }
 
 type Report struct {
@@ -99,6 +102,7 @@ func Build(location configpkg.Location) (Report, error) {
 
 		entry := SkillStatus{Skill: skill, LinkPath: filepath.Join(location.Target, skill.FlattenedName)}
 		metadata := doc.ManagedMetadata()
+		entry.Remote = doc.RemoteMetadata()
 		if metadata.Disabled {
 			entry.State = StateDisabled
 			report.Skills = append(report.Skills, entry)

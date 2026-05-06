@@ -41,6 +41,9 @@ func init() {
 		if cmd.Name() == "completion" || cmd.Name() == "help" {
 			return
 		}
+		if commandWantsJSON(cmd) {
+			return
+		}
 		printCLIHeader(cmd.OutOrStdout())
 	}
 	defaultHelpFunc := rootCmd.HelpFunc()
@@ -64,4 +67,16 @@ func init() {
 
 	rootCmd.SetOut(os.Stdout)
 	rootCmd.SetErr(os.Stderr)
+}
+
+func commandWantsJSON(cmd *cobra.Command) bool {
+	if cmd == nil {
+		return false
+	}
+	flag := cmd.Flags().Lookup("json")
+	if flag != nil && flag.Value.String() == "true" {
+		return true
+	}
+	flag = cmd.InheritedFlags().Lookup("json")
+	return flag != nil && flag.Value.String() == "true"
 }

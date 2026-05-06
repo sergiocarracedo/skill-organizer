@@ -82,6 +82,12 @@ func printStatusSummary(report statuspkg.Report) {
 		parts = append(parts, formatSummaryChip(row))
 	}
 	pterm.Println(strings.Join(parts, "  "))
+
+	updates := countAvailableUpdates(report)
+	if updates > 0 {
+		pterm.Println(pterm.NewStyle(pterm.FgYellow, pterm.Bold).Sprint("Updates available:")+":"+formatCount(updates))
+		pterm.Println("Run: skill-organizer skill update")
+	}
 }
 
 func formatCount(value int) string {
@@ -192,8 +198,14 @@ func flattenStatusTreeChildren(children map[string]*statusTreeNode, prefix strin
 
 func formatSkillLabel(entry statuspkg.SkillStatus, sourceLeaf string) string {
 	flattened := pterm.NewStyle(pterm.FgDarkGray).Sprint(entry.Skill.FlattenedName)
-	state := pterm.NewStyle(statusColor(entry.State), pterm.Bold).Sprint("[" + string(entry.State) + "]")
-	return sourceLeaf + " -> " + flattened + statusColumnSeparator() + state
+	parts := []string{pterm.NewStyle(statusColor(entry.State), pterm.Bold).Sprint("[" + string(entry.State) + "]")}
+	if entry.Remote.Version != "" {
+		parts = append(parts, pterm.NewStyle(pterm.FgCyan).Sprint("v"+entry.Remote.Version))
+	}
+	if entry.Update != nil && entry.Update.HasUpdate {
+		parts = append(parts, pterm.NewStyle(pterm.FgYellow, pterm.Bold).Sprint("update -> "+entry.Update.Available.Version))
+	}
+	return sourceLeaf + " -> " + flattened + statusColumnSeparator() + strings.Join(parts, " ")
 }
 
 func statusLineWidth() int {
@@ -270,4 +282,14 @@ func stripANSI(value string) string {
 		builder.WriteByte(ch)
 	}
 	return builder.String()
+}
+
+func countAvailableUpdates(report statuspkg.Report) int {
+	count := 0
+	for _, skill := range report.Skills {
+		if skill.Update != nil && skill.Update.HasUpdate {
+			count++
+		}
+	}
+	return count
 }

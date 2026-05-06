@@ -6,8 +6,10 @@ require (
 	atomicgo.dev/keyboard v0.2.9
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/kardianos/service v1.2.4
+	github.com/pmezard/go-difflib v1.0.0
 	github.com/pterm/pterm v0.12.83
 	github.com/spf13/cobra v1.9.1
+	golang.org/x/term v0.40.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -23,6 +25,5 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/term v0.40.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 )

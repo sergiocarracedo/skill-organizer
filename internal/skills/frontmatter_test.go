@@ -95,3 +95,34 @@ func TestParseDocumentAcceptsUnquotedDescriptionWithColon(t *testing.T) {
 		t.Fatalf("Name() = %q, want %q", doc.Name(), "frontend-project-bootstrap")
 	}
 }
+
+func TestSetAndReadRemoteMetadata(t *testing.T) {
+	content := []byte("---\nname: remote-skill\ndescription: test\n---\n\n# Body\n")
+
+	doc, err := ParseDocument(content)
+	if err != nil {
+		t.Fatalf("ParseDocument() error = %v", err)
+	}
+
+	doc.SetRemoteMetadata(RemoteMetadata{
+		Provider:      "skills.sh",
+		Source:        "https://github.com/vercel-labs/agent-skills",
+		ID:            "vercel-labs/agent-skills/next-js-development",
+		Version:       "abc1234",
+		Date:          "2026-05-06T20:00:00Z",
+		Hash:          "abcdef123456",
+		InstalledAt:   "2026-05-06T21:00:00Z",
+		RepoSkillPath: "skills/next-js-development",
+	})
+
+	metadata := doc.RemoteMetadata()
+	if metadata.Provider != "skills.sh" {
+		t.Fatalf("RemoteMetadata().Provider = %q", metadata.Provider)
+	}
+	if metadata.ID != "vercel-labs/agent-skills/next-js-development" {
+		t.Fatalf("RemoteMetadata().ID = %q", metadata.ID)
+	}
+	if metadata.RepoSkillPath != "skills/next-js-development" {
+		t.Fatalf("RemoteMetadata().RepoSkillPath = %q", metadata.RepoSkillPath)
+	}
+}
