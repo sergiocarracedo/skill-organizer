@@ -30,7 +30,7 @@ Release Please updates both:
 
 - `VERSION`
 - `release-please-manifest.json`
-- `packages/npm/package.json`
+- `packages/cli/packages/npm/package.json`
 
 Release Please also maintains:
 
@@ -86,10 +86,10 @@ For a local pre-flight check on the `alpha` branch, you can run:
 This helper validates:
 
 - current branch is `alpha`
-- `VERSION` matches `packages/npm/package.json`
+- `VERSION` matches `packages/cli/packages/npm/package.json`
 - current version is an alpha prerelease
-- `go test ./...`
-- `go build ./...`
+- `go test ./...` from `packages/cli`
+- `go build ./...` from `packages/cli`
 - npm wrapper script syntax
 
 It does not require `NPM_TOKEN` for CI publishing because npm uses trusted publishing.
@@ -165,7 +165,7 @@ It injects build metadata into the binary version output:
 This repository now includes an npm wrapper package in:
 
 ```text
-packages/npm
+packages/cli/packages/npm
 ```
 
 The npm package downloads the matching prebuilt GitHub Release binary during `postinstall`.
@@ -190,7 +190,7 @@ What you need to do:
 
 1. Reserve the npm package name.
 2. Configure npm trusted publishing for this repository.
-3. Confirm the `name`, `homepage`, `repository`, and `bugs` fields in `packages/npm/package.json`.
+3. Confirm the `name`, `homepage`, `repository`, and `bugs` fields in `packages/cli/packages/npm/package.json`.
 4. Publish by letting the release workflow run from the tag created by Release Please.
 
 The publish workflow determines the dist-tag automatically:
@@ -220,7 +220,7 @@ What you need to do:
 
 1. Create the tap repository.
 2. Add a token with permission to push formula updates to the tap repo.
-3. Review the generated brew metadata in `.goreleaser.yaml`.
+3. Review the generated brew metadata in `packages/cli/.goreleaser.yaml`.
 4. Let stable release tags on `main` drive formula updates automatically.
 
 The repository already includes a stable-only GoReleaser `brews` section. Because it uses `skip_upload: auto`, prerelease tags are ignored automatically.
@@ -248,8 +248,8 @@ To prepare it:
 - `release-please-config.alpha.json`
 - `release-please-config.beta.json`
 - `release-please-config.stable.json`
-- `.goreleaser.yaml`
-- `packages/npm/package.json`
+- `packages/cli/.goreleaser.yaml`
+- `packages/cli/packages/npm/package.json`
 - `scripts/release-common.sh`
 - `scripts/release-alpha.sh`
 - `scripts/release-beta.sh`

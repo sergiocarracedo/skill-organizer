@@ -1,0 +1,43 @@
+---
+import CodePanel from '@/components/CodePanel.astro'
+import SectionHeader from '@/components/SectionHeader.astro'
+import SectionShell from '@/components/SectionShell.astro'
+import { servicePanels } from '@/data/home'
+---
+
+<SectionShell className='max-w-[80rem]'>
+  <div class='flex flex-wrap items-start gap-5'>
+    <div class='flex min-w-0 flex-1 basis-[22rem] flex-col gap-4' data-reveal>
+      <SectionHeader
+        eyebrow='Service and watch mode'
+        title='Stop treating sync like manual maintenance.'
+        copy='Use watch mode while actively editing, or install the service when you want the flat target to stay current in the background.'
+        className=''
+        copyClassName='max-w-[38rem]'
+      />
+      <div class='flex flex-wrap gap-3'>
+        <span class='rounded-full border border-white/10 bg-white/4 px-[0.85rem] py-[0.55rem] text-[0.88rem] text-slate-200/80'>Foreground watch</span>
+        <span class='rounded-full border border-white/10 bg-white/4 px-[0.85rem] py-[0.55rem] text-[0.88rem] text-slate-200/80'>Watched registry</span>
+        <span class='rounded-full border border-white/10 bg-white/4 px-[0.85rem] py-[0.55rem] text-[0.88rem] text-slate-200/80'>Background service</span>
+        <span class='rounded-full border border-white/10 bg-white/4 px-[0.85rem] py-[0.55rem] text-[0.88rem] text-slate-200/80'>Log level control</span>
+      </div>
+    </div>
+
+    <div class='flex min-w-0 flex-1 basis-[36rem] flex-col gap-4'>
+      <CodePanel
+        eyebrow={servicePanels[0].eyebrow}
+        title={servicePanels[0].title}
+        code={servicePanels[0].commands}
+        footer={servicePanels[0].note}
+        accent='violet'
+      />
+      <CodePanel
+        eyebrow={servicePanels[1].eyebrow}
+        title={servicePanels[1].title}
+        code={servicePanels[1].commands}
+        footer={servicePanels[1].note}
+        accent='amber'
+      />
+    </div>
+  </div>
+</SectionShell>

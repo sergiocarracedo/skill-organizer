@@ -1,0 +1,22 @@
+{
+  "name": "skill-organizer-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "build": "pnpm run build:cli && pnpm run build:web",
+    "build:cli": "sh -c 'cd packages/cli && go build ./...'",
+    "build:web": "pnpm --filter web build",
+    "lint": "pnpm run lint:web",
+    "lint:web": "pnpm --filter web lint",
+    "type-check": "pnpm run type-check:web",
+    "type-check:web": "pnpm --filter web type-check",
+    "test": "pnpm run test:cli && pnpm run test:web",
+    "test:cli": "sh -c 'cd packages/cli && go test ./...'",
+    "test:web": "pnpm --filter web test"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

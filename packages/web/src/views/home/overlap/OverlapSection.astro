@@ -1,0 +1,93 @@
+---
+import SectionHeader from '@/components/SectionHeader.astro'
+import SectionShell from '@/components/SectionShell.astro'
+import TerminalFrame from '@/components/TerminalFrame.astro'
+import { overlapDemoGroups } from '@/data/home'
+---
+
+<SectionShell className="flex flex-col gap-8">
+  <SectionHeader
+    eyebrow="Skill overlap check"
+    title="Find overlapping skills before routing gets messy."
+    copy="`skill-organizer skill check-overlap` uses an installed agent to review your managed skills for duplicate or partial overlap, then groups the findings with explanations and cleanup guidance."
+    titleClassName="max-w-[15ch] text-[clamp(2.2rem,5vw,3.7rem)]"
+    copyClassName="max-w-[58rem] text-[1.08rem] leading-[1.9]"
+    reveal
+  />
+
+  <div class="overflow-x-auto" data-reveal>
+    <div class="min-w-0 max-w-full">
+      <TerminalFrame
+        bodyClassName="font-code max-w-full"
+        title="skill-organizer skill check-overlap"
+      >
+        <p class="font-semibold text-amber-300/92">
+          # Potential Overlap Groups
+        </p>
+
+        <div class="mt-[1.3rem] grid gap-[1.3rem]">
+          {
+            overlapDemoGroups.map((group) => (
+              <article class="flex flex-col gap-[0.55rem]">
+                <p class="font-bold text-cyan-300/92">{group.title}</p>
+
+                <div class="border border-white/18 bg-white/[0.01] px-[1.05rem] py-4">
+                  <p class="font-bold text-violet-300/92">Skills:</p>
+                  <ul class="mt-1 grid list-none gap-[0.15rem] p-0">
+                    {group.skills.map((skill) => (
+                      <li class='text-cyan-300/96 before:mr-1 before:text-slate-200/68 before:content-["-_"]'>
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p class="mt-2 font-bold text-violet-300/92">Overlap:</p>
+                  <p class="mt-1 flex flex-wrap gap-2">
+                    <span
+                      class:list={[
+                        'font-bold text-amber-200/94',
+                        group.overlapType === 'Duplicate' && 'text-rose-300/94',
+                      ]}
+                    >
+                      ■
+                    </span>
+                    <span
+                      class:list={[
+                        'font-bold text-amber-200/94',
+                        group.overlapType === 'Duplicate' && 'text-rose-300/94',
+                      ]}
+                    >
+                      {group.overlapType}
+                    </span>
+                    <span
+                      class:list={[
+                        'font-bold text-amber-200/94',
+                        group.overlapType === 'Duplicate' && 'text-rose-300/94',
+                      ]}
+                    >
+                      ({group.score}/100)
+                    </span>
+                  </p>
+
+                  <p class="mt-2 font-bold text-violet-300/92">
+                    Why the overlap:
+                  </p>
+                  <p class="mt-1 text-slate-100/82 leading-[1.7]">
+                    {group.why}
+                  </p>
+
+                  <p class="mt-2 font-bold text-violet-300/92">
+                    Recommendation:
+                  </p>
+                  <p class="mt-1 text-slate-100/82 leading-[1.7]">
+                    {group.recommendation}
+                  </p>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </TerminalFrame>
+    </div>
+  </div>
+</SectionShell>

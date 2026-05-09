@@ -1,0 +1,58 @@
+---
+type Props = {
+  title?: string
+  className?: string
+  bodyClassName?: string
+} & {
+  [propName: string]: unknown
+}
+
+const {
+  title,
+  className = '',
+  bodyClassName = '',
+  ...props
+} = Astro.props as Props
+---
+
+<div
+  {...props}
+  class={`overflow-hidden max-w-full rounded-[2rem] border border-white/10 bg-[rgba(7,11,21,0.94)] shadow-[0_32px_90px_rgba(7,13,26,0.48)] ${className}`.trim()}
+>
+  <div
+    class="flex flex-wrap items-start gap-[0.55rem] border-b border-white/8 bg-white/3 px-4 py-[0.9rem] md:flex-nowrap md:items-center"
+  >
+    <div class="flex shrink-0 items-center gap-[0.55rem]">
+      <span
+        class="h-[0.72rem] w-[0.72rem] shrink-0 rounded-full bg-[rgba(255,109,65,0.84)]"
+      ></span>
+      <span
+        class="h-[0.72rem] w-[0.72rem] shrink-0 rounded-full bg-[rgba(255,181,73,0.84)]"
+      ></span>
+      <span
+        class="h-[0.72rem] w-[0.72rem] shrink-0 rounded-full bg-[rgba(67,238,255,0.84)]"
+      ></span>
+    </div>
+    <div
+      class="mt-3 basis-full text-[rgba(235,244,255,0.82)] md:ml-[0.7rem] md:mt-0 md:basis-auto"
+    >
+      <slot name="header" />
+      {
+        title && (
+          <h6 class="font-code text-[0.82rem] text-[rgba(235,244,255,0.82)]">
+            {title}
+          </h6>
+        )
+      }
+    </div>
+  </div>
+
+  <div>
+    <slot name="description" />
+  </div>
+  <div
+    class={`px-[1.2rem] pb-[1.45rem] pt-[1.3rem] font-code text-[0.82rem] leading-[1.5] overflow-auto ${bodyClassName}`.trim()}
+  >
+    <slot />
+  </div>
+</div>

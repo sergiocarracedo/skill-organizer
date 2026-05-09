@@ -1,0 +1,25 @@
+---
+import AgentToolLogo from '@/components/AgentToolLogo.astro'
+import SectionHeader from '@/components/SectionHeader.astro'
+import SectionShell from '@/components/SectionShell.astro'
+import { compatibilityItems } from '@/data/home'
+---
+
+<SectionShell className='grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(16rem,0.95fr)] lg:items-end'>
+  <SectionHeader
+    eyebrow='Compatibility'
+    title='Works with the tools you already use.'
+    copy='Keep one organized source tree and generate the flat target expected by Claude Code, OpenCode, Codex, Cursor, and Antigravity.'
+    className=''
+    reveal
+  />
+
+  <div class='flex flex-col items-start gap-3 pt-2' data-reveal>
+    <span class='font-display text-[0.78rem] uppercase tracking-[0.22em] text-cyan-100/68'>Works with</span>
+    <div class='flex flex-wrap items-center gap-1.5'>
+      {compatibilityItems.map((item) => (
+        <AgentToolLogo id={item.id} name={item.name} compact iconOnly />
+      ))}
+    </div>
+  </div>
+</SectionShell>

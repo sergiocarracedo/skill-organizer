@@ -17,7 +17,7 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "packages/npm/package.json",
+          "path": "packages/cli/packages/npm/package.json",
           "jsonpath": "$.version"
         }
       ]

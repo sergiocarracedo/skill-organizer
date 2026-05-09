@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content'
+
+import SiteLayout from '@/layouts/SiteLayout.astro'
+import { docsSections, getDocsBySection, trimCollectionSlug } from '@/lib/docs'
+import { withBase } from '@/lib/with-base'
+
+const entries = await getCollection('docs')
+---
+
+<SiteLayout
+  title="Docs | Skill Organizer"
+  description="Guides and command reference for skill-organizer."
+  currentPath="/docs"
+>
+  <section class="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
+    <div class="max-w-4xl" data-reveal>
+      <p
+        class="font-display text-xs uppercase tracking-[0.34em] text-cyan-200/72"
+      >
+        Documentation
+      </p>
+      <h1 class="mt-5 text-4xl text-white sm:text-6xl">
+        Guides for setup and operations. Reference for every command surface.
+      </h1>
+      <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300/78">
+        Start with installation and onboarding, then move into command reference
+        for sync, service, completion output, and overlap analysis.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-6 lg:grid-cols-2">
+      {
+        docsSections.map((section) => {
+          const items = getDocsBySection(entries, section.slug)
+
+          return (
+            <article
+              class="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
+              data-reveal
+            >
+              <p class="font-display text-xs uppercase tracking-[0.32em] text-violet-200/72">
+                {section.title}
+              </p>
+              <p class="mt-4 max-w-xl text-base leading-8 text-slate-300/76">
+                {section.description}
+              </p>
+
+              <ul class="mt-7 grid gap-3">
+                {items.map((entry) => (
+                  <li>
+                    <a
+                      href={withBase(
+                        `/docs/${entry.data.section}/${trimCollectionSlug(entry.id)}`,
+                      )}
+                      class="block rounded-[1.25rem] border border-white/8 bg-slate-950/60 px-4 py-4 transition hover:border-cyan-300/25 hover:bg-slate-950"
+                    >
+                      <span class="font-display text-xl text-white">
+                        {entry.data.title}
+                      </span>
+                      <span class="mt-2 block text-sm leading-7 text-slate-400">
+                        {entry.data.description}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          )
+        })
+      }
+    </div>
+  </section>
+</SiteLayout>

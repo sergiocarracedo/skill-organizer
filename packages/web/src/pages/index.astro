@@ -1,0 +1,27 @@
+---
+import SiteLayout from '@/layouts/SiteLayout.astro'
+import AdvantagesSection from '@/views/home/advantages/AdvantagesSection.astro'
+import CompatibilitySection from '@/views/home/compatibility/CompatibilitySection.astro'
+import DocsCtaSection from '@/views/home/docs-cta/DocsCtaSection.astro'
+import FaqSection from '@/views/home/faq/FaqSection.astro'
+import FeaturesSection from '@/views/home/features/FeaturesSection.astro'
+import HeroSection from '@/views/home/hero/HeroSection.astro'
+import OverlapSection from '@/views/home/overlap/OverlapSection.astro'
+import ServiceSection from '@/views/home/service/ServiceSection.astro'
+import TerminalDemoSection from '@/views/home/terminal-demo/TerminalDemoSection.astro'
+---
+
+<SiteLayout
+  title="Skill Organizer"
+  description="CLI for organizing agent skills in nested source folders while keeping a flat tool-compatible target for Claude Code, OpenCode, Codex, Cursor, and more."
+>
+  <HeroSection />
+  <FeaturesSection />
+  <CompatibilitySection />
+  <AdvantagesSection />
+  <TerminalDemoSection />
+  <ServiceSection />
+  <OverlapSection />
+  <FaqSection />
+  <DocsCtaSection />
+</SiteLayout>

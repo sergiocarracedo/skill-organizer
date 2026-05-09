@@ -1,0 +1,48 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+import { docsSections, getDocsBySection, trimCollectionSlug } from '@/lib/docs'
+import { withBase } from '@/lib/with-base'
+
+type Props = {
+  entries: CollectionEntry<'docs'>[]
+  currentPath: string
+}
+
+const { entries, currentPath } = Astro.props as Props
+---
+
+<aside class='hidden gap-4 lg:sticky lg:top-[6.5rem] lg:grid'>
+  {docsSections.map((section) => {
+    const sectionEntries = getDocsBySection(entries, section.slug)
+
+    return (
+      <section class='m-0'>
+        <p class='m-0 font-display text-[0.7rem] uppercase tracking-[0.28em] text-cyan-100/58'>
+          {section.title}
+        </p>
+        <ul class='mt-[0.55rem] grid list-none gap-1 p-0'>
+          {sectionEntries.map((entry) => {
+            const href = `/docs/${entry.data.section}/${trimCollectionSlug(entry.id)}`
+
+            return (
+              <li>
+                <a
+                  href={withBase(href)}
+                  class:list={[
+                    'block rounded-full px-[0.95rem] py-[0.7rem] text-slate-100/70 transition',
+                    currentPath === href
+                      ? 'bg-[rgba(13,29,52,0.9)] text-white'
+                      : 'hover:bg-[rgba(13,29,52,0.9)] hover:text-white',
+                  ]}
+                >
+                  <span>{entry.data.title}</span>
+                </a>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+    )
+  })}
+</aside>

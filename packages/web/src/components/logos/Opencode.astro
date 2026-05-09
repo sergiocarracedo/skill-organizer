@@ -1,0 +1,19 @@
+---
+type Props = {
+  className?: string
+}
+
+const { className = 'w-6 h-6' } = Astro.props
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="96 64 288 384"
+  fill="currentColor"
+  aria-hidden="true"
+  class={className}
+  ><path d="M320 224V352H192V224H320Z" opacity="0.4"></path><path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z"></path></svg
+>

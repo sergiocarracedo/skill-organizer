@@ -1,0 +1,15 @@
+---
+type Props = {
+  id?: string
+  className?: string
+}
+
+const { id, className = '' } = Astro.props as Props
+---
+
+<section
+  id={id}
+  class={`mx-auto w-full max-w-[84rem] px-6 pt-24 lg:px-8 lg:pt-28 ${className}`.trim()}
+>
+  <slot />
+</section>

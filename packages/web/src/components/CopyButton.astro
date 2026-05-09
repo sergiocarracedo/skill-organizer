@@ -1,0 +1,69 @@
+---
+import { Icon } from 'astro-icon/components'
+
+type Props = {
+  copyText: string
+  title: string
+  className?: string
+}
+
+const { copyText, title, className } = Astro.props as Props
+---
+
+<button
+  type='button'
+  class:list={[
+    'group relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/12 text-white/72 transition duration-200 hover:border-cyan-300/42 hover:text-white cursor-pointer',
+    className,
+  ]}
+  data-copy-button
+  data-copy-text={copyText}
+  aria-label={`Copy ${title}`}
+  title={`Copy ${title}`}
+>
+  <span
+    class='pointer-events-none absolute inset-0 flex items-center justify-center transition duration-200 group-data-[copied=true]:scale-75 group-data-[copied=true]:opacity-0'
+    data-copy-idle
+    aria-hidden='true'
+  >
+    <Icon name='outline/copy-outline' class='h-[1.05rem] w-[1.05rem]' />
+  </span>
+  <span
+    class='pointer-events-none absolute inset-0 flex scale-75 items-center justify-center opacity-0 text-emerald-400 transition duration-200 group-data-[copied=true]:scale-100 group-data-[copied=true]:opacity-100'
+    data-copy-success
+    aria-hidden='true'
+  >
+    <Icon name='outline/checkmark-circle-outline' class='h-[1.1rem] w-[1.1rem]' />
+  </span>
+</button>
+
+<script>
+  const resetTimeouts = new WeakMap<HTMLButtonElement, number>()
+
+  document.querySelectorAll('[data-copy-button]').forEach((node) => {
+    const button = node instanceof HTMLButtonElement ? node : null
+    if (!button || button.dataset.copyReady === 'true') {
+      return
+    }
+
+    button.dataset.copyReady = 'true'
+
+    button.addEventListener('click', async () => {
+      const copyText = button.dataset.copyText ?? ''
+
+      try {
+        await navigator.clipboard.writeText(copyText)
+        button.dataset.copied = 'true'
+        window.clearTimeout(resetTimeouts.get(button))
+        resetTimeouts.set(
+          button,
+          window.setTimeout(() => {
+          delete button.dataset.copied
+          }, 1400),
+        )
+      } catch {
+        window.clearTimeout(resetTimeouts.get(button))
+      }
+    })
+  })
+</script>

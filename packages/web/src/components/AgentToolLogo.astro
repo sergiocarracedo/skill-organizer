@@ -1,0 +1,87 @@
+---
+import AppleLogo from '@/components/logos/Apple.astro'
+import AntigravityLogo from '@/components/logos/Antigravity.astro'
+import ClaudeLogo from '@/components/logos/Claude.astro'
+import CodexLogo from '@/components/logos/Codex.astro'
+import CursorLogo from '@/components/logos/Cursor.astro'
+import LinuxLogo from '@/components/logos/Linux.astro'
+import OpencodeLogo from '@/components/logos/Opencode.astro'
+
+type ToolId =
+  | 'claude'
+  | 'opencode'
+  | 'codex'
+  | 'cursor'
+  | 'antigravity'
+  | 'agents'
+  | 'macos'
+  | 'linux'
+
+type Props = {
+  id: ToolId
+  name: string
+  compact?: boolean
+  iconOnly?: boolean
+}
+
+const { id, name, compact = false, iconOnly = false } = Astro.props as Props
+---
+
+<span
+  class:list={[
+    'inline-flex items-center rounded-full border border-white/9 bg-white/3 text-slate-100/76 transition-[border-color,color,background-color] duration-180 hover:border-white/16 hover:bg-white/[0.045] hover:text-white/92',
+    compact ? 'gap-[0.48rem] px-[0.72rem] py-[0.46rem]' : 'gap-[0.55rem] px-[0.78rem] py-[0.5rem]',
+    iconOnly ? 'h-[2.45rem] w-[2.45rem] justify-center gap-0 p-[0.58rem]' : '',
+  ]}
+  title={name}
+  aria-label={name}
+>
+  <span class='inline-flex h-[1.2rem] w-[1.2rem] shrink-0 items-center justify-center text-current' aria-hidden='true'>
+    {id === 'claude' && (
+      <ClaudeLogo className='h-5 w-5' />
+    )}
+
+    {id === 'opencode' && (
+      <OpencodeLogo className='h-5 w-5' />
+    )}
+
+    {id === 'codex' && (
+      <CodexLogo className='h-5 w-5' />
+    )}
+
+    {id === 'cursor' && (
+      <CursorLogo className='h-5 w-5' />
+    )}
+
+    {id === 'antigravity' && (
+      <AntigravityLogo className='h-5 w-5' />
+    )}
+
+    {id === 'agents' && (
+      <svg viewBox='0 0 24 24' class='h-5 w-5' fill='none' xmlns='http://www.w3.org/2000/svg'>
+        <path d='M5.8 7h12.4v10H5.8z' stroke='currentColor' stroke-width='1.8'></path>
+        <path d='M8.8 10.2h6.4M8.8 13.7h4.4' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'></path>
+        <path d='M8 4.8h8' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' opacity='.72'></path>
+      </svg>
+    )}
+
+    {id === 'macos' && (
+      <AppleLogo className='h-5 w-5' />
+    )}
+
+    {id === 'linux' && (
+      <LinuxLogo className='h-5 w-5' />
+    )}
+  </span>
+
+  {!iconOnly && (
+    <span
+      class:list={[
+        'font-display whitespace-nowrap uppercase',
+        compact ? 'text-[0.68rem] tracking-[0.14em]' : 'text-[0.72rem] tracking-[0.16em]',
+      ]}
+    >
+      {name}
+    </span>
+  )}
+</span>

@@ -11,7 +11,7 @@ release_version() {
 }
 
 release_npm_version() {
-  node -p "require('./packages/npm/package.json').version"
+  node -p "require('./packages/cli/packages/npm/package.json').version"
 }
 
 release_require_branch() {
@@ -34,7 +34,7 @@ release_require_version_consistency() {
     exit 1
   fi
   if [[ "$repo_version" != "$npm_version" ]]; then
-    printf 'VERSION (%s) does not match packages/npm/package.json version (%s)\n' "$repo_version" "$npm_version" >&2
+    printf 'VERSION (%s) does not match packages/cli/packages/npm/package.json version (%s)\n' "$repo_version" "$npm_version" >&2
     exit 1
   fi
 }
@@ -71,12 +71,15 @@ release_require_version_kind() {
 
 release_validate_common() {
   printf 'Running Go validation...\n'
-  go test ./...
-  go build ./...
+  (
+    cd packages/cli
+    go test ./...
+    go build ./...
+  )
 
   printf 'Running npm wrapper validation...\n'
-  node --check packages/npm/scripts/postinstall.js
-  node --check packages/npm/bin/skill-organizer.js
+  node --check packages/cli/packages/npm/scripts/postinstall.js
+  node --check packages/cli/packages/npm/bin/skill-organizer.js
 
   printf 'Checking version consistency...\n'
   release_require_version_consistency

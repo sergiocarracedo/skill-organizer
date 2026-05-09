@@ -1,0 +1,33 @@
+---
+title: onboard
+description: Guide first-time setup for a global skills project.
+section: reference
+order: 2
+commandSlug: onboard
+summary: Interactive onboarding for the main supported tool targets.
+---
+
+## Synopsis
+
+```bash
+skill-organizer onboard
+```
+
+## What it does
+
+`onboard` is the fastest guided path to a valid project config. It explains the source-target model, prompts for the target tool, proposes a source folder, creates the config, offers to move unmanaged target skills into source, runs an initial sync, and can register the config for watch mode plus the background service.
+
+## Target presets
+
+- Generic `.agents`
+- Claude Code
+- Codex
+- Antigravity
+
+The generic `.agents` target is the right default for OpenCode, Cursor agent workflows, Codex CLI, aider, goose, and other tools that consume `~/.agents/skills`.
+
+## Typical follow-up
+
+```bash
+skill-organizer status
+```

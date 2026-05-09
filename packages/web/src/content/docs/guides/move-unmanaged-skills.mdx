@@ -1,0 +1,33 @@
+---
+title: Move Unmanaged Skills
+description: Adopt existing target entries into the organized source tree without manually rearranging folders.
+section: guides
+order: 4
+summary: Move unmanaged target entries into source.
+---
+
+## When to use it
+
+Use this flow when the target folder already contains skill directories that were created manually or installed directly.
+
+## Interactive move
+
+```bash
+skill-organizer skill move-unmanaged --config ~/.agents/.skill-organizer.yml
+```
+
+The interactive flow lets you:
+
+1. Select which unmanaged entries to move.
+2. Accept the proposed destination or choose a custom nested path.
+3. Apply the move.
+4. Trigger a sync so the managed target entries are rebuilt.
+
+## Useful flags
+
+```bash
+skill-organizer skill move-unmanaged --yes
+skill-organizer skill move-unmanaged --to thirdparty/asciinema/asciinema-recorder
+```
+
+`--yes` skips the confirmation path. `--to` is only valid when moving a single unmanaged entry and lets you place it at a custom source-relative path.

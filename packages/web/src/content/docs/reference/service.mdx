@@ -1,0 +1,29 @@
+---
+title: service
+description: Manage the background watcher service.
+section: reference
+order: 9
+commandSlug: service
+summary: Install, run, inspect, and tune the background service.
+---
+
+## Synopsis
+
+```bash
+skill-organizer service install
+skill-organizer service start
+skill-organizer service stop
+skill-organizer service restart
+skill-organizer service status
+skill-organizer service uninstall
+skill-organizer service log-level
+skill-organizer service log-level set <level>
+```
+
+## Service lifecycle
+
+The lifecycle subcommands delegate to the service controller and report the resulting service state.
+
+## Log level
+
+Use `skill-organizer service log-level` to view the current level and `skill-organizer service log-level set debug` to update it. Restart the service after changing log level so the new verbosity applies.

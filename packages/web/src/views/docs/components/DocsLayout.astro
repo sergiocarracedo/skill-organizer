@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+import SectionHeader from '@/components/SectionHeader.astro'
+import SiteLayout from '@/layouts/SiteLayout.astro'
+
+import DocsSidebar from './DocsSidebar.astro'
+import DocsToc from './DocsToc.astro'
+
+type Props = {
+  title: string
+  description: string
+  entries: CollectionEntry<'docs'>[]
+  headings?: Array<{ depth: number; slug: string; text: string }>
+  currentPath: string
+  sectionLabel: string
+}
+
+const { title, description, entries, headings = [], currentPath, sectionLabel } = Astro.props as Props
+---
+
+<SiteLayout title={`${title} | Skill Organizer`} description={description} currentPath={currentPath}>
+  <section class='mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20'>
+    <SectionHeader
+      eyebrow={sectionLabel}
+      title={title}
+      copy={description}
+      className='max-w-[62rem]'
+      eyebrowClassName='text-cyan-200/72 tracking-[0.34em]'
+      titleClassName='mt-0 max-w-4xl text-4xl sm:text-5xl'
+      copyClassName='mt-0 max-w-2xl text-lg leading-8 text-slate-300/78'
+      reveal
+    />
+
+    <div class='mt-12 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)_220px] lg:items-start'>
+      <DocsSidebar entries={entries} currentPath={currentPath} />
+      <article
+        class='docs-prose min-w-0 overflow-hidden rounded-[clamp(1rem,4vw,2rem)] border border-white/8 bg-[linear-gradient(180deg,rgba(8,14,29,0.92),rgba(6,10,22,0.72))] p-[clamp(1.5rem,3vw,3rem)] shadow-[0_30px_90px_rgba(7,13,26,0.55)] max-sm:rounded-[1rem] max-sm:p-4'
+        data-reveal
+      >
+        <slot />
+      </article>
+      <DocsToc headings={headings} />
+    </div>
+  </section>
+</SiteLayout>

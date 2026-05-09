@@ -1,0 +1,45 @@
+---
+title: First Project
+description: Understand the source folder, target folder, and per-project config that define a managed setup.
+section: guides
+order: 2
+summary: The shape of a managed project.
+---
+
+## The two folders
+
+Every project revolves around two locations:
+
+1. A source folder that you actually edit, usually something like `skills-organized/`.
+2. A flat target folder that your tool reads, such as `.agents/skills`.
+
+The project config binds those two together.
+
+## Example layout
+
+For a generic `.agents` setup, the default shape is:
+
+```text
+target: ~/.agents/skills
+source: ~/.agents/skills-organized
+config: ~/.agents/.skill-organizer.yml
+```
+
+The same pattern applies to tool-specific folders such as `~/.claude/skills`, `~/.codex/skills`, or `~/.agent/skills`.
+
+## Why this matters
+
+Most tools only scan one folder level for skills. That makes direct organization awkward once you want to group skills by source, team, or topic.
+
+`skill-organizer` keeps the organized tree as the source of truth and generates the flat target view that tools can consume.
+
+## The config file
+
+The config is intentionally small:
+
+```yaml
+source: /repo/.agents/skills-organized
+target: /repo/.agents/skills
+```
+
+That simplicity is what makes sync, status, watch mode, and service management predictable.

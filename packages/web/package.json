@@ -1,0 +1,40 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "lint": "oxlint .",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "type-check": "astro check",
+    "test": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "prepare": "lefthook install"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.4",
+    "astro": "^6.1.9",
+    "astro-icon": "^1.1.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@commitlint/cli": "^20.5.2",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@playwright/test": "^1.59.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "@vitest/coverage-v8": "^4.1.5",
+    "@vitest/ui": "^4.1.5",
+    "lefthook": "^2.1.6",
+    "oxc-parser": "^0.128.0",
+    "oxlint": "^1.62.0",
+    "playwright": "^1.59.1",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
+  }
+}

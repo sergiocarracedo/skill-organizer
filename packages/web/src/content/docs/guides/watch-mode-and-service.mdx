@@ -1,0 +1,42 @@
+---
+title: Watch Mode and Service
+description: Keep projects synchronized continuously with the foreground watcher or the background service.
+section: guides
+order: 6
+summary: Continuous sync options.
+---
+
+## Foreground watcher
+
+```bash
+skill-organizer watch
+```
+
+This reads the watched registry, monitors registered project configs and their source and target trees, and reruns sync for the affected project when changes happen.
+
+## Watched registry commands
+
+```bash
+skill-organizer watched list
+skill-organizer watched add /path/to/.skill-organizer.yml
+skill-organizer watched remove
+```
+
+Use these commands to manage which project configs are included in watch mode and the background service.
+
+## Background service
+
+```bash
+skill-organizer service install
+skill-organizer service start
+skill-organizer service status
+```
+
+You can also change log verbosity:
+
+```bash
+skill-organizer service log-level set debug
+skill-organizer service restart
+```
+
+On Linux user services, logs are available through `journalctl --user -u skill-organizer.service`.

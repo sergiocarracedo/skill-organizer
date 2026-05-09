@@ -1,0 +1,26 @@
+---
+type Heading = {
+  depth: number
+  slug: string
+  text: string
+}
+
+const { headings = [] } = Astro.props as { headings?: Heading[] }
+
+const visibleHeadings = headings.filter((heading) => heading.depth <= 2)
+---
+
+{visibleHeadings.length > 0 && (
+  <aside class='hidden lg:sticky lg:top-[6.5rem] lg:block'>
+    <p class='m-0 font-display text-[0.7rem] uppercase tracking-[0.28em] text-cyan-100/58'>On this page</p>
+    <ul class='mt-4 grid gap-2 text-sm text-slate-300/80'>
+      {visibleHeadings.map((heading) => (
+        <li>
+          <a href={`#${heading.slug}`} class='transition hover:text-white'>
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}
