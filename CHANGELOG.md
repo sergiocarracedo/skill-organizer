@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.6](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.5...v0.0.6) (2026-05-09)
+
+
+### Features
+
+* add cli self-update command ([bb29d2e](https://github.com/sergiocarracedo/skill-organizer/commit/bb29d2e29ce104600333df1354955b5aef7e9755))
+* add cli self-update command ([5980803](https://github.com/sergiocarracedo/skill-organizer/commit/5980803b314a615dae7b89a83e456f33eae77dc2))
+
 ## [0.0.5](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.4...v0.0.5) (2026-04-29)
 
 
