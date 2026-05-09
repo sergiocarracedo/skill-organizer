@@ -1,0 +1,5 @@
+---
+const { className = '' } = Astro.props
+---
+
+<img src={`${import.meta.env.BASE_URL}logo_color2.png`} alt='Skill Organizer logo' class={`logo-mark ${className}`.trim()} loading='eager' />

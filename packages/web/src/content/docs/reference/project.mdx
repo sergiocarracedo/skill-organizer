@@ -1,0 +1,30 @@
+---
+title: project
+description: Add, edit, or remove a managed project configuration.
+section: reference
+order: 2
+commandSlug: project
+summary: Manage project config files explicitly.
+---
+
+## Synopsis
+
+```bash
+skill-organizer project add
+skill-organizer project edit
+skill-organizer project remove
+```
+
+## Subcommands
+
+### add
+
+Interactively creates a managed project config after choosing a target folder and source folder.
+
+### edit
+
+Loads the resolved project config, prompts for updated source and target paths, and rewrites the config. If the config path changes, the old file is removed and the watched registry is updated.
+
+### remove
+
+Deletes the current managed project config after confirmation and removes it from the watched registry if it was registered.

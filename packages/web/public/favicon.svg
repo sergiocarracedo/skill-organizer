@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="18" fill="#050914"/>
+  <circle cx="32" cy="32" r="22" fill="url(#orb)"/>
+  <path d="M32 10 46 18 49 33 40 48 24 50 14 39 15 22 32 10Z" fill="url(#facets)" fill-opacity=".85"/>
+  <path d="M32 10 24 30 15 22 32 10Z" fill="#47EEFF" fill-opacity=".95"/>
+  <path d="M32 10 46 18 39 31 32 10Z" fill="#9D61FF" fill-opacity=".9"/>
+  <path d="M39 31 49 33 40 48 31 37 39 31Z" fill="#FFB549" fill-opacity=".95"/>
+  <path d="M24 30 31 37 24 50 14 39 24 30Z" fill="#4FD7FF" fill-opacity=".7"/>
+  <path d="M24 30 39 31 31 37 24 30Z" fill="#F5F7FF" fill-opacity=".35"/>
+  <circle cx="25" cy="24" r="5" fill="#F5F7FF" fill-opacity=".18"/>
+  <defs>
+    <linearGradient id="orb" x1="14" y1="12" x2="49" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D2133"/>
+      <stop offset=".5" stop-color="#171C41"/>
+      <stop offset="1" stop-color="#2E180A"/>
+    </linearGradient>
+    <linearGradient id="facets" x1="17" y1="16" x2="47" y2="47" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#47EEFF"/>
+      <stop offset=".48" stop-color="#9D61FF"/>
+      <stop offset="1" stop-color="#FFB549"/>
+    </linearGradient>
+  </defs>
+</svg>

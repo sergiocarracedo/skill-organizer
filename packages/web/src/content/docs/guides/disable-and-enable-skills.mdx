@@ -1,0 +1,27 @@
+---
+title: Disable and Enable Skills
+description: Hide a skill from the generated target without deleting the real source folder.
+section: guides
+order: 5
+summary: Temporarily remove a skill from the target view.
+---
+
+## Disable a skill
+
+```bash
+skill-organizer skill disable my-skills/coding-skills/astro-performance-auditor
+```
+
+This updates `metadata.skill-organizer.disabled` in the source `SKILL.md` and then runs sync so the generated target entry disappears.
+
+## Re-enable it later
+
+```bash
+skill-organizer skill enable my-skills/coding-skills/astro-performance-auditor
+```
+
+The skill stays in the organized source tree the entire time. Only the tool-facing target view changes.
+
+## Why this is better than deleting
+
+Disabling preserves history, frontmatter, and folder placement. It is the right choice when you want to temporarily hide a skill from your tools without losing the curated source structure.

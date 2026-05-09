@@ -1,0 +1,748 @@
+---
+type DemoSkill = {
+  id: string
+  path: string[]
+  enabled: boolean
+}
+
+type DemoOperation =
+  | { type: 'add'; id: string; path: string[] }
+  | { type: 'move'; id: string; to: string[] }
+  | { type: 'disable'; id: string }
+  | { type: 'enable'; id: string }
+  | { type: 'delete'; id: string }
+
+const initialSkills: DemoSkill[] = [
+  {
+    id: 'frontend-auditor',
+    path: ['personal', 'coding', 'frontend-auditor'],
+    enabled: true,
+  },
+  {
+    id: 'text-corrector',
+    path: ['personal', 'text-corrector'],
+    enabled: true,
+  },
+  {
+    id: 'frontend-perf-audit',
+    path: ['personal', 'coding', 'frontend-perf-audit'],
+    enabled: true,
+  },
+  {
+    id: 'design-token-sync',
+    path: ['personal', 'coding', 'design-token-sync'],
+    enabled: true,
+  },
+  {
+    id: 'asciinema-recorder',
+    path: ['thirdparty', 'asciinema', 'asciinema-recorder'],
+    enabled: true,
+  },
+  {
+    id: 'asciinema-trimmer',
+    path: ['thirdparty', 'asciinema', 'asciinema-trimmer'],
+    enabled: true,
+  },
+  {
+    id: 'pii-review-helper',
+    path: ['company', 'security', 'pii-review-helper'],
+    enabled: true,
+  },
+  {
+    id: 'access-policy-check',
+    path: ['company', 'security', 'access-policy-check'],
+    enabled: true,
+  },
+  {
+    id: 'data-handling-audit',
+    path: ['company', 'data-handling-audit'],
+    enabled: true,
+  },
+]
+
+const operations: DemoOperation[] = [
+  {
+    type: 'disable',
+    id: 'frontend-auditor',
+  },
+  {
+    type: 'add',
+    id: 'frontend-testing',
+    path: ['personal', 'coding', 'frontend-testing'],
+  },
+  {
+    type: 'move',
+    id: 'asciinema-recorder',
+    to: ['community', 'media', 'asciinema-recorder'],
+  },
+  {
+    type: 'delete',
+    id: 'frontend-testing',
+  },
+  {
+    type: 'move',
+    id: 'asciinema-recorder',
+    to: ['thirdparty', 'asciinema', 'asciinema-recorder'],
+  },
+  {
+    type: 'enable',
+    id: 'frontend-auditor',
+  },
+]
+
+const serializedInitialSkills = JSON.stringify(initialSkills)
+const serializedOperations = JSON.stringify(operations)
+const serializedTopLevelOrder = JSON.stringify([
+  'personal',
+  'thirdparty',
+  'experimental',
+  'community',
+  'company',
+])
+---
+
+<section
+  class="hero-transform w-full max-w-[84rem] overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,13,27,0.92),rgba(5,9,21,0.76))] p-5 shadow-[0_36px_100px_rgba(7,13,26,0.6)] lg:flex lg:items-stretch lg:gap-4"
+  data-hero-transform
+  data-initial-skills={serializedInitialSkills}
+  data-operations={serializedOperations}
+  data-top-level-order={serializedTopLevelOrder}
+>
+  <div class="flex min-w-0 flex-1 flex-col gap-3">
+    <p
+      class="font-display text-left text-[0.72rem] uppercase tracking-[0.28em] text-cyan-100/70"
+    >
+      Organized source
+    </p>
+    <div
+      class="relative h-[28rem] overflow-hidden rounded-[1.6rem] border border-white/8 bg-[rgba(11,18,34,0.76)] p-4 sm:h-[29rem] lg:h-[30rem]"
+    >
+      <div
+        class="h-full overflow-y-auto pr-2 hero-source-scroll"
+        data-source-list
+      >
+      </div>
+      <div
+        class="pointer-events-none absolute left-0 top-0 z-20 hidden rounded-full border border-violet-200/45 bg-[linear-gradient(120deg,rgba(48,35,92,0.96),rgba(86,67,145,0.82))] px-4 py-3 font-code text-[0.82rem] text-white opacity-0 shadow-[0_26px_62px_rgba(93,67,180,0.5)] transition-none"
+        data-source-ghost
+      >
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="relative flex min-h-24 items-center justify-center px-4 lg:min-h-0 lg:w-56 lg:flex-none lg:pr-8"
+  >
+    <div
+      class="h-[1.2rem] w-full max-w-56 rounded-full bg-[linear-gradient(90deg,rgba(67,238,255,0.22),rgba(157,97,255,0.72),rgba(255,181,73,0.84))] shadow-[0_0_42px_rgba(141,120,255,0.25)] [clip-path:polygon(0_0,92%_0,100%_50%,92%_100%,0_100%,7%_50%)] transition-transform duration-500 ease-in-out lg:max-w-none"
+      data-beam
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute inset-y-1/2 left-[12%] h-[0.35rem] w-[76%] -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,rgba(67,238,255,0),rgba(67,238,255,0.4),rgba(157,97,255,0.72),rgba(255,181,73,0.6),rgba(255,181,73,0))] opacity-0 blur-[1px]"
+      data-transfer
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center"
+    >
+      <p
+        class="hero-action-copy rounded-full border border-white/10 bg-[rgba(7,12,24,0.72)] px-4 py-2 text-center font-display text-[0.62rem] uppercase tracking-[0.24em] text-cyan-100/78 shadow-[0_18px_45px_rgba(7,13,26,0.34)] backdrop-blur-[6px]"
+        data-action-copy
+      >
+        Organize skill changes
+      </p>
+    </div>
+    <span
+      class="pointer-events-none absolute left-[24%] top-[50%] h-[1.25rem] w-[1.25rem] [clip-path:polygon(50%_0%,100%_38%,82%_100%,20%_92%,0%_47%)] bg-[linear-gradient(145deg,rgba(67,238,255,0.92),rgba(157,97,255,0.72))] shadow-[0_0_18px_rgba(78,224,248,0.28)] hero-shard-motion"
+      style="--hero-orbit-x:-28px;--hero-orbit-y:-26px;--hero-orbit-rotate:10deg"
+      data-sync-figure></span>
+    <span
+      class="pointer-events-none absolute left-[49%] top-[50%] h-[1.05rem] w-[1.05rem] [clip-path:polygon(50%_0%,100%_38%,82%_100%,20%_92%,0%_47%)] bg-[linear-gradient(145deg,rgba(255,181,73,0.95),rgba(255,109,65,0.82))] shadow-[0_0_18px_rgba(255,181,73,0.22)] hero-shard-motion [animation-delay:1.3s]"
+      style="--hero-orbit-x:0px;--hero-orbit-y:-34px;--hero-orbit-rotate:-8deg"
+      data-sync-figure></span>
+    <span
+      class="pointer-events-none absolute right-[24%] top-[50%] h-[1.2rem] w-[1.2rem] [clip-path:polygon(50%_0%,100%_38%,82%_100%,20%_92%,0%_47%)] bg-[linear-gradient(145deg,rgba(67,238,255,0.92),rgba(157,97,255,0.72))] shadow-[0_0_18px_rgba(78,224,248,0.28)] hero-shard-motion [animation-delay:2.1s]"
+      style="--hero-orbit-x:28px;--hero-orbit-y:-8px;--hero-orbit-rotate:12deg"
+      data-sync-figure></span>
+  </div>
+
+  <div class="flex min-w-0 flex-1 flex-col gap-3">
+    <p
+      class="font-display text-left text-[0.72rem] uppercase tracking-[0.28em] text-cyan-100/70"
+    >
+      Tool-facing target
+    </p>
+    <div
+      class="h-[28rem] overflow-hidden rounded-[1.6rem] border border-white/8 bg-[rgba(11,18,34,0.76)] p-4 sm:h-[29rem] lg:h-[30rem]"
+    >
+      <div class="flex flex-col gap-2" data-target-list></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  type DemoSkillData = {
+    id: string
+    path: string[]
+    enabled: boolean
+  }
+
+  type DemoOperationData =
+    | { type: 'add'; id: string; path: string[] }
+    | { type: 'move'; id: string; to: string[] }
+    | { type: 'disable'; id: string }
+    | { type: 'enable'; id: string }
+    | { type: 'delete'; id: string }
+
+  type SkillAvailability = 'active' | 'disabled'
+  type SkillAction = 'new' | 'moved' | 'enabling' | 'deleting' | null
+  type SkillTargetState = 'visible' | 'hidden' | 'entering' | 'exiting'
+
+  type RuntimeSkill = DemoSkillData & {
+    availability: SkillAvailability
+    action: SkillAction
+    prevFlat: string | null
+    activeAction: boolean
+    targetState: SkillTargetState
+  }
+
+  type TreeNode = {
+    key: string
+    name: string
+    depth: number
+    children: TreeNode[]
+    skill: RuntimeSkill | null
+  }
+
+  type TargetStatusKey = 'new' | 'moved' | 'disabled' | 'deleting' | 'active'
+  type TargetExitReasonKey = 'disabled' | 'deleting'
+
+  const flattenSkillPath = (path: string[]) => path.join('--')
+
+  const cloneSkills = (skills: DemoSkillData[]): RuntimeSkill[] =>
+    skills.map((skill) => ({
+      ...skill,
+      path: [...skill.path],
+      availability: skill.enabled ? 'active' : 'disabled',
+      action: null,
+      prevFlat: null,
+      activeAction: false,
+      targetState: skill.enabled ? 'visible' : 'hidden',
+    }))
+
+  const badgeByStatus: Record<string, string> = {
+    disabled: 'Disabled',
+  }
+
+  const badgeClassByStatus: Record<string, string> = {
+    disabled: 'bg-amber-400/15 text-amber-100 border-amber-300/25',
+  }
+
+  const actionCopyByType: Record<DemoOperationData['type'], string> = {
+    disable: 'Disable a skill',
+    add: 'Add a new skill',
+    move: 'Move a skill',
+    delete: 'Remove a skill',
+    enable: 'Enable a skill',
+  }
+
+  const targetClassByStatus: Record<TargetStatusKey, string> = {
+    new: 'hero-target-enter border-cyan-300/20 bg-cyan-400/[0.08]',
+    moved: 'hero-target-enter border-violet-300/20 bg-violet-400/[0.08]',
+    disabled: '',
+    deleting: 'hero-target-exit border-rose-300/16 bg-rose-400/[0.06]',
+    active: '',
+  }
+
+  const targetExitClassByReason: Record<TargetExitReasonKey, string> = {
+    disabled:
+      'hero-target-exit border-white/8 bg-[linear-gradient(120deg,rgba(10,24,41,0.95),rgba(22,58,77,0.42))]',
+    deleting: 'hero-target-exit border-rose-300/16 bg-rose-400/[0.06]',
+  }
+
+  document.querySelectorAll('[data-hero-transform]').forEach((panel) => {
+    const sourceList = panel.querySelector('[data-source-list]')
+    const targetList = panel.querySelector('[data-target-list]')
+    const beam = panel.querySelector('[data-beam]')
+    const transfer = panel.querySelector('[data-transfer]')
+    const actionCopy = panel.querySelector('[data-action-copy]')
+    const ghost = panel.querySelector('[data-source-ghost]')
+    const syncFigures = [...panel.querySelectorAll('[data-sync-figure]')]
+
+    if (
+      !(sourceList instanceof HTMLElement) ||
+      !(targetList instanceof HTMLElement)
+    ) {
+      return
+    }
+
+    const initialSkills = JSON.parse(
+      panel.getAttribute('data-initial-skills') ?? '[]',
+    ) as DemoSkillData[]
+    const operations = JSON.parse(panel.getAttribute('data-operations') ?? '[]') as DemoOperationData[]
+    const topLevelOrder = JSON.parse(
+      panel.getAttribute('data-top-level-order') ?? '[]',
+    ) as string[]
+    const topLevelRank = new Map(
+      topLevelOrder.map((entry, index) => [entry, index]),
+    )
+
+    const sortSkills = (skills: RuntimeSkill[]) =>
+      [...skills].sort((left, right) => {
+        const leftTop = left.path[0] ?? ''
+        const rightTop = right.path[0] ?? ''
+        const leftRank = topLevelRank.get(leftTop) ?? Number.MAX_SAFE_INTEGER
+        const rightRank = topLevelRank.get(rightTop) ?? Number.MAX_SAFE_INTEGER
+
+        if (leftRank !== rightRank) {
+          return leftRank - rightRank
+        }
+
+        return left.path.join('/').localeCompare(right.path.join('/'))
+      })
+
+    let skills = cloneSkills(initialSkills)
+    let currentStep = 0
+    let timeoutId = 0
+    let treeContainerRect: DOMRect | null = null
+
+    const pulseBeam = (variant = 'default') => {
+      if (!(beam instanceof HTMLElement)) {
+        return
+      }
+      beam.classList.remove('hero-beam-pulse-once')
+      beam.classList.remove('hero-beam-pulse-soft')
+      beam.classList.remove('hero-beam-sync-run')
+      void beam.offsetWidth
+      beam.classList.add('hero-beam-sync-run')
+      beam.classList.add(
+        variant === 'soft' ? 'hero-beam-pulse-soft' : 'hero-beam-pulse-once',
+      )
+    }
+
+    const pulseTransfer = (variant = 'default') => {
+      if (!(transfer instanceof HTMLElement)) {
+        return
+      }
+      transfer.classList.remove('hero-transfer-active')
+      transfer.classList.remove('hero-transfer-soft')
+      void transfer.offsetWidth
+      transfer.classList.add(
+        variant === 'soft' ? 'hero-transfer-soft' : 'hero-transfer-active',
+      )
+    }
+
+    const pulseSyncFigures = (variant = 'default') => {
+      syncFigures.forEach((figure) => {
+        if (!(figure instanceof HTMLElement)) {
+          return
+        }
+        figure.style.opacity = variant === 'soft' ? '0.74' : '1'
+      })
+    }
+
+    const setActionCopy = (operation: DemoOperationData) => {
+      if (!(actionCopy instanceof HTMLElement)) {
+        return
+      }
+
+      actionCopy.textContent =
+        actionCopyByType[operation.type] ?? 'Organize skill changes'
+      actionCopy.classList.remove('hero-action-copy-change')
+      void actionCopy.offsetWidth
+      actionCopy.classList.add('hero-action-copy-change')
+    }
+
+    const normalizeSkills = () => {
+      skills = skills.map((skill) => ({
+        ...skill,
+        availability: skill.enabled ? 'active' : 'disabled',
+        action: null,
+        prevFlat: null,
+        activeAction: false,
+        targetState: skill.enabled ? 'visible' : 'hidden',
+      }))
+    }
+
+    const createTree = () => {
+      const root: TreeNode[] = []
+      const byKey = new Map<string, TreeNode>()
+
+      sortSkills(skills).forEach((skill) => {
+        skill.path.forEach((segment, index) => {
+          const key = skill.path.slice(0, index + 1).join('/')
+          if (!byKey.has(key)) {
+            const node = {
+              key,
+              name: segment,
+              depth: index,
+              children: [],
+              skill: index === skill.path.length - 1 ? skill : null,
+            }
+            byKey.set(key, node)
+            if (index === 0) {
+              root.push(node)
+            } else {
+              const parent = byKey.get(skill.path.slice(0, index).join('/'))
+              parent?.children.push(node)
+            }
+          }
+        })
+      })
+
+      return root
+    }
+
+    const renderTreeNodes = (nodes: TreeNode[]): string =>
+      nodes
+        .map((node) => {
+          let collapsedNode = node
+          const folderParts = [node.name]
+
+          while (
+            !collapsedNode.skill &&
+            collapsedNode.children.length === 1 &&
+            !collapsedNode.children[0]?.skill
+          ) {
+            collapsedNode = collapsedNode.children[0]
+            folderParts.push(collapsedNode.name)
+          }
+
+          const skill = collapsedNode.skill
+          const isLeaf = Boolean(skill)
+          const formatFolderSegment = (segment: string) =>
+            segment
+              .split('-')
+              .map((part) =>
+                part ? part[0].toUpperCase() + part.slice(1) : part,
+              )
+              .join('-')
+          const badge =
+            skill?.availability === 'disabled' ? badgeByStatus.disabled : ''
+          const rowTone =
+            skill?.availability === 'disabled'
+              ? 'text-amber-100/88'
+              : skill?.action === 'enabling'
+                ? 'text-emerald-100/92'
+                : skill?.action === 'deleting'
+                  ? 'text-rose-100/85'
+                  : 'text-white/95'
+          const branchOffset = node.depth > 0 ? 'ml-3.5' : ''
+          const rowAnim =
+            skill?.action === 'new'
+              ? 'hero-source-enter'
+              : skill?.action === 'enabling'
+                ? 'hero-source-enable'
+                : skill?.action === 'deleting'
+                  ? 'hero-source-exit'
+                  : ''
+          const activeClass = skill?.activeAction
+            ? 'hero-source-active ring-1 ring-cyan-300/35 shadow-[0_0_0_1px_rgba(67,238,255,0.12),0_16px_38px_rgba(35,189,226,0.16)]'
+            : ''
+          const label = isLeaf
+            ? collapsedNode.name
+            : folderParts.map(formatFolderSegment).join('/')
+          const rowMarkup = isLeaf
+            ? `<div class="hero-source-row ${rowAnim} ${activeClass} relative flex min-w-0 items-center rounded-full border border-white/8 bg-[linear-gradient(120deg,rgba(10,24,41,0.95),rgba(22,58,77,0.42))] px-3 py-2.5 font-code text-[0.74rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${rowTone} ${skill?.availability === 'disabled' ? 'hero-source-disabled' : ''} ${skill?.action === 'moved' ? 'opacity-20 scale-[0.985]' : ''}" data-skill-id="${skill?.id ?? ''}">
+                <span class="min-w-0 flex-1 text-left truncate">${label}</span>
+                ${badge ? `<span class="ml-auto inline-flex items-center rounded-full border px-2.5 py-0.5 text-[0.58rem] font-display uppercase tracking-[0.22em] ${badgeClassByStatus.disabled}">${badge}</span>` : ''}
+              </div>`
+            : `<div class="min-w-0 px-3 py-1.5 text-left font-code text-[0.72rem] uppercase tracking-[0.16em] text-cyan-100/72">${label}</div>`
+          return `
+            <div class="relative ${branchOffset} pl-4 ${node.depth > 0 ? 'border-l border-white/8' : ''}">
+              ${rowMarkup}
+              ${collapsedNode.children.length > 0 ? `<div class="mt-2 flex flex-col gap-2">${renderTreeNodes(collapsedNode.children)}</div>` : ''}
+            </div>
+          `
+        })
+        .join('')
+
+    const renderSource = () => {
+      const tree = createTree()
+      sourceList.innerHTML = `<div class="flex flex-col gap-2 pb-16">${renderTreeNodes(tree)}</div>`
+      treeContainerRect = sourceList.getBoundingClientRect()
+    }
+
+    const renderTarget = () => {
+      const activeSkills = sortSkills(
+        skills.filter(
+          (skill) =>
+            skill.targetState === 'visible' || skill.targetState === 'exiting',
+        ),
+      )
+      const chips = activeSkills
+        .flatMap((skill) => {
+          if (skill.action === 'moved' && skill.prevFlat) {
+            return [
+              `<div class="hero-target-chip hero-target-exit rounded-full border border-white/8 bg-[linear-gradient(120deg,rgba(10,24,41,0.95),rgba(22,58,77,0.42))] px-4 py-3 font-code text-[0.82rem] text-white/95 opacity-55 line-through">${skill.prevFlat}</div>`,
+              `<div class="hero-target-chip ${targetClassByStatus.new} rounded-full border border-white/8 px-4 py-3 font-code text-[0.82rem] text-white/95">${flattenSkillPath(skill.path)}</div>`,
+            ]
+          }
+
+          const flat = flattenSkillPath(skill.path)
+          const exitReason: TargetExitReasonKey = skill.action === 'deleting' ? 'deleting' : 'disabled'
+          const activeStatus: TargetStatusKey =
+            skill.action === 'new' ||
+            skill.action === 'moved' ||
+            skill.action === 'deleting' ||
+            skill.action === 'enabling'
+              ? skill.action === 'enabling'
+                ? 'active'
+                : skill.action
+              : skill.availability
+          const stateClass =
+            skill.targetState === 'exiting'
+              ? targetExitClassByReason[exitReason]
+              : skill.targetState === 'entering'
+                ? targetClassByStatus.new
+                : targetClassByStatus[activeStatus]
+          return [
+            `<div class="hero-target-chip ${stateClass} rounded-full border px-4 py-3 font-code text-[0.82rem] text-white/95">${flat}</div>`,
+          ]
+        })
+        .join('')
+
+      targetList.innerHTML = chips
+    }
+
+    const render = () => {
+      renderSource()
+      renderTarget()
+    }
+
+    const findSkill = (id: string) => skills.find((skill) => skill.id === id)
+
+    const revealSourceSkill = (skillId: string) => {
+      if (!(sourceList instanceof HTMLElement)) {
+        return
+      }
+
+      const row = sourceList.querySelector(`[data-skill-id="${skillId}"]`)
+      if (!(row instanceof HTMLElement)) {
+        return
+      }
+
+      const top = row.offsetTop - 36
+      sourceList.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
+    }
+
+    const animateMoveGhost = (skillId: string) => {
+      if (
+        !(ghost instanceof HTMLElement) ||
+        !(treeContainerRect instanceof DOMRect)
+      ) {
+        return
+      }
+
+      const rows = [
+        ...sourceList.querySelectorAll(`[data-skill-id="${skillId}"]`),
+      ]
+      if (rows.length < 2) {
+        ghost.classList.add('hidden')
+        return
+      }
+
+      const from = rows[0].getBoundingClientRect()
+      const to = rows[1].getBoundingClientRect()
+
+      ghost.textContent = rows[0].querySelector('span')?.textContent ?? ''
+      ghost.style.width = `${Math.max(from.width, to.width) + 16}px`
+      ghost.style.setProperty(
+        '--hero-ghost-start-x',
+        `${from.left - treeContainerRect.left}px`,
+      )
+      ghost.style.setProperty(
+        '--hero-ghost-start-y',
+        `${from.top - treeContainerRect.top}px`,
+      )
+      ghost.classList.remove('hidden')
+      ghost.classList.remove('hero-source-ghost-move')
+      void ghost.offsetWidth
+      ghost.style.setProperty('--hero-ghost-x', `${to.left - from.left}px`)
+      ghost.style.setProperty('--hero-ghost-y', `${to.top - from.top}px`)
+      ghost.classList.add('hero-source-ghost-move')
+
+      window.setTimeout(() => {
+        ghost.classList.add('hidden')
+        ghost.classList.remove('hero-source-ghost-move')
+      }, 1100)
+    }
+
+    const applyOperation = (operation: DemoOperationData) => {
+      pulseBeam(
+        operation.type === 'disable' || operation.type === 'delete'
+          ? 'soft'
+          : 'default',
+      )
+      pulseTransfer(
+        operation.type === 'disable' || operation.type === 'delete'
+          ? 'soft'
+          : 'default',
+      )
+      pulseSyncFigures(
+        operation.type === 'disable' || operation.type === 'delete'
+          ? 'soft'
+          : 'default',
+      )
+
+      const markActive = (id: string) => {
+        skills.forEach((skill) => {
+          skill.activeAction = skill.id === id
+        })
+      }
+
+      if (operation.type === 'add') {
+        skills = [
+          ...skills,
+          {
+            id: operation.id,
+            path: [...operation.path],
+            enabled: true,
+            availability: 'active',
+            action: 'new',
+            prevFlat: null,
+            activeAction: true,
+            targetState: 'entering',
+          },
+        ]
+        markActive(operation.id)
+        render()
+        revealSourceSkill(operation.id)
+
+        window.setTimeout(() => {
+          const current = findSkill(operation.id)
+          if (current && current.action === 'new') {
+            current.action = null
+            current.targetState = 'visible'
+            render()
+          }
+        }, 1500)
+        return
+      }
+
+      const skill = findSkill(operation.id)
+      if (!skill) {
+        render()
+        return
+      }
+
+      if (operation.type === 'move') {
+        skill.prevFlat = flattenSkillPath(skill.path)
+        skill.action = 'moved'
+        markActive(operation.id)
+        render()
+        revealSourceSkill(operation.id)
+
+        window.setTimeout(() => {
+          skill.path = [...operation.to]
+          render()
+          revealSourceSkill(operation.id)
+          animateMoveGhost(operation.id)
+        }, 180)
+
+        window.setTimeout(() => {
+          const current = findSkill(operation.id)
+          if (current && current.action === 'moved') {
+            current.action = null
+            current.prevFlat = null
+            render()
+          }
+        }, 1800)
+
+        return
+      }
+
+      if (operation.type === 'disable') {
+        skill.availability = 'disabled'
+        skill.action = null
+        markActive(operation.id)
+        skill.targetState = 'exiting'
+        render()
+        revealSourceSkill(operation.id)
+
+        window.setTimeout(() => {
+          skill.enabled = false
+          skill.targetState = 'hidden'
+          render()
+        }, 1150)
+        return
+      }
+
+      if (operation.type === 'enable') {
+        skill.enabled = true
+        skill.availability = 'active'
+        skill.action = 'enabling'
+        skill.targetState = 'entering'
+        markActive(operation.id)
+        render()
+        revealSourceSkill(operation.id)
+
+        window.setTimeout(() => {
+          const current = findSkill(operation.id)
+          if (current && current.targetState === 'entering') {
+            current.targetState = 'visible'
+            if (current.action === 'enabling') {
+              current.action = null
+            }
+            render()
+          }
+        }, 1500)
+        return
+      }
+
+      if (operation.type === 'delete') {
+        skill.action = 'deleting'
+        skill.targetState = 'exiting'
+        markActive(operation.id)
+        render()
+        revealSourceSkill(operation.id)
+        window.clearTimeout(timeoutId)
+        timeoutId = window.setTimeout(() => {
+          skills = skills.filter((item) => item.id !== operation.id)
+          render()
+        }, 1200)
+      }
+    }
+
+    const resetLoop = () => {
+      skills = cloneSkills(initialSkills)
+      currentStep = 0
+      normalizeSkills()
+      render()
+    }
+
+    normalizeSkills()
+    render()
+
+    const loop = () => {
+      const operation = operations[currentStep]
+      setActionCopy(operation)
+      applyOperation(operation)
+      currentStep += 1
+
+      const finishedCycle = currentStep >= operations.length
+      const nextDelay = finishedCycle ? 3400 : 4700
+
+      timeoutId = window.setTimeout(() => {
+        if (finishedCycle) {
+          resetLoop()
+          timeoutId = window.setTimeout(loop, 2200)
+          return
+        }
+
+        loop()
+      }, nextDelay)
+    }
+
+    timeoutId = window.setTimeout(loop, 2200)
+
+    window.addEventListener(
+      'beforeunload',
+      () => {
+        window.clearTimeout(timeoutId)
+      },
+      { once: true },
+    )
+  })
+</script>

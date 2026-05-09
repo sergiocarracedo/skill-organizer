@@ -1,0 +1,28 @@
+---
+title: watched
+description: Manage watched project config paths.
+section: reference
+order: 7
+commandSlug: watched
+summary: The registry used by watch mode and the background service.
+---
+
+## Synopsis
+
+```bash
+skill-organizer watched list
+skill-organizer watched add [config-path]
+skill-organizer watched remove [config-path]
+```
+
+## list
+
+Prints all currently registered watched project config paths.
+
+## add
+
+Resolves and validates a project config path, then adds it to the watched registry.
+
+## remove
+
+Removes a watched project config path. If you do not pass one, the command offers an interactive selector.

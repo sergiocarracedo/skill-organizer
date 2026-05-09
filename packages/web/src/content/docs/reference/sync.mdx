@@ -1,0 +1,24 @@
+---
+title: sync
+description: Synchronize managed skills into the target folder.
+section: reference
+order: 4
+commandSlug: sync
+summary: Refresh the tool-facing target from the organized source.
+---
+
+## Synopsis
+
+```bash
+skill-organizer sync
+skill-organizer sync --config ~/.agents/.skill-organizer.yml
+```
+
+## What sync updates
+
+- Managed frontmatter fields in source `SKILL.md` files.
+- Managed symlinks in the target folder.
+- Stale managed target entries that no longer correspond to source.
+- The hidden manifest in the target folder.
+
+Unmanaged target entries are not deleted automatically.

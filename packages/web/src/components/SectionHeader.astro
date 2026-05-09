@@ -1,0 +1,39 @@
+---
+type Props = {
+  eyebrow: string
+  title: string
+  copy?: string
+  className?: string
+  eyebrowClassName?: string
+  titleClassName?: string
+  copyClassName?: string
+  reveal?: boolean
+}
+
+const {
+  eyebrow,
+  title,
+  copy,
+  className = '',
+  eyebrowClassName = '',
+  titleClassName = '',
+  copyClassName = '',
+  reveal = false,
+} = Astro.props as Props
+---
+
+<div class={`flex flex-col gap-4 ${className}`.trim()} data-reveal={reveal ? '' : undefined}>
+  <p
+    class={`font-display text-[0.76rem] uppercase tracking-[0.3em] text-cyan-100/72 ${eyebrowClassName}`.trim()}
+  >
+    {eyebrow}
+  </p>
+  <h2 class={`max-w-[18ch] text-[clamp(2.1rem,5vw,3.5rem)] text-white ${titleClassName}`.trim()}>
+    {title}
+  </h2>
+  {copy && (
+    <p class={`max-w-[56rem] text-[1.06rem] leading-[1.88] text-slate-200/78 ${copyClassName}`.trim()}>
+      {copy}
+    </p>
+  )}
+</div>

@@ -1,0 +1,27 @@
+---
+title: status
+description: Show source, target, and sync status.
+section: reference
+order: 5
+commandSlug: status
+summary: Understand the current managed state before taking action.
+---
+
+## Synopsis
+
+```bash
+skill-organizer status
+```
+
+## Report contents
+
+The status output is built to expose the real shape of a project:
+
+- Source and target locations.
+- Managed source skills and flattened names.
+- Disabled skills.
+- Unmanaged target entries.
+- Broken links and drift.
+- Summary counts.
+
+Run it before and after structural changes to verify that sync has left the project clean.

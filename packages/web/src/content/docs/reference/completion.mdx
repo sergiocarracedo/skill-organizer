@@ -1,0 +1,41 @@
+---
+title: completion
+description: Generate shell completion scripts.
+section: reference
+order: 1
+commandSlug: completion
+summary: Completion output for bash, zsh, fish, and PowerShell.
+---
+
+## Synopsis
+
+```bash
+skill-organizer completion bash
+skill-organizer completion zsh
+skill-organizer completion fish
+skill-organizer completion powershell
+```
+
+## Supported shells
+
+- `bash`
+- `zsh`
+- `fish`
+- `powershell`
+
+Each shell subcommand prints the completion script to standard output, so you can redirect it into the location your shell expects.
+
+## Examples
+
+```bash
+skill-organizer completion bash > ~/.local/share/bash-completion/completions/skill-organizer
+skill-organizer completion zsh > ~/.zsh/completions/_skill-organizer
+skill-organizer completion fish > ~/.config/fish/completions/skill-organizer.fish
+skill-organizer completion powershell > skill-organizer.ps1
+```
+
+## Flags
+
+```text
+--no-descriptions  Disable completion descriptions
+```

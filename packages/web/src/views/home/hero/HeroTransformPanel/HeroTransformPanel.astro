@@ -1,0 +1,31 @@
+---
+import { withBase } from '@/lib/with-base'
+
+import HeroTransformPanelContent from './components/HeroTransformPanelContent.astro'
+
+const demoVideoMp4Src = withBase('/hero/demo.mp4')
+const demoVideoWebmSrc = withBase('/hero/demo.webm')
+---
+
+<div class="w-full max-w-[84rem]" data-reveal>
+  <section
+    class="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(8,13,27,0.92),rgba(5,9,21,0.76))] shadow-[0_36px_100px_rgba(7,13,26,0.6)] md:hidden"
+  >
+    <video
+      class="block aspect-[16/9] w-full object-content object-center"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-label="Skill organizer demo video"
+    >
+      <source src={demoVideoWebmSrc} type="video/webm" />
+      <source src={demoVideoMp4Src} type="video/mp4" />
+    </video>
+  </section>
+
+  <div class="hidden md:block">
+    <HeroTransformPanelContent />
+  </div>
+</div>

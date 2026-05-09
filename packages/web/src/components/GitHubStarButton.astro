@@ -1,0 +1,105 @@
+---
+type Props = {
+  className?: string
+  compact?: boolean
+  showLabel?: boolean
+}
+
+const {
+  className = '',
+  compact = false,
+  showLabel = true,
+} = Astro.props as Props
+
+const repoUrl = 'https://github.com/sergiocarracedo/skill-organizer'
+const apiUrl = 'https://api.github.com/repos/sergiocarracedo/skill-organizer'
+const fallbackStars = '1'
+---
+
+<a
+  href={repoUrl}
+  target="_blank"
+  rel="noreferrer"
+  class:list={[
+    'group inline-flex items-center justify-center overflow-hidden rounded-full border border-white/14 bg-white/[0.045] text-slate-100/92 no-underline transition-[border-color,background-color,color,transform] duration-200 hover:border-white/22 hover:bg-white/[0.075] hover:text-white',
+    compact
+      ? showLabel
+        ? 'min-h-10 gap-3 px-3.5 text-[0.88rem]'
+        : 'min-h-10 gap-2.5 px-3 text-[0.88rem]'
+      : 'min-h-12 gap-3.5 px-5 text-[0.95rem]',
+    className,
+  ]}
+  data-github-star-button
+  data-github-stars-url={apiUrl}
+  aria-label={showLabel ? undefined : 'Star Skill Organizer on GitHub'}
+>
+  <span class="inline-flex items-center gap-2.5 whitespace-nowrap">
+    <span class="inline-flex h-5 w-5 items-center justify-center text-white/92" aria-hidden="true">
+      <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current">
+        <path d="M12 .5C5.648.5.5 5.648.5 12c0 5.084 3.292 9.398 7.86 10.92.575.106.785-.25.785-.555 0-.273-.01-.996-.016-1.955-3.197.694-3.872-1.54-3.872-1.54-.523-1.328-1.277-1.681-1.277-1.681-1.044-.714.079-.699.079-.699 1.155.08 1.763 1.186 1.763 1.186 1.026 1.758 2.691 1.25 3.347.956.104-.743.401-1.25.73-1.538-2.552-.29-5.236-1.276-5.236-5.682 0-1.255.448-2.28 1.183-3.084-.119-.29-.512-1.457.112-3.038 0 0 .964-.309 3.159 1.178A10.97 10.97 0 0 1 12 5.76c.973.004 1.953.132 2.87.388 2.194-1.487 3.157-1.178 3.157-1.178.626 1.581.233 2.748.114 3.038.737.804 1.181 1.829 1.181 3.084 0 4.417-2.688 5.388-5.248 5.672.412.355.78 1.055.78 2.126 0 1.535-.014 2.773-.014 3.15 0 .308.207.667.79.554C20.211 21.394 23.5 17.083 23.5 12 23.5 5.648 18.352.5 12 .5Z"></path>
+      </svg>
+    </span>
+    {showLabel && <span class="font-medium">Star on GitHub</span>}
+  </span>
+
+  {showLabel && <span class="h-5 w-px bg-white/12" aria-hidden="true"></span>}
+
+  <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#0f1727] px-2.5 py-1 text-[0.82em] text-amber-200/94 ring-1 ring-white/8">
+    <svg viewBox="0 0 24 24" class="h-[0.92rem] w-[0.92rem] fill-current text-amber-300/96" aria-hidden="true">
+      <path d="M12 2.75l2.855 5.786 6.386.928-4.62 4.503 1.09 6.361L12 17.325 6.29 20.328l1.09-6.361-4.62-4.503 6.386-.928L12 2.75Z"></path>
+    </svg>
+    <span data-github-star-count>{fallbackStars}</span>
+  </span>
+</a>
+
+<script>
+  const formatStarCount = (value: number) => new Intl.NumberFormat('en', { notation: value >= 1000 ? 'compact' : 'standard', maximumFractionDigits: 1 }).format(value)
+
+  const buttons = document.querySelectorAll('[data-github-star-button]')
+  const hydratedApiUrls = new Set<string>()
+
+  const updateButtons = (apiUrl: string, text: string) => {
+    document
+      .querySelectorAll(`[data-github-star-button][data-github-stars-url="${apiUrl}"] [data-github-star-count]`)
+      .forEach((node) => {
+        node.textContent = text
+      })
+  }
+
+  buttons.forEach((button) => {
+    if (!(button instanceof HTMLElement)) {
+      return
+    }
+
+    const apiUrl = button.dataset.githubStarsUrl
+
+    if (!apiUrl || hydratedApiUrls.has(apiUrl)) {
+      return
+    }
+
+    hydratedApiUrls.add(apiUrl)
+
+    fetch(apiUrl, {
+      headers: {
+        Accept: 'application/vnd.github+json',
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`GitHub API responded with ${response.status}`)
+        }
+
+        return response.json() as Promise<{ stargazers_count?: number }>
+      })
+      .then((payload) => {
+        if (typeof payload.stargazers_count !== 'number') {
+          return
+        }
+
+        updateButtons(apiUrl, formatStarCount(payload.stargazers_count))
+      })
+      .catch(() => {
+        // Keep the fallback count when the public API is unavailable or rate-limited.
+      })
+  })
+</script>

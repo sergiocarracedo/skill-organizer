@@ -1,0 +1,37 @@
+---
+title: Onboard a Tool
+description: Use the guided onboarding flow to set up a generic .agents or tool-specific target quickly.
+section: guides
+order: 3
+summary: The fastest path to a working setup.
+---
+
+## Start the onboarding flow
+
+```bash
+skill-organizer onboard
+```
+
+The CLI guides you through:
+
+1. Choosing the target tool.
+2. Accepting or editing the proposed source folder.
+3. Creating the project config.
+4. Optionally moving unmanaged target entries into source.
+5. Running an initial sync.
+6. Optionally installing and starting the watch service.
+
+## Supported target presets
+
+- Generic `.agents`
+- Claude Code
+- Codex
+- Antigravity
+
+The generic `.agents` target is the default choice when the user is on OpenCode, Codex CLI, aider, goose, or another tool that reads `~/.agents/skills`.
+
+Cursor-style agent workflows and any other tool that reads a shared `.agents` directory also fit the generic target well.
+
+## After onboarding
+
+The flow ends by showing `status`, which means you immediately see whether managed skills, unmanaged entries, or disabled skills need attention.

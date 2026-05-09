@@ -1,0 +1,80 @@
+---
+import SectionHeader from '@/components/SectionHeader.astro'
+import SectionShell from '@/components/SectionShell.astro'
+import { featureCards } from '@/data/home'
+
+const featureShapeClasses = {
+  bevel:
+    'rounded-[1.7rem] [clip-path:polygon(0_0.6rem,calc(100%_-_1.6rem)_0,100%_1.15rem,100%_100%,0_100%)]',
+  arc: 'rounded-[2.5rem_1.35rem_2.1rem_1.1rem]',
+  slant:
+    'rounded-[1.45rem] [clip-path:polygon(0_0.95rem,100%_0,100%_calc(100%_-_0.45rem),0_100%)]',
+  ticket:
+    'rounded-[1.55rem] [clip-path:polygon(0_0,100%_0,100%_74%,95%_80%,100%_88%,100%_100%,0_100%,0_0)]',
+  hex: 'rounded-[1.35rem] [clip-path:polygon(10%_0,100%_0,100%_85%,90%_100%,0_100%,0_14%)]',
+  shield:
+    'rounded-[1.55rem_1.55rem_1.9rem_1.9rem] [clip-path:polygon(0_0,100%_0,100%_76%,56%_100%,0_82%)]',
+} as const
+---
+
+<SectionShell id="features" className="flex flex-col gap-8">
+  <SectionHeader
+    eyebrow="Main features"
+    title="Built for growing skill libraries."
+    copy="Keep the source tree clean for humans and the generated target predictable for tools, without resorting to manual copying, renaming, or cleanup."
+    titleClassName="max-w-[16ch] text-[clamp(2.2rem,5vw,3.7rem)]"
+    copyClassName="max-w-[58rem] text-[1.08rem] leading-[1.9]"
+    reveal
+  />
+
+  <div
+    class="grid gap-4 min-[760px]:grid-cols-2 min-[960px]:grid-cols-3 min-[960px]:gap-[1.2rem]"
+  >
+    {
+      featureCards.map((card, index) => (
+        <article
+          class:list={[
+            'feature-card relative flex min-h-[17.5rem] flex-col gap-[0.9rem] overflow-hidden border border-[rgba(177,197,255,0.12)] bg-[linear-gradient(180deg,rgba(10,17,35,0.86),rgba(7,12,25,0.72))] p-[1.2rem] shadow-[0_24px_60px_rgba(7,13,26,0.14)] transition-transform duration-180 [transform:rotate(calc(var(--feature-rotation,0deg)*1deg))] [transform-origin:center] [will-change:transform]',
+            featureShapeClasses[card.shape],
+          ]}
+          data-reveal
+          data-feature-card
+          data-base-rotation={card.rotation}
+          data-rotation-speed={card.speed}
+        >
+          <span
+            class="absolute right-4 top-4 h-[3.5rem] w-[3.5rem] rounded-[0.9rem] bg-[linear-gradient(145deg,rgba(67,238,255,0.26),rgba(157,97,255,0.16),rgba(255,181,73,0.22))] shadow-[0_0_28px_rgba(114,163,255,0.18)] flex items-center justify-center font-display text-sm text-amber-300/92"
+            aria-hidden="true"
+          >
+            0{index + 1}
+          </span>
+          <h3 class="mt-3 max-w-[14ch] text-[1.55rem] text-white min-h-[3rem]">
+            {card.title}
+          </h3>
+          <p class="max-w-[28rem] leading-[1.82]">{card.copy}</p>
+        </article>
+      ))
+    }
+  </div>
+</SectionShell>
+
+<script>
+  const updateFeatureCardMotion = () => {
+    document.querySelectorAll('[data-feature-card]').forEach((card) => {
+      if (!(card instanceof HTMLElement)) {
+        return
+      }
+
+      const base = Number(card.dataset.baseRotation ?? '0')
+      const speed = Number(card.dataset.rotationSpeed ?? '0')
+      const rect = card.getBoundingClientRect()
+      const centerOffset = rect.top + rect.height / 2 - window.innerHeight / 2
+      const drift = centerOffset * speed * 0.035
+      card.style.setProperty('--feature-rotation', `${base + drift}`)
+    })
+  }
+
+  updateFeatureCardMotion()
+  window.addEventListener('scroll', updateFeatureCardMotion, { passive: true })
+  window.addEventListener('resize', updateFeatureCardMotion)
+</script>

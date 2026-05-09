@@ -7,6 +7,11 @@
 
 skill-organizer
 dist/
+packages/*/dist/
+packages/*/node_modules/
+packages/*/coverage/
+packages/web/test-results/
+node_modules/
 
 # Go test binaries and coverage
 *.test

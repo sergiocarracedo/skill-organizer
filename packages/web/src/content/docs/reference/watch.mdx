@@ -1,0 +1,20 @@
+---
+title: watch
+description: Watch registered projects and keep them synchronized.
+section: reference
+order: 8
+commandSlug: watch
+summary: Foreground watching for registered configs.
+---
+
+## Synopsis
+
+```bash
+skill-organizer watch
+```
+
+## Behavior
+
+The watcher reads the home registry, loads the configured service log level, watches registered projects, and reruns sync only for projects affected by a change.
+
+It is ideal when you want live synchronization without installing the background service.

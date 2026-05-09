@@ -1,0 +1,32 @@
+---
+import SectionShell from '@/components/SectionShell.astro'
+import { advantageItems } from '@/data/home'
+---
+
+<SectionShell>
+  <div
+    class="grid w-full gap-6 rounded-[2rem] md:border md:border-white/10 bg-[linear-gradient(135deg,rgba(6,13,27,0.98),rgba(15,23,43,0.9),rgba(23,15,36,0.82))] md:p-6 shadow-[0_0_80px_rgba(45,118,170,0.12)] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:p-8"
+    data-reveal
+  >
+    <div class="flex flex-col gap-4">
+      <p
+        class="font-display text-[0.76rem] uppercase tracking-[0.3em] text-cyan-100/72"
+      >
+        Why use it
+      </p>
+      <h2 class="max-w-[18ch] text-[clamp(2.1rem,5vw,3.4rem)] text-white">
+        A cleaner way to manage skills long term.
+      </h2>
+    </div>
+
+    <ul class="grid list-none gap-4 p-0 m-0">
+      {
+        advantageItems.map((item) => (
+          <li class='rounded-[1.25rem] border border-white/8 bg-white/4 px-[1.05rem] py-4 leading-7 text-slate-100/88 before:mr-[0.7rem] before:content-["◈"] before:text-amber-300/82'>
+            {item}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</SectionShell>

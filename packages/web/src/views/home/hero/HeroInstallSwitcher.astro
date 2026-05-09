@@ -1,0 +1,117 @@
+---
+import CopyButton from '@/components/CopyButton.astro'
+import type { InstallMethod } from '@/data/home'
+
+type Props = {
+  methods: InstallMethod[]
+}
+
+const { methods } = Astro.props as Props
+---
+
+<div class="mb-10 flex w-full flex-col items-center gap-[1.2rem]" data-install-switcher>
+  <div class="flex w-full flex-wrap items-center justify-center gap-[0.85rem] max-[720px]:items-stretch">
+    <label class="flex items-center gap-[0.8rem] font-display text-[0.78rem] uppercase tracking-[0.18em] text-[rgba(229,241,255,0.72)] max-[720px]:w-full">
+      <span>Install via</span>
+      <select
+        class="min-h-[2.9rem] appearance-none rounded-full border border-[rgba(153,214,255,0.35)] bg-[rgba(10,24,41,0.92)] bg-no-repeat px-4 pr-[3.7rem] font-display text-[0.78rem] uppercase tracking-[0.18em] text-[rgba(244,250,255,0.98)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+        style="background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.25 6.25 8 10l3.75-3.75' stroke='%23cfe9ff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;);background-position:right 1.2rem center;background-size:0.95rem"
+        data-select
+      >
+        {
+          methods.map((method) => (
+            <option value={method.id}>{method.label}</option>
+          ))
+        }
+      </select>
+    </label>
+
+    <div class="flex min-w-0 max-w-full flex-[0_1_auto] max-[720px]:w-full">
+      {
+        methods.map((method, index) => (
+          <section
+            class:list={{
+              hidden: index !== 0,
+              flex: index === 0,
+            }}
+            class="max-w-full flex-[0_1_auto] flex-nowrap items-center gap-[0.85rem] rounded-full border border-white/10 bg-[linear-gradient(180deg,rgba(8,14,29,0.88),rgba(7,11,22,0.78))] px-4 py-[0.55rem] pr-[0.7rem] shadow-[0_24px_50px_rgba(5,10,22,0.32)] max-[720px]:w-full max-[720px]:rounded-[1rem] max-[720px]:px-[0.8rem] max-[720px]:py-[0.5rem] max-[720px]:pr-[0.55rem]"
+            data-panel={method.id}
+          >
+            {!method.linkOnly && method.command && (
+              <>
+                <div class="min-w-0 flex-1 overflow-x-auto">
+                  <code class="block w-full overflow-x-auto text-left font-code text-[0.9rem] leading-[1.6] whitespace-nowrap text-[rgba(235,244,255,0.94)] [scrollbar-width:thin]">
+                    <span class="inline-block min-w-max">{method.command}</span>
+                  </code>
+                </div>
+                <CopyButton className='ml-auto' copyText={method.command} title={method.label} />
+              </>
+            )}
+
+            {method.linkOnly && (
+              <a
+                class="text-[0.94rem] text-cyan-300/92 no-underline"
+                href={method.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {method.hrefLabel}
+              </a>
+            )}
+          </section>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="flex min-h-[3.1rem] w-full justify-center px-[0.6rem]">
+    {
+      methods.map((method, index) => (
+        <section
+          class:list={{ hidden: index !== 0, flex: index === 0 }}
+          class="flex-col gap-[0.45rem]"
+          data-meta={method.id}
+        >
+          {method.secondaryText && (
+            <p class="max-w-[54rem] text-center leading-[1.7]">
+              {method.secondaryText}
+            </p>
+          )}
+          <p class="max-w-[54rem] text-center leading-[1.7]">{method.note}</p>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('[data-install-switcher]').forEach((switcher) => {
+    const select = switcher.querySelector('[data-select]')
+    const panels = Array.from(switcher.querySelectorAll('[data-panel]'))
+    const metas = Array.from(switcher.querySelectorAll('[data-meta]'))
+
+    if (!(select instanceof HTMLSelectElement)) {
+      return
+    }
+
+    const sync = (target: string) => {
+      panels.forEach((panel) => {
+        const isActive = panel.getAttribute('data-panel') === target
+        panel.classList.toggle('hidden', !isActive)
+        panel.classList.toggle('flex', isActive)
+      })
+
+      metas.forEach((meta) => {
+        const isActive = meta.getAttribute('data-meta') === target
+        meta.classList.toggle('hidden', !isActive)
+        meta.classList.toggle('flex', isActive)
+      })
+    }
+
+    select.addEventListener('change', () => {
+      sync(select.value)
+    })
+
+    sync(select.value)
+  })
+</script>

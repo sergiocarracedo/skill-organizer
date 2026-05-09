@@ -1,0 +1,73 @@
+---
+import GitHubStarButton from '@/components/GitHubStarButton.astro'
+import LogoMark from '@/components/LogoMark.astro'
+import { withBase } from '@/lib/with-base'
+
+const { currentPath = '/' } = Astro.props
+
+const isDocs = currentPath.startsWith('/docs')
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/60 backdrop-blur-xl"
+>
+  <div
+    class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-4 sm:px-8"
+  >
+    <a href={withBase('/')} class="flex items-center gap-3">
+      <LogoMark className="h-9 w-auto sm:h-10" />
+      <div class="hidden md:block">
+        <p
+          class="font-display text-sm uppercase tracking-[0.28em] text-cyan-100/70"
+        >
+          Skill Organizer
+        </p>
+        <p class="text-xs text-slate-300/70">
+          Structured skills, tool-ready output
+        </p>
+      </div>
+    </a>
+
+    <nav class="hidden items-center gap-6 text-sm text-slate-200/80 lg:flex">
+      <a href={withBase('/#install-flow')} class="transition hover:text-white"
+        >Install</a
+      >
+      <a href={withBase('/#features')} class="transition hover:text-white"
+        >Features</a
+      >
+      <a
+        href={withBase('/docs')}
+        class:list={{ 'text-white': isDocs }}
+        class="transition hover:text-white">Docs</a
+      >
+      <a
+        href="https://github.com/sergiocarracedo/skill-organizer"
+        target="_blank"
+        rel="noreferrer"
+        class="transition hover:text-white"
+      >
+        GitHub
+      </a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a
+        href={withBase('/docs/guides/install-and-verify')}
+        class="hidden rounded-full border border-white/15 px-4 py-2 text-sm text-slate-100 transition hover:border-cyan-300/40 hover:text-white sm:inline-flex"
+      >
+        Read docs
+      </a>
+      <GitHubStarButton
+        compact
+        showLabel={false}
+        className="hidden lg:inline-flex"
+      />
+      <a
+        href={withBase('/docs/guides/install-and-verify')}
+        class="inline-flex rounded-full bg-[linear-gradient(120deg,rgba(38,232,255,0.95),rgba(164,95,255,0.88),rgba(255,182,73,0.95))] px-4 py-2 text-sm font-medium text-slate-950 shadow-[0_0_35px_rgba(74,211,255,0.28)] transition hover:scale-[1.02]"
+      >
+        Get started
+      </a>
+    </div>
+  </div>
+</header>

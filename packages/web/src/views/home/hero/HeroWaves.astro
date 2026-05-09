@@ -1,0 +1,86 @@
+<div class='hero-waves' data-vanta-waves aria-hidden='true'></div>
+
+<script>
+  type VantaFactory = (config: {
+    el: Element
+    THREE: unknown
+    mouseControls?: boolean
+    touchControls?: boolean
+    gyroControls?: boolean
+    shininess?: number
+    waveHeight?: number
+    waveSpeed?: number
+    zoom?: number
+    color?: number
+    waveColor?: number
+    backgroundColor?: number
+  }) => { destroy: () => void }
+
+  type VantaWindow = Window & {
+    VANTA?: {
+      WAVES?: VantaFactory
+    }
+    THREE?: unknown
+  }
+
+  const loadScript = (src: string) => {
+    return new Promise<void>((resolve, reject) => {
+      const existing = document.querySelector(`script[data-src="${src}"]`)
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true })
+        existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true })
+        if ((existing as HTMLScriptElement).dataset.loaded === 'true') {
+          resolve()
+        }
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = src
+      script.async = true
+      script.dataset.src = src
+      script.addEventListener('load', () => {
+        script.dataset.loaded = 'true'
+        resolve()
+      })
+      script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)))
+      document.head.append(script)
+    })
+  }
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (!prefersReducedMotion) {
+    Promise.all([
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js'),
+      loadScript('https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js'),
+    ]).then(() => {
+      const vantaWindow = window as VantaWindow
+      const THREE = vantaWindow.THREE
+      const WAVES = vantaWindow.VANTA?.WAVES
+
+      if (!THREE || !WAVES) {
+        return
+      }
+
+      document.querySelectorAll('[data-vanta-waves]').forEach((node) => {
+        const effect = WAVES({
+          el: node,
+          THREE,
+          mouseControls: true,
+          touchControls: false,
+          gyroControls: false,
+          shininess: 18,
+          waveHeight: 12,
+          waveSpeed: 0.45,
+          zoom: 0.88,
+          color: 0x0c1326,
+          waveColor: 0x165a6a,
+          backgroundColor: 0x020611,
+        })
+
+        window.addEventListener('beforeunload', () => effect.destroy(), { once: true })
+      })
+    })
+  }
+</script>

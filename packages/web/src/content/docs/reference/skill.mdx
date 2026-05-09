@@ -1,0 +1,59 @@
+---
+title: skill
+description: Enable, disable, or move unmanaged source skills.
+section: reference
+order: 6
+commandSlug: skill
+summary: Per-skill management commands.
+---
+
+## Synopsis
+
+```bash
+skill-organizer skill enable <source-path>
+skill-organizer skill disable <source-path>
+skill-organizer skill move-unmanaged
+skill-organizer skill check-overlap
+```
+
+## enable and disable
+
+These commands resolve a source skill, rewrite the managed metadata in its `SKILL.md`, and run sync immediately afterward.
+
+## move-unmanaged
+
+`move-unmanaged` discovers target entries that are not currently managed and offers to move them into the organized source tree.
+
+## check-overlap
+
+`check-overlap` asks an installed supported agent CLI to review the current managed skills for overlap or duplication.
+
+Typical examples:
+
+```bash
+skill-organizer skill check-overlap
+skill-organizer skill check-overlap --choose-tool
+skill-organizer skill check-overlap --tool claude
+skill-organizer skill check-overlap --include-disabled
+skill-organizer skill check-overlap --min-overlap-type partial
+skill-organizer skill check-overlap --no-ask-to-apply
+```
+
+By default it analyzes enabled skills only, hides `adjacent` results unless requested, and asks whether to prepare a plan after the report.
+
+If the selected tool supports verified interactive plan mode, the CLI can open that tool in plan mode.
+
+If it does not, the CLI asks whether it should generate a remediation prompt, saves that prompt under `plans/skill-overlap-fix-[YYYYDDMM]-[HHmmss].md`, and prints the absolute path.
+
+### Flags
+
+```text
+--yes  Apply unmanaged moves without confirmation
+--to   Move a single unmanaged skill to a custom path relative to the source root
+--include-disabled  Include disabled skills when using check-overlap
+--min-overlap-type  adjacent|partial|duplicate or 1|2|3
+--choose-tool       Prompt to choose the agent tool again
+--tool              Use a specific installed tool id
+--no-ask-to-apply   Skip the follow-up plan prompt
+--print-prompt      Print the generated analysis prompt without invoking a tool
+```

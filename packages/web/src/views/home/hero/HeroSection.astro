@@ -1,0 +1,76 @@
+---
+import AgentToolLogo from '@/components/AgentToolLogo.astro'
+import GitHubStarButton from '@/components/GitHubStarButton.astro'
+import LogoMark from '@/components/LogoMark.astro'
+import { heroInstallMethods, heroLogoItems } from '@/data/home'
+import { cliVersion } from '@/lib/cli-version'
+import { withBase } from '@/lib/with-base'
+
+import HeroWaves from './HeroWaves.astro'
+import HeroInstallSwitcher from './HeroInstallSwitcher.astro'
+import HeroTransformPanel from './HeroTransformPanel/HeroTransformPanel.astro'
+---
+
+<section class="relative overflow-hidden">
+  <HeroWaves />
+
+  <div class="relative z-1 mx-auto flex max-w-[88rem] flex-col items-center gap-6 px-6 pb-[4.25rem] pt-[5.25rem] text-center min-[900px]:gap-10 min-[900px]:px-8 min-[900px]:pb-[4.75rem] min-[900px]:pt-[6.5rem]">
+    <div class="flex flex-col items-center gap-4">
+      <div class="inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/4 px-[0.85rem] py-[0.6rem] backdrop-blur-[18px]" data-reveal>
+        <LogoMark className="h-7 w-auto" />
+        <span class="font-display text-[0.76rem] uppercase tracking-[0.28em] text-cyan-100/75">Version {cliVersion}</span>
+      </div>
+
+      <p class="font-display text-[0.76rem] uppercase tracking-[0.28em] text-cyan-100/75" data-reveal>
+        Stop managing skills in a flat folder
+      </p>
+
+      <h1 class="max-w-[16ch] text-[clamp(2.7rem,5.5vw,5.1rem)] text-white" data-reveal>
+        Organize skills. Keep tools compatible.
+      </h1>
+    </div>
+
+    <div class="flex w-full justify-center">
+      <HeroTransformPanel />
+    </div>
+
+    <div class="flex max-w-full flex-col items-center gap-[1.35rem]">
+      <div class="flex flex-wrap justify-center gap-[0.55rem]" data-reveal>
+        {
+          heroLogoItems.map((item) => (
+            <AgentToolLogo id={item.id} name={item.name} compact />
+          ))
+        }
+      </div>
+
+      <HeroInstallSwitcher methods={heroInstallMethods} />
+
+      <h2 class="max-w-[22ch] text-[clamp(1.7rem,4vw,2.8rem)] text-white" data-reveal>
+        Use a real source tree. Keep the tool-facing view your agent stack
+        expects.
+      </h2>
+
+      <p class="mt-1 max-w-[60rem] text-[1.08rem] leading-[1.9] text-slate-100/78" data-reveal>
+        `skill-organizer` replaces the messy first-level skills folder with a
+        workflow that actually scales. Organize skills by source, topic,
+        company, or project in `skills-organized/`, then keep the generated
+        tool-readable view synced automatically across one or many setups.
+      </p>
+
+      <div class="mt-[0.2rem] flex flex-wrap justify-center gap-[0.85rem]" data-reveal>
+        <a
+          class="inline-flex min-h-12 items-center justify-center rounded-full bg-[linear-gradient(120deg,rgba(38,232,255,0.95),rgba(164,95,255,0.88),rgba(255,182,73,0.95))] px-5 text-[0.95rem] text-[rgb(4,11,24)] no-underline shadow-[0_0_34px_rgba(74,211,255,0.24)]"
+          href={withBase('/docs/guides/install-and-verify')}
+        >
+          Get started
+        </a>
+        <GitHubStarButton />
+        <a
+          class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/14 bg-white/5 px-5 text-[0.95rem] text-slate-100/92 no-underline"
+          href={withBase('/docs/guides/onboard-a-tool')}
+          >See onboarding</a
+        >
+      </div>
+    </div>
+  </div>
+</section>

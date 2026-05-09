@@ -1,0 +1,366 @@
+---
+import TerminalFrame from '@/components/TerminalFrame.astro'
+import type { TerminalScenario } from '@/data/home'
+
+type Props = {
+  scenarios: TerminalScenario[]
+}
+
+const { scenarios } = Astro.props as Props
+
+const scenarioDuration = (scenario: TerminalScenario) =>
+  scenario.events.reduce((total, event) => {
+    if (event.type === 'wait' || event.type === 'progress') {
+      return total + event.delay
+    }
+
+    return total + (event.delay ?? 520)
+  }, 0)
+const terminalTabBaseClass =
+  'rounded-full border border-white/8 bg-white/3 px-[0.72rem] py-[0.42rem] font-display text-[0.7rem] uppercase tracking-[0.18em] text-[rgba(177,225,255,0.68)] transition-colors duration-150 hover:border-white/14 hover:bg-white/5 hover:text-[rgba(235,244,255,0.9)] cursor-pointer'
+const terminalTabActiveClass =
+  'border-white/16 bg-white/6 text-[rgba(255,255,255,0.92)]'
+const terminalDescriptionBaseClass =
+  'hidden m-0 leading-[1.7] text-[rgba(224,236,255,0.7)]'
+const terminalDescriptionActiveClass = 'block'
+const terminalPanelBaseClass = 'hidden min-h-96 overflow-hidden '
+const terminalPanelActiveClass = 'block'
+
+const serializeScenarios = JSON.stringify(
+  scenarios.map((scenario) => ({
+    ...scenario,
+    duration: scenarioDuration(scenario),
+  })),
+)
+
+const getInitialDescriptionClass = (isActive: boolean) =>
+  isActive
+    ? 'block m-0 leading-[1.7] text-[rgba(224,236,255,0.7)]'
+    : terminalDescriptionBaseClass
+---
+
+<TerminalFrame
+  data-reveal
+  data-terminal-scene
+  data-scenarios={serializeScenarios}
+  data-tab-base-class={terminalTabBaseClass}
+  data-tab-active-class={terminalTabActiveClass}
+  data-description-base-class={terminalDescriptionBaseClass}
+  data-description-active-class={terminalDescriptionActiveClass}
+  data-panel-base-class={terminalPanelBaseClass}
+  data-panel-active-class={terminalPanelActiveClass}
+>
+  <Fragment slot="header">
+    <div class="flex flex-wrap gap-[0.45rem]">
+      {
+        scenarios.map((scenario, index) => (
+          <button
+            class:list={[
+              terminalTabBaseClass,
+              index === 0 && terminalTabActiveClass,
+            ]}
+            type="button"
+            data-tab={scenario.id}
+          >
+            {scenario.label}
+          </button>
+        ))
+      }
+    </div>
+  </Fragment>
+
+  <Fragment slot="description">
+    <div class="min-h-[3.4rem] px-[1.15rem] pt-[0.95rem]">
+      {
+        scenarios.map((scenario, index) => (
+          <p
+            class={getInitialDescriptionClass(index === 0)}
+            data-description={scenario.id}
+          >
+            {scenario.description}
+          </p>
+        ))
+      }
+    </div>
+  </Fragment>
+
+  <div>
+    {
+      scenarios.map((scenario) => (
+        <section data-panel={scenario.id}>
+          <div
+            class="flex min-h-96 max-h-96 flex-col gap-[0.08rem] overflow-y-auto "
+            data-stream={scenario.id}
+          />
+        </section>
+      ))
+    }
+  </div>
+</TerminalFrame>
+
+<script>
+  type ScenarioChunk = { text: string; color?: string; bold?: boolean }
+  type ScenarioLine = string | ScenarioChunk[]
+  type ScenarioEvent =
+    | { type: 'wait'; delay: number }
+    | { type: 'prompt'; content: string; prompt?: string; delay?: number }
+    | { type: 'output'; content: ScenarioLine[]; delay?: number }
+    | { type: 'progress'; label: string; color?: string; delay: number }
+  type ScenarioData = { id: string; duration: number; events: ScenarioEvent[] }
+  type ScenarioColor =
+    | 'default'
+    | 'white'
+    | 'muted'
+    | 'cyan'
+    | 'violet'
+    | 'amber'
+    | 'green'
+    | 'red'
+
+  const DEFAULT_PROMPT_DELAY = 640
+  const DEFAULT_OUTPUT_DELAY = 520
+  const PROMPT_LINE_CLASS =
+    'flex min-h-[1.1rem] items-center gap-[0.7rem] text-[rgba(235,244,255,0.96)]'
+  const OUTPUT_LINE_CLASS = 'min-h-[1.1rem] whitespace-pre-wrap'
+  const PROGRESS_LINE_CLASS =
+    'inline-flex min-h-[1.1rem] items-center gap-[0.7rem] whitespace-pre-wrap'
+  const PROMPT_CLASS = 'whitespace-pre text-[rgba(67,238,255,0.92)]'
+  const COMMAND_CLASS = 'whitespace-pre-wrap text-[rgba(235,244,255,0.96)]'
+  const SPINNER_CLASS = 'w-4 text-center'
+  const TOKEN_BASE_CLASS = 'whitespace-pre-wrap text-[rgba(223,236,255,0.82)]'
+  const TOKEN_BOLD_CLASS = 'font-bold'
+  const TOKEN_COLOR_CLASS = {
+    default: 'text-[rgba(235,244,255,0.94)]',
+    white: 'text-[rgba(235,244,255,0.94)]',
+    muted: 'text-[rgba(197,211,229,0.66)]',
+    cyan: 'text-[rgba(67,238,255,0.92)]',
+    violet: 'text-[rgba(196,166,255,0.92)]',
+    amber: 'text-[rgba(255,191,98,0.92)]',
+    green: 'text-[rgba(112,246,177,0.94)]',
+    red: 'text-[rgba(255,130,130,0.9)]',
+  }
+  const getTokenColorClass = (color?: string) =>
+    TOKEN_COLOR_CLASS[(color ?? 'default') as ScenarioColor] ??
+    TOKEN_COLOR_CLASS.default
+
+  const sleep = (delay: number) =>
+    new Promise((resolve) => window.setTimeout(resolve, delay))
+
+  const createPromptLine = (content: string, prompt = '$') => {
+    const row = document.createElement('div')
+    row.className = PROMPT_LINE_CLASS
+
+    const promptEl = document.createElement('span')
+    promptEl.className = PROMPT_CLASS
+    promptEl.textContent = `${prompt} `
+
+    const codeEl = document.createElement('code')
+    codeEl.className = COMMAND_CLASS
+
+    row.append(promptEl, codeEl)
+    return { row, codeEl, content }
+  }
+
+  const appendChunk = (parent: HTMLElement, chunk: ScenarioChunk) => {
+    const span = document.createElement('span')
+    span.textContent = chunk.text
+    span.className = [TOKEN_BASE_CLASS, getTokenColorClass(chunk.color)]
+      .filter(Boolean)
+      .join(' ')
+    if (chunk.bold) {
+      span.classList.add(TOKEN_BOLD_CLASS)
+    }
+    parent.append(span)
+  }
+
+  const createOutputLine = (line: ScenarioLine) => {
+    const row = document.createElement('div')
+    row.className = OUTPUT_LINE_CLASS
+    const chunks =
+      typeof line === 'string'
+        ? [{ text: line, color: 'default', bold: false }]
+        : line
+    if (chunks.length === 1 && chunks[0]?.text === '') {
+      row.innerHTML = '&nbsp;'
+      return row
+    }
+    chunks.forEach((chunk) => appendChunk(row, chunk))
+    return row
+  }
+
+  const createProgressLine = (label: string, color = 'cyan') => {
+    const row = document.createElement('div')
+    row.className = PROGRESS_LINE_CLASS
+
+    const spinner = document.createElement('span')
+    spinner.className = [SPINNER_CLASS, getTokenColorClass(color)].join(' ')
+    spinner.textContent = '◐'
+
+    const text = document.createElement('span')
+    text.className = [TOKEN_BASE_CLASS, getTokenColorClass(color)].join(' ')
+    text.textContent = label
+
+    row.append(spinner, text)
+    return { row, spinner }
+  }
+
+  const typeText = async (node: HTMLElement, content: string) => {
+    node.textContent = ''
+    for (const char of content) {
+      node.textContent += char
+      await sleep(18)
+    }
+  }
+
+  const runScenario = async (panel: HTMLElement, scenario: ScenarioData) => {
+    const stream = panel.querySelector(`[data-stream="${scenario.id}"]`)
+    if (!(stream instanceof HTMLElement)) {
+      return
+    }
+
+    stream.innerHTML = ''
+
+    for (const event of scenario.events) {
+      if (event.type === 'wait') {
+        await sleep(event.delay)
+        continue
+      }
+
+      if (event.type === 'prompt') {
+        const { row, codeEl, content } = createPromptLine(
+          event.content,
+          event.prompt,
+        )
+        stream.append(row)
+        stream.scrollTop = stream.scrollHeight
+        await typeText(codeEl, content)
+        await sleep(event.delay ?? DEFAULT_PROMPT_DELAY)
+        continue
+      }
+
+      if (event.type === 'output') {
+        for (const line of event.content) {
+          stream.append(createOutputLine(line))
+          stream.scrollTop = stream.scrollHeight
+          await sleep(74)
+        }
+        await sleep(event.delay ?? DEFAULT_OUTPUT_DELAY)
+        continue
+      }
+
+      if (event.type === 'progress') {
+        const { row, spinner } = createProgressLine(event.label, event.color)
+        stream.append(row)
+        stream.scrollTop = stream.scrollHeight
+        const frames = ['◐', '◓', '◑', '◒']
+        let index = 0
+        const timer = window.setInterval(() => {
+          spinner.textContent = frames[index % frames.length]
+          index += 1
+        }, 120)
+        await sleep(event.delay)
+        window.clearInterval(timer)
+        row.remove()
+      }
+    }
+  }
+
+  document.querySelectorAll('[data-terminal-scene]').forEach((scene) => {
+    const raw = scene.getAttribute('data-scenarios') ?? '[]'
+    const tabBaseClass = scene.getAttribute('data-tab-base-class') ?? ''
+    const tabActiveClass = scene.getAttribute('data-tab-active-class') ?? ''
+    const descriptionBaseClass =
+      scene.getAttribute('data-description-base-class') ?? ''
+    const descriptionActiveClass =
+      scene.getAttribute('data-description-active-class') ?? ''
+    const descriptionVisibleClass =
+      scene.getAttribute('data-description-visible-class') ?? ''
+    const panelBaseClass = scene.getAttribute('data-panel-base-class') ?? ''
+    const panelActiveClass = scene.getAttribute('data-panel-active-class') ?? ''
+    const panelVisibleBaseClass =
+      scene.getAttribute('data-panel-visible-base-class') ?? ''
+    const scenarios = JSON.parse(raw) as ScenarioData[]
+    const tabs = [...scene.querySelectorAll<HTMLElement>('[data-tab]')]
+    const panels = [...scene.querySelectorAll<HTMLElement>('[data-panel]')]
+    const descriptions = [
+      ...scene.querySelectorAll<HTMLElement>('[data-description]'),
+    ]
+    let currentId = scenarios[0]?.id
+    let cycleTimeout = 0
+    let cycleRun = 0
+    let autoCycleEnabled = true
+
+    const syncState = (id: string) => {
+      currentId = id
+      tabs.forEach((tab) => {
+        const isActive = tab.getAttribute('data-tab') === id
+        tab.className = isActive
+          ? `${tabBaseClass} ${tabActiveClass}`.trim()
+          : tabBaseClass
+      })
+      panels.forEach((panel) => {
+        const isActive = panel.getAttribute('data-panel') === id
+        const accentClass = panel.getAttribute('data-accent-class') ?? ''
+        panel.className = isActive
+          ? `${panelVisibleBaseClass || panelActiveClass} ${accentClass}`.trim()
+          : `${panelBaseClass} ${accentClass}`.trim()
+      })
+      descriptions.forEach((item) => {
+        const isActive = item.getAttribute('data-description') === id
+        item.className = isActive
+          ? descriptionVisibleClass || descriptionActiveClass
+          : descriptionBaseClass
+      })
+    }
+
+    const start = async (id: string) => {
+      const runId = ++cycleRun
+      const scenario = scenarios.find((item) => item.id === id)
+      const panel = scene.querySelector(`[data-panel="${id}"]`)
+
+      if (!scenario || !(panel instanceof HTMLElement)) {
+        return
+      }
+
+      syncState(id)
+      await runScenario(panel, scenario)
+
+      if (runId !== cycleRun) {
+        return
+      }
+
+      const currentIndex = scenarios.findIndex((item) => item.id === id)
+      if (!autoCycleEnabled) {
+        return
+      }
+
+      const next = scenarios[(currentIndex + 1) % scenarios.length]
+      cycleTimeout = window.setTimeout(() => start(next.id), 10000)
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const id = tab.getAttribute('data-tab')
+        if (!id) {
+          return
+        }
+
+        autoCycleEnabled = false
+        window.clearTimeout(cycleTimeout)
+        cycleRun += 1
+        start(id)
+      })
+    })
+
+    start(currentId)
+
+    window.addEventListener(
+      'beforeunload',
+      () => {
+        window.clearTimeout(cycleTimeout)
+        cycleRun += 1
+      },
+      { once: true },
+    )
+  })
+</script>

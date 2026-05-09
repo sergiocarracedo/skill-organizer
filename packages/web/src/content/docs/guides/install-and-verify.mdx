@@ -1,0 +1,74 @@
+---
+title: Install and Verify
+description: Install the CLI with npm, pnpm, or Homebrew and confirm the binary is available.
+section: guides
+order: 1
+summary: Installation basics and a first verification step.
+---
+
+## Install with npm
+
+```bash
+npm i -g skill-organizer
+```
+
+Then verify that the binary is on your path:
+
+```bash
+skill-organizer --version
+```
+
+The npm package downloads the matching prebuilt release artifact for your current operating system and architecture.
+
+## Install with pnpm
+
+```bash
+pnpm add -g skill-organizer
+```
+
+Then verify that the binary is on your path:
+
+```bash
+skill-organizer --version
+```
+
+pnpm is a good fit when you already use it for your global CLI tooling.
+
+## Install with Homebrew
+
+```bash
+brew tap sergiocarracedo/tap
+brew install skill-organizer
+```
+
+Homebrew is a good fit when you already manage developer tooling through taps and formulae.
+
+## Direct release downloads
+
+If you prefer binaries directly, use the GitHub Releases page:
+
+`https://github.com/sergiocarracedo/skill-organizer/releases`
+
+## Verify before onboarding
+
+Once the CLI is available, the next practical step is usually:
+
+```bash
+skill-organizer onboard
+skill-organizer status
+```
+
+`onboard` creates or updates the project config and helps you adopt a source folder plus target folder pair. `status` confirms the current state right after setup.
+
+## Optional: shell completion
+
+If you want command and flag completion in your shell:
+
+```bash
+skill-organizer completion zsh
+skill-organizer completion bash
+skill-organizer completion fish
+skill-organizer completion powershell
+```
+
+Each subcommand prints a completion script to standard output so you can redirect it into your shell's completion directory.

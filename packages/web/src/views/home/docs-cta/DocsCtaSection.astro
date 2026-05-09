@@ -1,0 +1,32 @@
+---
+import SectionShell from '@/components/SectionShell.astro'
+import { docsEntryCards } from '@/data/home'
+import { withBase } from '@/lib/with-base'
+
+---
+
+<SectionShell className='pb-20 lg:pb-24'>
+  <div
+    class='flex w-full flex-col gap-4 rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(6,13,27,0.98),rgba(16,29,53,0.86),rgba(51,30,8,0.74))] p-[1.7rem] shadow-[0_0_80px_rgba(45,118,170,0.16)] lg:p-8'
+    data-reveal
+  >
+    <p class='font-display text-[0.76rem] uppercase tracking-[0.3em] text-cyan-100/72'>Documentation</p>
+    <h2 class='max-w-[16ch] text-[clamp(2.1rem,5vw,3.45rem)] text-white'>Pick the path you need.</h2>
+    <p class='max-w-[54rem] leading-[1.88] text-slate-100/78'>
+      Start with install if you are new, onboarding if you are wiring up a skills location, or reference if you want the
+      exact command surface for sync, service, overlap analysis, and completion scripts.
+    </p>
+
+    <div class='mt-1 grid gap-4 min-[820px]:grid-cols-3'>
+      {docsEntryCards.map((card) => (
+        <a
+          class='flex flex-col gap-2 rounded-[1.3rem] border border-white/8 bg-white/5 px-[1.05rem] py-4 no-underline transition hover:border-cyan-300/28 hover:bg-white/7'
+          href={withBase(card.href)}
+        >
+          <span class='font-display text-[1.1rem] text-white'>{card.title}</span>
+          <span class='leading-[1.72] text-slate-100/72'>{card.copy}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</SectionShell>

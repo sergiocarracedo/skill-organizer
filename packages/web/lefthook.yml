@@ -1,0 +1,15 @@
+pre-commit:
+  commands:
+    lint:
+      run: pnpm oxlint .
+    format:
+      run: pnpm format:check
+    type-check:
+      run: pnpm astro check
+    test:
+      run: pnpm vitest run
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}
