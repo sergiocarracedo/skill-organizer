@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "asciinema-recorder": {
+      "source": "terrylica/cc-skills",
+      "sourceType": "github",
+      "computedHash": "aa59fcd1ade5bc987277e0115d53fd512cf26f81b246b661cab7d80d5af31d7e"
+    }
+  }
+}
