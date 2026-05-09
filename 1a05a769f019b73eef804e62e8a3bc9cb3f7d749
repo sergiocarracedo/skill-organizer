@@ -1,0 +1,25 @@
+docs/asciinema-demo.md
+  b8004d8caac07f82 28,40,43
+README.md
+  b8004d8caac07f82 200,205,282,284
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "1a05a769f019b73eef804e62e8a3bc9cb3f7d749",
+  "prompts": {
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 19,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}

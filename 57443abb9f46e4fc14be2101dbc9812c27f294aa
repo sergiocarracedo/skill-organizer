@@ -1,0 +1,29 @@
+CHANGELOG.md
+  84d8ebb04e0058d8 5-9
+VERSION
+  84d8ebb04e0058d8 1
+release-please-manifest.json
+  84d8ebb04e0058d8 2
+packages/npm/package.json
+  84d8ebb04e0058d8 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "57443abb9f46e4fc14be2101dbc9812c27f294aa",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 4,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}

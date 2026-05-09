@@ -1,0 +1,59 @@
+internal/mover/mover.go
+  b8004d8caac07f82 8,42-61
+AGENTS_README.md
+  b8004d8caac07f82 18
+packages/npm/README.md
+  b8004d8caac07f82 10
+docs/asciinema-install-demo.cast
+  b8004d8caac07f82 1-96
+scripts/asciinema-install-demo.sh
+  b8004d8caac07f82 1-28
+README.md
+  b8004d8caac07f82 3,5,11-90,165-209,282
+internal/mover/mover_test.go
+  b8004d8caac07f82 50-80
+cmd/move_unmanaged.go
+  b8004d8caac07f82 5,9,20,25,43,53-62,78,82-83,86,119-123,130-141
+cmd/onboard.go
+  b8004d8caac07f82 203
+scripts/asciinema-install-move-demo.sh
+  b8004d8caac07f82 1-33
+docs/asciinema-install-move-demo.cast
+  84d8ebb04e0058d8 80-85
+  b8004d8caac07f82 86-98
+docs/asciinema-demo.md
+  b8004d8caac07f82 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d126aefec748fc08cfdb0aee27664dbda772c548",
+  "prompts": {
+    "84d8ebb04e0058d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_231ce5036ffeyga4wruY1XeuPG",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 0,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    },
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 568,
+      "total_deletions": 134,
+      "accepted_lines": 445,
+      "overriden_lines": 0
+    }
+  }
+}

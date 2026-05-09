@@ -1,0 +1,31 @@
+CHANGELOG.md
+  b8004d8caac07f82 5,7
+.goreleaser.yaml
+  b8004d8caac07f82 21,25-28
+VERSION
+  b8004d8caac07f82 1
+packages/npm/package.json
+  b8004d8caac07f82 3
+release-please-manifest.json
+  b8004d8caac07f82 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "868e3461560bae74ba5643efb82d7b6b90183504",
+  "prompts": {
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 10,
+      "total_deletions": 5,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  }
+}

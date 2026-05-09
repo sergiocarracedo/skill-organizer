@@ -1,0 +1,43 @@
+cmd/skill.go
+  5a6dc4a967d6dc99 14
+cmd/skill_overlap_test.go
+  5a6dc4a967d6dc99 1-150
+internal/overlap/overlap_test.go
+  5a6dc4a967d6dc99 1-118
+internal/config/overlap_test.go
+  5a6dc4a967d6dc99 1-52
+internal/config/config.go
+  5a6dc4a967d6dc99 36-40,44,74,87,96-99
+internal/config/registry.go
+  5a6dc4a967d6dc99 119-143
+README.md
+  5a6dc4a967d6dc99 175-178,205,212-227
+internal/agenttools/agenttools_test.go
+  5a6dc4a967d6dc99 1-43
+internal/skills/frontmatter.go
+  5a6dc4a967d6dc99 91-97
+AGENTS_README.md
+  5a6dc4a967d6dc99 131-162
+cmd/skill_overlap.go
+  5a6dc4a967d6dc99 1-189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "ff353714ec381e2dfd10d29401f07bfa1bba712a",
+  "prompts": {
+    "5a6dc4a967d6dc99": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_22b851239ffeY1sI0SS7rYPZoX",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 714,
+      "total_deletions": 61,
+      "accepted_lines": 653,
+      "overriden_lines": 0
+    }
+  }
+}

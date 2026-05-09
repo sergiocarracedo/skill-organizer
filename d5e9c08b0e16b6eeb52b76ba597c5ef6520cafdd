@@ -1,0 +1,23 @@
+README.md
+  b8004d8caac07f82 218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d5e9c08b0e16b6eeb52b76ba597c5ef6520cafdd",
+  "prompts": {
+    "b8004d8caac07f82": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_23495d156ffelAoHSXrBAk2Z4a",
+        "model": "github-copilot/gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 49,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
