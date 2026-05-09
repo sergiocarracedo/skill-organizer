@@ -76,6 +76,7 @@ func TestSaveAppConfigWritesMergedShape(t *testing.T) {
 	cfg := AppConfig{
 		Watched: []string{"/tmp/a/.skill-organizer.yml"},
 		Service: ServiceConfig{LogLevel: "error"},
+		Backup:  BackupConfig{RetentionDays: 14},
 	}
 	if err := SaveAppConfig(path, cfg); err != nil {
 		t.Fatalf("SaveAppConfig() error = %v", err)
@@ -89,7 +90,36 @@ func TestSaveAppConfigWritesMergedShape(t *testing.T) {
 	if text == "" {
 		t.Fatalf("SaveAppConfig() wrote empty file")
 	}
-	if !strings.Contains(text, "watched:") || !strings.Contains(text, "service:") || !strings.Contains(text, "log-level: error") {
+	if !strings.Contains(text, "watched:") || !strings.Contains(text, "service:") || !strings.Contains(text, "log-level: error") || !strings.Contains(text, "backup:") || !strings.Contains(text, "retention-days: 14") {
 		t.Fatalf("SaveAppConfig() content = %q", text)
+	}
+}
+
+func TestSaveBackupConfigPreservesWatchedEntries(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "skill-organizer.yml")
+	registry := WatchRegistry{}
+	registry.Add(filepath.Join(t.TempDir(), "a.yml"))
+	if err := SaveRegistry(path, registry); err != nil {
+		t.Fatalf("SaveRegistry() error = %v", err)
+	}
+
+	if err := SaveBackupConfig(path, BackupConfig{RetentionDays: 21}); err != nil {
+		t.Fatalf("SaveBackupConfig() error = %v", err)
+	}
+
+	loaded, err := LoadRegistry(path)
+	if err != nil {
+		t.Fatalf("LoadRegistry() error = %v", err)
+	}
+	if len(loaded.Watched) != 1 {
+		t.Fatalf("LoadRegistry().Watched len = %d, want 1", len(loaded.Watched))
+	}
+
+	backup, err := LoadBackupConfig(path)
+	if err != nil {
+		t.Fatalf("LoadBackupConfig() error = %v", err)
+	}
+	if backup.RetentionDays != 21 {
+		t.Fatalf("LoadBackupConfig().RetentionDays = %d, want 21", backup.RetentionDays)
 	}
 }

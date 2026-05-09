@@ -19,6 +19,12 @@ func TestDocumentManagedFieldsPreserveExtraFrontmatter(t *testing.T) {
 		OriginalName:       "allium",
 		SourceRelativePath: "thirdparty/allium",
 		Disabled:           true,
+		Source:             "terrylica/cc-skills",
+		SourceType:         "github",
+		InstalledVersion:   "abc123",
+		InstalledAt:        "2026-05-09T12:00:00Z",
+		RepoSkillPath:      "skills/asciinema-recorder",
+		LastUpdatedAt:      "2026-05-01T12:00:00Z",
 	}, true)
 
 	marshaled, err := doc.Marshal()
@@ -34,11 +40,58 @@ func TestDocumentManagedFieldsPreserveExtraFrontmatter(t *testing.T) {
 		"original-name: allium",
 		"source-relative-path: thirdparty/allium",
 		"disabled: true",
+		"source: terrylica/cc-skills",
+		"source-type: github",
+		"installed-version: abc123",
+		"installed-at: \"2026-05-09T12:00:00Z\"",
+		"repo-skill-path: skills/asciinema-recorder",
+		"last-updated-at: \"2026-05-01T12:00:00Z\"",
 		"# Body",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("Marshal() output missing %q\n%s", want, output)
 		}
+	}
+}
+
+func TestRewriteManagedFieldsWithMetadataMergesImportFields(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "thirdparty", "example")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+
+	path := filepath.Join(dir, SkillFileName)
+	content := "---\nname: example\ndescription: test\n---\n\n# Example\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	skill := Skill{
+		Dir:           dir,
+		SkillFile:     path,
+		RelativePath:  "thirdparty/example",
+		FlattenedName: "thirdparty--example",
+	}
+
+	if err := RewriteManagedFieldsWithMetadata(skill, true, false, ManagedMetadata{
+		Source:           "terrylica/cc-skills",
+		InstalledVersion: "deadbeef",
+	}); err != nil {
+		t.Fatalf("RewriteManagedFieldsWithMetadata() error = %v", err)
+	}
+
+	updated, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+
+	output := string(updated)
+	if !strings.Contains(output, "source: terrylica/cc-skills") {
+		t.Fatalf("missing source metadata\n%s", output)
+	}
+	if !strings.Contains(output, "installed-version: deadbeef") {
+		t.Fatalf("missing installed version\n%s", output)
 	}
 }
 

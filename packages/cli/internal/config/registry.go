@@ -11,13 +11,21 @@ import (
 
 const appDirName = "skill-organizer"
 
-func RegistryPath() (string, error) {
+func AppDir() (string, error) {
 	base, err := os.UserConfigDir()
 	if err != nil {
 		return "", fmt.Errorf("resolve user config dir: %w", err)
 	}
+	return filepath.Join(base, appDirName), nil
+}
 
-	return filepath.Join(base, appDirName, "skill-organizer.yml"), nil
+func RegistryPath() (string, error) {
+	appDir, err := AppDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(appDir, "skill-organizer.yml"), nil
 }
 
 func LoadAppConfig(path string) (AppConfig, error) {
@@ -138,6 +146,31 @@ func SaveOverlapConfig(path string, overlap OverlapConfig) error {
 		return err
 	}
 	cfg.Overlap = overlap
+	return SaveAppConfig(path, cfg)
+}
+
+func LoadBackupConfig(path string) (BackupConfig, error) {
+	cfg, err := LoadAppConfig(path)
+	if err != nil {
+		return BackupConfig{}, err
+	}
+	return cfg.Backup, nil
+}
+
+func LoadBackupConfigOrDefault(path string) (BackupConfig, error) {
+	cfg, err := LoadAppConfigOrDefault(path)
+	if err != nil {
+		return BackupConfig{}, err
+	}
+	return cfg.Backup, nil
+}
+
+func SaveBackupConfig(path string, backup BackupConfig) error {
+	cfg, err := LoadAppConfigOrDefault(path)
+	if err != nil {
+		return err
+	}
+	cfg.Backup = backup
 	return SaveAppConfig(path, cfg)
 }
 

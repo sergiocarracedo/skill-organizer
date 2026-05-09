@@ -76,14 +76,14 @@ export const commandGroups: CommandGroup[] = [
     slug: "skill",
     title: "Skill",
     command: "skill-organizer skill <subcommand>",
-    summary: "Enable, disable, or move unmanaged source skills.",
+    summary: "Import, update, enable, disable, delete, or move managed skills.",
     whyItMatters:
-      "Skill-level commands let you reshape the source tree without hand-editing generated target directories.",
+      "Skill-level commands let you import skills from skills.sh, keep them updated, and reshape the source tree without hand-editing generated target directories.",
     flags: [
       {
         flag: "--yes",
         description:
-          "Apply unmanaged moves without confirmation when using move-unmanaged.",
+          "Skip confirmation when deleting or updating skills, or apply unmanaged moves without confirmation.",
       },
       {
         flag: "--to",
@@ -101,8 +101,11 @@ export const commandGroups: CommandGroup[] = [
       },
     ],
     examples: [
+      "skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder",
       "skill-organizer skill disable my-skills/coding-skills/astro-performance-auditor",
       "skill-organizer skill enable my-skills/coding-skills/astro-performance-auditor",
+      "skill-organizer skill delete thirdparty/asciinema/asciinema-recorder",
+      "skill-organizer skill check-updates",
       "skill-organizer skill move-unmanaged --config ~/.agents/.skill-organizer.yml",
       "skill-organizer skill check-overlap --tool claude",
       "skill-organizer skill check-overlap --min-overlap-type partial",

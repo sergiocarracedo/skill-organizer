@@ -10,7 +10,10 @@ func newSkillCommand() *cobra.Command {
 
 	cmd.AddCommand(newEnableCommand())
 	cmd.AddCommand(newDisableCommand())
+	cmd.AddCommand(newSkillAddCommand())
+	cmd.AddCommand(newSkillDeleteCommand())
 	cmd.AddCommand(newMoveUnmanagedCommand())
+	cmd.AddCommand(newCheckUpdatesCommand())
 	cmd.AddCommand(newCheckOverlapCommand())
 
 	return cmd

@@ -14,6 +14,27 @@ type UpdateCache struct {
 	LastCheckedAt string `yaml:"last-checked-at,omitempty"`
 	LatestVersion string `yaml:"latest-version,omitempty"`
 	LatestPageURL string `yaml:"latest-page-url,omitempty"`
+	SkillUpdates   SkillUpdateCache `yaml:"skill-updates,omitempty"`
+	BackupGC       TaskCache        `yaml:"backup-gc,omitempty"`
+}
+
+type TaskCache struct {
+	LastCheckedAt string `yaml:"last-checked-at,omitempty"`
+}
+
+type SkillUpdateCache struct {
+	LastCheckedAt string              `yaml:"last-checked-at,omitempty"`
+	Pending       []SkillUpdateRecord `yaml:"pending,omitempty"`
+}
+
+type SkillUpdateRecord struct {
+	RelativePath      string `yaml:"relative-path,omitempty"`
+	FlattenedName     string `yaml:"flattened-name,omitempty"`
+	InstalledVersion  string `yaml:"installed-version,omitempty"`
+	LatestVersion     string `yaml:"latest-version,omitempty"`
+	Source            string `yaml:"source,omitempty"`
+	RepoSkillPath     string `yaml:"repo-skill-path,omitempty"`
+	CheckedAt         string `yaml:"checked-at,omitempty"`
 }
 
 func CachePath() (string, error) {
@@ -29,6 +50,35 @@ func (c *UpdateCache) Normalize() {
 	c.LastCheckedAt = strings.TrimSpace(c.LastCheckedAt)
 	c.LatestVersion = strings.TrimSpace(c.LatestVersion)
 	c.LatestPageURL = strings.TrimSpace(c.LatestPageURL)
+	c.SkillUpdates.Normalize()
+	c.BackupGC.Normalize()
+}
+
+func (c *TaskCache) Normalize() {
+	c.LastCheckedAt = strings.TrimSpace(c.LastCheckedAt)
+}
+
+func (c *SkillUpdateCache) Normalize() {
+	c.LastCheckedAt = strings.TrimSpace(c.LastCheckedAt)
+	cleaned := make([]SkillUpdateRecord, 0, len(c.Pending))
+	for _, pending := range c.Pending {
+		pending.Normalize()
+		if pending.RelativePath == "" && pending.FlattenedName == "" {
+			continue
+		}
+		cleaned = append(cleaned, pending)
+	}
+	c.Pending = cleaned
+}
+
+func (r *SkillUpdateRecord) Normalize() {
+	r.RelativePath = strings.TrimSpace(r.RelativePath)
+	r.FlattenedName = strings.TrimSpace(r.FlattenedName)
+	r.InstalledVersion = strings.TrimSpace(r.InstalledVersion)
+	r.LatestVersion = strings.TrimSpace(r.LatestVersion)
+	r.Source = strings.TrimSpace(r.Source)
+	r.RepoSkillPath = strings.TrimSpace(r.RepoSkillPath)
+	r.CheckedAt = strings.TrimSpace(r.CheckedAt)
 }
 
 func LoadUpdateCache(path string) (UpdateCache, error) {

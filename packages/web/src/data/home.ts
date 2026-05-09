@@ -484,6 +484,13 @@ export const featureCards: FeatureCard[] = [
     rotation: -2.7,
     speed: 0.18,
   },
+  {
+    title: "Import and track updates",
+    copy: "Bring in skills from skills.sh, store their source metadata, inspect diffs, and update them later without losing your managed structure.",
+    shape: "ticket",
+    rotation: -1.4,
+    speed: 0.13,
+  },
 ];
 
 export const advantageItems = [
@@ -492,6 +499,7 @@ export const advantageItems = [
   "Manage multiple skill targets with one consistent workflow",
   "Disable or re-enable skills without deleting your curation work",
   "Non-destructive sync that leaves unrelated target entries alone",
+  "Import skills from skills.sh and keep their upstream provenance",
 ];
 
 export const overlapDemoGroups: OverlapGroupDemo[] = [
@@ -566,6 +574,11 @@ export const faqItems = [
     question: "What does the overlap check do?",
     answer:
       "It asks an installed coding agent to analyze your managed skills for duplication or overlap, renders grouped reports, and can open a plan-only flow or save a remediation prompt under plans/ for tools without verified interactive plan mode.",
+  },
+  {
+    question: "Can I import skills from skills.sh and update them later?",
+    answer:
+      "Yes. skill-organizer skill add imports skills from skills.sh into the managed source tree, stores source and version metadata, and skill-organizer skill check-updates lets you review diffs and apply updates later with automatic backups.",
   },
 ];
 

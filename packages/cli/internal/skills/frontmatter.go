@@ -16,6 +16,12 @@ type ManagedMetadata struct {
 	OriginalName       string
 	SourceRelativePath string
 	Disabled           bool
+	Source             string
+	SourceType         string
+	InstalledVersion   string
+	InstalledAt        string
+	RepoSkillPath      string
+	LastUpdatedAt      string
 }
 
 type Document struct {
@@ -110,6 +116,24 @@ func (d *Document) ManagedMetadata() ManagedMetadata {
 	if node := mappingValue(organizerNode, "disabled"); node != nil {
 		metadata.Disabled = strings.EqualFold(node.Value, "true")
 	}
+	if node := mappingValue(organizerNode, "source"); node != nil {
+		metadata.Source = node.Value
+	}
+	if node := mappingValue(organizerNode, "source-type"); node != nil {
+		metadata.SourceType = node.Value
+	}
+	if node := mappingValue(organizerNode, "installed-version"); node != nil {
+		metadata.InstalledVersion = node.Value
+	}
+	if node := mappingValue(organizerNode, "installed-at"); node != nil {
+		metadata.InstalledAt = node.Value
+	}
+	if node := mappingValue(organizerNode, "repo-skill-path"); node != nil {
+		metadata.RepoSkillPath = node.Value
+	}
+	if node := mappingValue(organizerNode, "last-updated-at"); node != nil {
+		metadata.LastUpdatedAt = node.Value
+	}
 
 	return metadata
 }
@@ -126,6 +150,24 @@ func (d *Document) SetManagedFields(flattenedName string, metadata ManagedMetada
 	setScalar(organizerNode, "original-name", metadata.OriginalName)
 	setScalar(organizerNode, "source-relative-path", metadata.SourceRelativePath)
 	setBool(organizerNode, "disabled", metadata.Disabled)
+	if strings.TrimSpace(metadata.Source) != "" {
+		setScalar(organizerNode, "source", metadata.Source)
+	}
+	if strings.TrimSpace(metadata.SourceType) != "" {
+		setScalar(organizerNode, "source-type", metadata.SourceType)
+	}
+	if strings.TrimSpace(metadata.InstalledVersion) != "" {
+		setScalar(organizerNode, "installed-version", metadata.InstalledVersion)
+	}
+	if strings.TrimSpace(metadata.InstalledAt) != "" {
+		setScalar(organizerNode, "installed-at", metadata.InstalledAt)
+	}
+	if strings.TrimSpace(metadata.RepoSkillPath) != "" {
+		setScalar(organizerNode, "repo-skill-path", metadata.RepoSkillPath)
+	}
+	if strings.TrimSpace(metadata.LastUpdatedAt) != "" {
+		setScalar(organizerNode, "last-updated-at", metadata.LastUpdatedAt)
+	}
 }
 
 func (d Document) WriteTo(path string) error {
@@ -239,6 +281,10 @@ func (d *Document) mapping() *yaml.Node {
 }
 
 func RewriteManagedFields(skill Skill, rename bool, disabled bool) error {
+	return RewriteManagedFieldsWithMetadata(skill, rename, disabled, ManagedMetadata{})
+}
+
+func RewriteManagedFieldsWithMetadata(skill Skill, rename bool, disabled bool, updates ManagedMetadata) error {
 	doc, err := LoadDocument(skill.SkillFile)
 	if err != nil {
 		return err
@@ -250,7 +296,35 @@ func RewriteManagedFields(skill Skill, rename bool, disabled bool) error {
 	}
 	metadata.SourceRelativePath = skill.RelativePath
 	metadata.Disabled = disabled
+	mergeManagedMetadata(&metadata, updates)
 
 	doc.SetManagedFields(skill.FlattenedName, metadata, rename)
 	return doc.WriteTo(skill.SkillFile)
+}
+
+func mergeManagedMetadata(target *ManagedMetadata, updates ManagedMetadata) {
+	if strings.TrimSpace(updates.OriginalName) != "" {
+		target.OriginalName = updates.OriginalName
+	}
+	if strings.TrimSpace(updates.SourceRelativePath) != "" {
+		target.SourceRelativePath = updates.SourceRelativePath
+	}
+	if strings.TrimSpace(updates.Source) != "" {
+		target.Source = updates.Source
+	}
+	if strings.TrimSpace(updates.SourceType) != "" {
+		target.SourceType = updates.SourceType
+	}
+	if strings.TrimSpace(updates.InstalledVersion) != "" {
+		target.InstalledVersion = updates.InstalledVersion
+	}
+	if strings.TrimSpace(updates.InstalledAt) != "" {
+		target.InstalledAt = updates.InstalledAt
+	}
+	if strings.TrimSpace(updates.RepoSkillPath) != "" {
+		target.RepoSkillPath = updates.RepoSkillPath
+	}
+	if strings.TrimSpace(updates.LastUpdatedAt) != "" {
+		target.LastUpdatedAt = updates.LastUpdatedAt
+	}
 }

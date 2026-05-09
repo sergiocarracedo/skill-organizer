@@ -12,24 +12,25 @@ import (
 	"strings"
 	"time"
 
+	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	"gopkg.in/yaml.v3"
 )
 
-type skillsCLIRunner struct {
+type SkillsCLIRunner struct {
 	command []string
 }
 
-type skillsCLISandbox struct {
+type Sandbox struct {
 	root       string
 	projectDir string
 	homeDir    string
-	runner     *skillsCLIRunner
+	runner     *SkillsCLIRunner
 }
 
 type skillsCLIInstalledEntry struct {
-	Name  string `json:"name"`
-	Path  string `json:"path"`
-	Scope string `json:"scope"`
+	Name   string   `json:"name"`
+	Path   string   `json:"path"`
+	Scope  string   `json:"scope"`
 	Agents []string `json:"agents"`
 }
 
@@ -53,6 +54,7 @@ type SkillSummary struct {
 	Name          string
 	Source        string
 	SourceURL     string
+	SourceType    string
 	Version       string
 	VersionDate   time.Time
 	Hash          string
@@ -61,6 +63,7 @@ type SkillSummary struct {
 
 type SkillBundle struct {
 	Skill SkillSummary
+	Root  string
 	Files []File
 }
 
@@ -69,21 +72,55 @@ type File struct {
 	Contents string
 }
 
+type SkillsUpdate struct {
+	Skill           SkillSummary
+	InstalledPath   string
+	InstalledBundle SkillBundle
+	LatestBundle    SkillBundle
+}
+
+type skillFrontmatter struct {
+	Metadata map[string]any `yaml:"metadata"`
+}
+
 var ansiPattern = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
 var listedSkillPattern = regexp.MustCompile(`^\s*[│|]\s{4}([a-z0-9][a-z0-9-]+)\s*$`)
 
-func detectSkillsCLI() (*skillsCLIRunner, error) {
+func DetectSkillsCLI() (*SkillsCLIRunner, error) {
 	if _, err := exec.LookPath("skills"); err == nil {
-		return &skillsCLIRunner{command: []string{"skills"}}, nil
+		return &SkillsCLIRunner{command: []string{"skills"}}, nil
 	}
 	if _, err := exec.LookPath("npx"); err == nil {
-		return &skillsCLIRunner{command: []string{"npx", "skills"}}, nil
+		return &SkillsCLIRunner{command: []string{"npx", "skills"}}, nil
 	}
-	return nil, fmt.Errorf("skills CLI not available: install `skills` or ensure `npx skills` can run")
+	return nil, fmt.Errorf("skills CLI not available. Install `skills` or ensure `npx skills` can run")
 }
 
-func newSkillsCLISandbox() (*skillsCLISandbox, error) {
-	runner, err := detectSkillsCLI()
+func (r *SkillsCLIRunner) Label() string {
+	if r == nil {
+		return ""
+	}
+	return strings.Join(r.command, " ")
+}
+
+func (r *SkillsCLIRunner) RunIn(dir string, env []string, args ...string) (string, error) {
+	command := exec.Command(r.command[0], append(r.command[1:], args...)...)
+	if strings.TrimSpace(dir) != "" {
+		command.Dir = dir
+	}
+	if len(env) > 0 {
+		command.Env = append(os.Environ(), env...)
+	}
+	output, err := command.CombinedOutput()
+	text := string(output)
+	if err != nil {
+		return text, fmt.Errorf("run %s: %w\n%s", strings.Join(append(r.command, args...), " "), err, text)
+	}
+	return text, nil
+}
+
+func NewSandbox() (*Sandbox, error) {
+	runner, err := DetectSkillsCLI()
 	if err != nil {
 		return nil, err
 	}
@@ -101,27 +138,19 @@ func newSkillsCLISandbox() (*skillsCLISandbox, error) {
 		return nil, fmt.Errorf("create sandbox home directory: %w", err)
 	}
 
-	return &skillsCLISandbox{root: root, projectDir: projectDir, homeDir: homeDir, runner: runner}, nil
+	return &Sandbox{root: root, projectDir: projectDir, homeDir: homeDir, runner: runner}, nil
 }
 
-func (s *skillsCLISandbox) Close() {
+func (s *Sandbox) Close() {
 	_ = os.RemoveAll(s.root)
 }
 
-func (s *skillsCLISandbox) run(args ...string) (string, error) {
-	command := exec.Command(s.runner.command[0], append(s.runner.command[1:], args...)...)
-	command.Dir = s.projectDir
-	command.Env = append(os.Environ(), "HOME="+s.homeDir, "FORCE_COLOR=0", "NO_COLOR=1", "CI=1")
-	output, err := command.CombinedOutput()
-	text := string(output)
-	if err != nil {
-		return text, fmt.Errorf("run %s: %w\n%s", strings.Join(append(s.runner.command, args...), " "), err, text)
-	}
-	return text, nil
+func (s *Sandbox) Run(args ...string) (string, error) {
+	return s.runner.RunIn(s.projectDir, []string{"HOME=" + s.homeDir, "FORCE_COLOR=0", "NO_COLOR=1", "CI=1"}, args...)
 }
 
-func (s *skillsCLISandbox) listRepoSkills(source string) ([]SkillSummary, error) {
-	output, err := s.run("add", source, "-l")
+func (s *Sandbox) ListRepoSkills(source string) ([]SkillSummary, error) {
+	output, err := s.Run("add", source, "-l")
 	if err != nil {
 		return nil, err
 	}
@@ -136,11 +165,12 @@ func (s *skillsCLISandbox) listRepoSkills(source string) ([]SkillSummary, error)
 		}
 		name := matches[1]
 		results = append(results, SkillSummary{
-			Provider:  "skills.sh",
-			ID:        source + "/" + name,
-			Name:      name,
-			Source:    source,
-			SourceURL: sourceToGitHubURL(source),
+			Provider:   "skills.sh",
+			ID:         source + "/" + name,
+			Name:       name,
+			Source:     source,
+			SourceURL:  sourceToGitHubURL(source),
+			SourceType: sourceTypeFromSource(source),
 		})
 	}
 	if len(results) == 0 {
@@ -149,13 +179,13 @@ func (s *skillsCLISandbox) listRepoSkills(source string) ([]SkillSummary, error)
 	return results, nil
 }
 
-func (s *skillsCLISandbox) installSkill(skill SkillSummary) (string, error) {
+func (s *Sandbox) InstallSkill(skill SkillSummary) (string, error) {
 	args := []string{"add", skill.SourceURL, "--skill", skill.Name, "-y", "--copy"}
-	return s.run(args...)
+	return s.Run(args...)
 }
 
-func (s *skillsCLISandbox) installedSkills() ([]skillsCLIInstalledEntry, error) {
-	output, err := s.run("list", "--json")
+func (s *Sandbox) InstalledSkills() ([]skillsCLIInstalledEntry, error) {
+	output, err := s.Run("list", "--json")
 	if err != nil {
 		return nil, err
 	}
@@ -167,8 +197,8 @@ func (s *skillsCLISandbox) installedSkills() ([]skillsCLIInstalledEntry, error) 
 	return entries, nil
 }
 
-func (s *skillsCLISandbox) loadInstalledBundle(skill SkillSummary) (SkillBundle, error) {
-	entries, err := s.installedSkills()
+func (s *Sandbox) LoadInstalledBundle(skill SkillSummary) (SkillBundle, error) {
+	entries, err := s.InstalledSkills()
 	if err != nil {
 		return SkillBundle{}, err
 	}
@@ -186,29 +216,10 @@ func (s *skillsCLISandbox) loadInstalledBundle(skill SkillSummary) (SkillBundle,
 		return SkillBundle{}, fmt.Errorf("installed skill %q not found in sandbox", skill.Name)
 	}
 
-	files := make([]File, 0)
-	err = filepath.WalkDir(installed.Path, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		rel, err := filepath.Rel(installed.Path, path)
-		if err != nil {
-			return err
-		}
-		files = append(files, File{Path: filepath.ToSlash(rel), Contents: string(content)})
-		return nil
-	})
+	bundle, err := LoadBundleFromDir(installed.Path)
 	if err != nil {
-		return SkillBundle{}, fmt.Errorf("read sandbox installed skill: %w", err)
+		return SkillBundle{}, err
 	}
-	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 
 	updated := skill
 	metadata, _ := loadSkillsCLIMetadata(filepath.Join(installed.Path, "metadata.json"))
@@ -227,10 +238,142 @@ func (s *skillsCLISandbox) loadInstalledBundle(skill SkillSummary) (SkillBundle,
 		if entry.Source != "" {
 			updated.Source = entry.Source
 			updated.SourceURL = sourceToGitHubURL(entry.Source)
+			updated.SourceType = sourceTypeFromSource(entry.Source)
+		}
+		if entry.SourceType != "" {
+			updated.SourceType = strings.TrimSpace(entry.SourceType)
 		}
 	}
 
-	return SkillBundle{Skill: updated, Files: files}, nil
+	bundle.Skill = updated
+	bundle.Root = installed.Path
+	return bundle, nil
+}
+
+func LoadBundleFromDir(root string) (SkillBundle, error) {
+	files := make([]File, 0)
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		files = append(files, File{Path: filepath.ToSlash(rel), Contents: string(content)})
+		return nil
+	})
+	if err != nil {
+		return SkillBundle{}, fmt.Errorf("read skill bundle: %w", err)
+	}
+	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
+	return SkillBundle{Root: root, Files: files}, nil
+}
+
+func LatestFileModTime(root string) (time.Time, error) {
+	var latest time.Time
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if info.ModTime().After(latest) {
+			latest = info.ModTime().UTC()
+		}
+		return nil
+	})
+	if err != nil {
+		return time.Time{}, fmt.Errorf("scan skill modtimes: %w", err)
+	}
+	return latest, nil
+}
+
+func CheckForSkillUpdate(ctx SkillSummary) (SkillsUpdate, bool, error) {
+	if strings.TrimSpace(ctx.Source) == "" || strings.TrimSpace(ctx.RepoSkillPath) == "" {
+		return SkillsUpdate{}, false, nil
+	}
+	sandbox, err := NewSandbox()
+	if err != nil {
+		return SkillsUpdate{}, false, err
+	}
+	defer sandbox.Close()
+
+	output, err := sandbox.Run("add", ctx.SourceURL, "--skill", ctx.Name, "-y", "--copy")
+	if err != nil {
+		return SkillsUpdate{}, false, err
+	}
+	_ = output
+	latestBundle, err := sandbox.LoadInstalledBundle(ctx)
+	if err != nil {
+		return SkillsUpdate{}, false, err
+	}
+	installedBundle, err := LoadBundleFromDir(ctx.ID)
+	if err != nil {
+		return SkillsUpdate{}, false, nil
+	}
+	if latestBundle.Skill.Hash == "" || latestBundle.Skill.Hash == ctx.Hash || latestBundle.Skill.Hash == ctx.Version {
+		return SkillsUpdate{}, false, nil
+	}
+	return SkillsUpdate{Skill: ctx, InstalledPath: ctx.ID, InstalledBundle: installedBundle, LatestBundle: latestBundle}, true, nil
+}
+
+func FetchSkillBundle(source string, name string) (SkillBundle, error) {
+	sandbox, err := NewSandbox()
+	if err != nil {
+		return SkillBundle{}, err
+	}
+	defer sandbox.Close()
+
+	summary := SkillSummary{
+		Provider:   "skills.sh",
+		Name:       strings.TrimSpace(name),
+		Source:     strings.TrimSpace(source),
+		SourceURL:  sourceToGitHubURL(source),
+		SourceType: sourceTypeFromSource(source),
+	}
+	if _, err := sandbox.InstallSkill(summary); err != nil {
+		return SkillBundle{}, err
+	}
+	return sandbox.LoadInstalledBundle(summary)
+}
+
+func ResolveVersion(skill SkillSummary, files []File) string {
+	if strings.TrimSpace(skill.Hash) != "" {
+		return strings.TrimSpace(skill.Hash)
+	}
+	if strings.TrimSpace(skill.Version) != "" {
+		return strings.TrimSpace(skill.Version)
+	}
+	for _, file := range files {
+		if file.Path == "SKILL.md" {
+			if version := SkillVersionFromSkillFile(file.Contents); version != "" {
+				return version
+			}
+			break
+		}
+	}
+	return "unknown"
+}
+
+func CacheDir() (string, error) {
+	appDir, err := configpkg.AppDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(appDir, "cache", "skills"), nil
 }
 
 func loadSkillsCLIMetadata(path string) (skillsCLIMetadata, error) {
@@ -265,6 +408,17 @@ func sourceToGitHubURL(source string) string {
 	return "https://github.com/" + strings.Trim(trimmed, "/")
 }
 
+func sourceTypeFromSource(source string) string {
+	trimmed := strings.TrimSpace(source)
+	if strings.HasPrefix(trimmed, "http://") || strings.HasPrefix(trimmed, "https://github.com/") || regexp.MustCompile(`^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$`).MatchString(trimmed) {
+		return "github"
+	}
+	if strings.HasPrefix(trimmed, "https://") || strings.HasPrefix(trimmed, "http://") {
+		return "url"
+	}
+	return "unknown"
+}
+
 func parseLooseDate(value string) time.Time {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
@@ -279,11 +433,7 @@ func parseLooseDate(value string) time.Time {
 	return time.Time{}
 }
 
-type skillFrontmatter struct {
-	Metadata map[string]any `yaml:"metadata"`
-}
-
-func skillVersionFromSkillFile(content string) string {
+func SkillVersionFromSkillFile(content string) string {
 	var frontmatter skillFrontmatter
 	parts := strings.SplitN(content, "---\n", 3)
 	if len(parts) < 3 {

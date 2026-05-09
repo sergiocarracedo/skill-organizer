@@ -140,6 +140,38 @@ Follow this decision order:
 - Source skills are edited in `skills-organized`, not directly in the flat target folder.
 - If the target already contains manual directories, move them with `skill-organizer skill move-unmanaged` before relying on regular sync.
 
+## Import Skills From skills.sh
+
+Use this command when the user wants to install a skill from a `skills.sh` source and keep it managed inside `skills-organized`:
+
+```bash
+skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder
+```
+
+Behavior:
+
+1. Detects `skills` first, then falls back to `npx skills`.
+2. Prints `Using skills.sh cli tool to add the skills` before invoking `skills.sh`.
+3. Imports the selected skill into the managed source tree.
+4. Writes source and installed-version metadata into `metadata.skill-organizer`.
+5. Runs sync immediately.
+
+Use this command to remove a managed imported skill safely:
+
+```bash
+skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
+```
+
+The CLI confirms first, then moves the skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` and syncs the project.
+
+Use this command to review updates for imported skills:
+
+```bash
+skill-organizer skill check-updates
+```
+
+The interactive list lets you press `d` to inspect the full folder diff before selecting skills to update.
+
 ## Evaluate Skill Overlap
 
 Use this command when the user wants to detect duplicated or overlapping skills in the organized source tree:

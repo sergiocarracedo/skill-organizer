@@ -38,10 +38,15 @@ type OverlapConfig struct {
 	AcknowledgedExternalToolCosts bool   `yaml:"acknowledged-external-tool-costs,omitempty"`
 }
 
+type BackupConfig struct {
+	RetentionDays int `yaml:"retention-days,omitempty"`
+}
+
 type AppConfig struct {
 	Watched []string      `yaml:"watched"`
 	Service ServiceConfig `yaml:"service"`
 	Overlap OverlapConfig `yaml:"overlap,omitempty"`
+	Backup  BackupConfig  `yaml:"backup,omitempty"`
 }
 
 func (r *WatchRegistry) Normalize() {
@@ -72,6 +77,7 @@ func (c *AppConfig) Normalize() {
 	c.Watched = registry.Watched
 	c.Service.Normalize()
 	c.Overlap.Normalize()
+	c.Backup.Normalize()
 }
 
 func (c AppConfig) WatchRegistry() WatchRegistry {
@@ -85,6 +91,7 @@ func (c *AppConfig) SetWatchRegistry(registry WatchRegistry) {
 	c.Watched = append([]string{}, registry.Watched...)
 	c.Service.Normalize()
 	c.Overlap.Normalize()
+	c.Backup.Normalize()
 }
 
 func (c *ServiceConfig) Normalize() {
@@ -100,7 +107,14 @@ func (c *OverlapConfig) Normalize() {
 	}
 }
 
+func (c *BackupConfig) Normalize() {
+	if c.RetentionDays <= 0 {
+		c.RetentionDays = DefaultBackupRetentionDays
+	}
+}
+
 const DefaultLogLevel = "info"
+const DefaultBackupRetentionDays = 10
 
 func IsValidLogLevel(level string) bool {
 	switch level {

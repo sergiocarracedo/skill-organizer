@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	maintenancepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/maintenance"
 	selfupdatepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/selfupdate"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,11 @@ func init() {
 			return
 		}
 		printCLIHeader(cmd.OutOrStdout())
+		maintenancepkg.MaybeRunBackupGC(cmd.Context())
 		selfupdatepkg.MaybeNotify(cmd.Context(), version, cmd.OutOrStdout())
+		if cmd.Name() != "check-updates" {
+			maintenancepkg.MaybeNotifySkillUpdates(cmd.Context(), cmd.OutOrStdout())
+		}
 	}
 	defaultHelpFunc := rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {

@@ -1,6 +1,6 @@
 ---
 title: skill
-description: Enable, disable, or move unmanaged source skills.
+description: Import, update, enable, disable, delete, or move managed skills.
 section: reference
 order: 6
 commandSlug: skill
@@ -10,19 +10,36 @@ summary: Per-skill management commands.
 ## Synopsis
 
 ```bash
+skill-organizer skill add <source> --skill <name>
 skill-organizer skill enable <source-path>
 skill-organizer skill disable <source-path>
+skill-organizer skill delete <source-path>
 skill-organizer skill move-unmanaged
+skill-organizer skill check-updates
 skill-organizer skill check-overlap
 ```
+
+## add
+
+`skill add` uses `skills.sh` via `skills` or `npx skills`, prints `Using skills.sh cli tool to add the skills`, imports the selected skills into the managed source tree, writes source metadata, and runs sync immediately.
 
 ## enable and disable
 
 These commands resolve a source skill, rewrite the managed metadata in its `SKILL.md`, and run sync immediately afterward.
 
+## delete
+
+`delete` confirms first, then moves the managed source skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` before running sync.
+
 ## move-unmanaged
 
 `move-unmanaged` discovers target entries that are not currently managed and offers to move them into the organized source tree.
+
+## check-updates
+
+`check-updates` scans imported managed skills for newer upstream versions. In interactive mode you can press `d` to inspect the full folder diff before selecting which skills to update.
+
+Selected skills are backed up into `.old/`, updated in source, and then synchronized.
 
 ## check-overlap
 
@@ -31,6 +48,9 @@ These commands resolve a source skill, rewrite the managed metadata in its `SKIL
 Typical examples:
 
 ```bash
+skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder
+skill-organizer skill check-updates
+skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
 skill-organizer skill check-overlap
 skill-organizer skill check-overlap --choose-tool
 skill-organizer skill check-overlap --tool claude
@@ -49,6 +69,7 @@ If it does not, the CLI asks whether it should generate a remediation prompt, sa
 
 ```text
 --yes  Apply unmanaged moves without confirmation
+--skill  Add one or more specific skills from a skills.sh source
 --to   Move a single unmanaged skill to a custom path relative to the source root
 --include-disabled  Include disabled skills when using check-overlap
 --min-overlap-type  adjacent|partial|duplicate or 1|2|3

@@ -147,3 +147,30 @@ func ResolveSourceSkill(locationRoot, input string) (Skill, error) {
 		FlattenedName: FlattenName(relPath),
 	}, nil
 }
+
+func ResolveSourceSkillTarget(locationRoot, relativePath string) (Skill, error) {
+	locationRoot, err := configpkg.ResolvePath(locationRoot)
+	if err != nil {
+		return Skill{}, fmt.Errorf("resolve source root: %w", err)
+	}
+
+	relativePath = strings.TrimSpace(relativePath)
+	if relativePath == "" {
+		return Skill{}, fmt.Errorf("source-relative path cannot be empty")
+	}
+	cleaned := filepath.Clean(relativePath)
+	if filepath.IsAbs(cleaned) {
+		return Skill{}, fmt.Errorf("source-relative path must be relative")
+	}
+	if cleaned == "." || cleaned == ".." || strings.HasPrefix(filepath.ToSlash(cleaned), "../") {
+		return Skill{}, fmt.Errorf("source-relative path cannot escape the source root")
+	}
+
+	dir := filepath.Join(locationRoot, cleaned)
+	return Skill{
+		Dir:           dir,
+		SkillFile:     filepath.Join(dir, SkillFileName),
+		RelativePath:  filepath.ToSlash(cleaned),
+		FlattenedName: FlattenName(cleaned),
+	}, nil
+}

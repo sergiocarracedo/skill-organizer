@@ -216,18 +216,44 @@ skill-organizer project remove
 ```bash
 skill-organizer sync
 skill-organizer status
+skill-organizer skill add <source>
 skill-organizer skill enable <source-path>
 skill-organizer skill disable <source-path>
+skill-organizer skill delete <source-path>
 skill-organizer skill move-unmanaged
+skill-organizer skill check-updates
 skill-organizer skill check-overlap
 ```
 
 - `sync` scans the source tree, rewrites source skill frontmatter, creates or repairs managed symlinks in the target, removes stale managed symlinks, and updates the hidden target manifest.
 - `status` reports source skills, flattened names, disabled skills, target drift, and unmanaged target entries.
+- `skill add` uses `skills.sh` through `skills` or `npx skills`, imports selected skills into `skills-organized`, writes import metadata, and syncs immediately.
 - `skill enable` and `skill disable` update `metadata.skill-organizer.disabled` in the source `SKILL.md`.
+- `skill delete` moves a managed source skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` after confirmation, then syncs the project.
 - `skill move-unmanaged` previews moves from unmanaged target entries into the source tree and applies them after confirmation, or immediately with `--yes`.
+- `skill check-updates` checks imported managed skills for upstream updates, lets you inspect diffs with `d`, backs up selected skills into `.old/`, applies updates, and syncs afterward.
 - `skill check-overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only and shows only `partial` and `duplicate` overlap groups. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, `--tool <id>` to choose one explicitly, `--min-overlap-type` to include weaker matches, or `--no-ask-to-apply` to skip the follow-up planning prompt.
 - `skill check-overlap --print-prompt` prints the generated analysis prompt without invoking any external CLI. This bypasses tool selection and the one-time cost notice.
+
+### Imported Skills
+
+```bash
+skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder
+skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
+skill-organizer skill check-updates
+```
+
+When `skill add` runs, the CLI prints `Using skills.sh cli tool to add the skills` before invoking `skills.sh`. The imported skill is written directly into the managed source tree, not left behind as an unmanaged target entry.
+
+Imported skills store source metadata in `metadata.skill-organizer`, including source, source type, installed version, installed date, and repo skill path. That metadata powers `skill check-updates` and the periodic update notice shown on normal CLI runs when cached updates are available.
+
+Deleted or updated skills are backed up under:
+
+```text
+~/.config/skill-organizer/.old/[timestamp]-[flattened-name]
+```
+
+Expired backups are removed automatically by a periodic cleanup task. The default retention window is 10 days.
 
 ### Overlap Analysis
 
