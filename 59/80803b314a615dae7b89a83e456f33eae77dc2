@@ -1,0 +1,33 @@
+packages/cli/internal/selfupdate/selfupdate_test.go
+  s_56e44c42e8dc3e::t_e25f1d301f88db 32,55
+  s_56e44c42e8dc3e::t_a7f26bf4f1ad39 1-27,29-31,33-50,52-54,56-62,64-84
+  s_56e44c42e8dc3e::t_1aba37d6a66d5a 28,51,63,85
+packages/cli/internal/selfupdate/selfupdate.go
+  s_56e44c42e8dc3e::t_1aba37d6a66d5a 51-53,125,168,195,206,226,245,288,306,343,354,385,428,435,485,526,562,569,576,584,592,601,643,671,681
+  s_56e44c42e8dc3e::t_859e0eb96e8aae 86,91,97,115,120,228,587,591
+  s_56e44c42e8dc3e::t_fdf4dcefb4255e 1-50,54-85,87-90,92-96,98-114,116-119,121-124,126-167,169-194,196-205,207-225,227,229-244,246-287,289-305,307-342,344-353,355-384,386-427,429-434,436-484,486-525,527-561,563-568,570-575,577-583,585-586,588-590,593-600,602-642,644-670,672-680
+packages/cli/cmd/update.go
+  s_56e44c42e8dc3e::t_dcc780d00e534a 1-15
+  s_56e44c42e8dc3e::t_1aba37d6a66d5a 16
+packages/cli/cmd/root.go
+  s_56e44c42e8dc3e::t_92259d7acee072 10,46,66
+packages/cli/internal/config/cache.go
+  s_56e44c42e8dc3e::t_fd304b06328486 26,32,47,56,75,82
+  s_56e44c42e8dc3e::t_d5aa84bd6871ed 1-25,27-31,33-46,48-55,57-74,76-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "5980803b314a615dae7b89a83e456f33eae77dc2",
+  "prompts": {},
+  "sessions": {
+    "s_56e44c42e8dc3e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1f2092a66ffereJ5HzCNEHJpDA",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
