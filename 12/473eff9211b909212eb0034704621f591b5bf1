@@ -1,0 +1,92 @@
+packages/cli/internal/remote/skillscli.go
+  s_18bd58fc9e60f0::t_94487f09b9fdc9 223-224,470-477
+  s_18bd58fc9e60f0::t_ed7899a3770f7b 31,216,222,273
+  s_18bd58fc9e60f0::t_bda71e656fd018 16,219,225-228,233-264
+  s_18bd58fc9e60f0::t_619fb0c6373733 168-170,172-178
+  s_18bd58fc9e60f0::t_50338a1237cb33 123-137,165,171
+packages/cli/cmd/skill_add_test.go
+  s_18bd58fc9e60f0::t_55a2538dd4fc59 107-121,352
+  s_18bd58fc9e60f0::t_74c265aef8ed6e 126,294-297,299-301,362,459-466,468
+  s_18bd58fc9e60f0::t_7dc4853ef2de00 399,410,426-427,439
+  s_18bd58fc9e60f0::t_2911ca67c63adf 1-88,91-106,122-125,127-141,274-293,298,302-325,328-351,353-361,363-398,400-409,411-425,428-438,440-458,467,469
+  s_18bd58fc9e60f0::t_b35135696b1fd3 89-90,245-246,326-327
+  s_18bd58fc9e60f0::t_e9bed71de3d74c 142-244,247-273
+packages/cli/cmd/aliases.go
+  s_18bd58fc9e60f0::t_b5adaebee03b30 1-23
+README.md
+  s_18bd58fc9e60f0::t_27b64d44fb0ba6 238-241,246,248,250
+packages/cli/cmd/skill_check_updates.go
+  s_18bd58fc9e60f0::t_99923077942c94 42-44
+packages/cli/cmd/disable.go
+  s_18bd58fc9e60f0::t_6831101c4cb84d 13-16
+packages/cli/cmd/editable_path_selector.go
+  s_18bd58fc9e60f0::t_d2434dcf6c3475 1-13,16-67,69,71-73,75-399,420,422,424-428,430,432-436,438-439,442,444,446-450,452-453,456,458,460-465,470-479,481,483,485,487,489-552
+  s_18bd58fc9e60f0::t_546000eff96c24 400,402,413-419,423
+  s_18bd58fc9e60f0::t_4f75bd82a33d01 466-469
+  s_18bd58fc9e60f0::t_019c02e13677cf 14-15,429,437,440,451,454
+  s_18bd58fc9e60f0::t_50338a1237cb33 405-412
+  s_18bd58fc9e60f0::t_b150a43635f345 68,70,403-404,421
+  s_18bd58fc9e60f0::t_f8e01e9324b2fd 431,441,443,445,455,457,459,480,482,484,486,488
+  s_18bd58fc9e60f0::t_8a40caf830ff7b 74
+  s_18bd58fc9e60f0::t_b8ff5032b2cf28 401
+packages/cli/cmd/skill_delete.go
+  s_18bd58fc9e60f0::t_52a5effbab2edd 19-22
+packages/cli/cmd/prompt.go
+  s_18bd58fc9e60f0::t_5877c8d27938a2 238-252
+  s_18bd58fc9e60f0::t_d47fd62136087e 81
+  s_18bd58fc9e60f0::t_984b4195f520dd 276
+packages/web/src/data/commands.ts
+  s_18bd58fc9e60f0::t_ca5d61ef60eb93 105,107,109,111,113
+packages/cli/cmd/logo.go
+  s_18bd58fc9e60f0::t_990b8dec3eaef5 34-65
+packages/web/src/content/docs/reference/skill.mdx
+  s_18bd58fc9e60f0::t_fed6ca7026a729 14,16,18,20,23,31-32,41-42,53-54,63,65,67
+packages/cli/internal/remote/skillscli_test.go
+  s_18bd58fc9e60f0::t_302e4930bab250 1-2,8-14,52-53
+  s_18bd58fc9e60f0::t_bda71e656fd018 3-7,15-51
+packages/cli/cmd/prompt_test.go
+  s_18bd58fc9e60f0::t_615f5278c8f913 66-91
+packages/cli/cmd/editable_path_selector_test.go
+  s_18bd58fc9e60f0::t_2aa9340fc6fba1 28
+  s_18bd58fc9e60f0::t_ee22562cb97f32 29
+  s_18bd58fc9e60f0::t_615f5278c8f913 1-27,30-31
+packages/cli/cmd/enable.go
+  s_18bd58fc9e60f0::t_7198bb5cfdb71a 13-16
+packages/cli/cmd/root.go
+  s_18bd58fc9e60f0::t_57b30a0b1962f3 8
+  s_18bd58fc9e60f0::t_a320a04bd2d3ec 68-69,75-83
+AGENTS_README.md
+  s_18bd58fc9e60f0::t_f607f16674a6d9 149,164,173,178-182
+packages/cli/cmd/skill_check_updates_test.go
+  s_18bd58fc9e60f0::t_f36fb74f9360a3 99-111,113-118
+  s_18bd58fc9e60f0::t_2911ca67c63adf 112
+packages/cli/cmd/skill_add.go
+  s_18bd58fc9e60f0::t_c6e206d5611dd9 14,58,149,157-161,163-172,188,205-206,208,213,216,221-228
+  s_18bd58fc9e60f0::t_2805374c17254c 44-47
+  s_18bd58fc9e60f0::t_e9bed71de3d74c 74-80,84-87,95,150-156,265-297
+  s_18bd58fc9e60f0::t_4aa2cfacd4985a 121,231,300-301
+  s_18bd58fc9e60f0::t_b150a43635f345 255
+  s_18bd58fc9e60f0::t_2911ca67c63adf 20-31,33-39,49,60,68,162,177-178,192
+  s_18bd58fc9e60f0::t_ab2000e99ed761 54,207,209-212,214-215,217-220
+  s_18bd58fc9e60f0::t_0563924327bce9 69-73,88-94,96-98,100,102-103,107,111-113,117-120,122-123,189,229-230,232-236,298-299,302-308
+  s_18bd58fc9e60f0::t_990b8dec3eaef5 105
+  s_18bd58fc9e60f0::t_d7715ad97e0b37 7,32,116,127-128,130-143,237-254,256-264
+packages/cli/cmd/move_unmanaged.go
+  s_18bd58fc9e60f0::t_56b5780ab7f7f0 155-157,161,163,165,175-180,186-192,197,205-208,210,213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "12473eff9211b909212eb0034704621f591b5bf1",
+  "prompts": {},
+  "sessions": {
+    "s_18bd58fc9e60f0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1f1983b66ffeilhuzHsh3XzKUH",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
