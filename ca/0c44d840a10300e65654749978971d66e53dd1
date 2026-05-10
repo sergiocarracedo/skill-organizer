@@ -1,0 +1,21 @@
+packages/cli/.goreleaser.yaml
+  s_4ed5196a097e03::t_0b1b49865a77e9 51
+packages/cli/README.md
+  s_4ed5196a097e03::t_0b1b49865a77e9 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ca0c44d840a10300e65654749978971d66e53dd1",
+  "prompts": {},
+  "sessions": {
+    "s_4ed5196a097e03": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1ecd06cc6ffeBnxxM5uT19PgNZ",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
