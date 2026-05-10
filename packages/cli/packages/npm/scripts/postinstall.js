@@ -14,6 +14,7 @@ const owner = "sergiocarracedo";
 const repo = "skill-organizer";
 const version = pkg.version;
 const tag = `v${version}`;
+const allowedRedirectHosts = new Set(["github.com", "release-assets.githubusercontent.com"]);
 const osMap = {
   linux: "Linux",
   darwin: "Darwin",
@@ -103,7 +104,7 @@ function download(url, destination) {
     https.get(url, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         const redirect = new URL(response.headers.location, url);
-        if (redirect.protocol !== "https:" || redirect.hostname !== "github.com") {
+        if (redirect.protocol !== "https:" || !allowedRedirectHosts.has(redirect.hostname)) {
           reject(new Error(`refusing redirect to unexpected host: ${redirect.origin}`));
           response.resume();
           return;
