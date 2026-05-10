@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.2-beta.1...v1.0.3-beta.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* allow npm installer release asset redirects ([6089086](https://github.com/sergiocarracedo/skill-organizer/commit/6089086f53911f95b6d68f1404b1e15782178e67))
+
 ## [1.0.2-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.1-beta.1...v1.0.2-beta.1) (2026-05-10)
 
 
