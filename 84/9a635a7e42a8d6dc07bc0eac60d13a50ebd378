@@ -1,0 +1,19 @@
+packages/cli/packages/npm/scripts/postinstall.js
+  s_4ed5196a097e03::t_38fbd138a3ce0b 17,107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "849a635a7e42a8d6dc07bc0eac60d13a50ebd378",
+  "prompts": {},
+  "sessions": {
+    "s_4ed5196a097e03": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1ecd06cc6ffeBnxxM5uT19PgNZ",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
