@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.1-beta.1...v1.0.2-beta.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* archive cli release docs from package ([ca0c44d](https://github.com/sergiocarracedo/skill-organizer/commit/ca0c44d840a10300e65654749978971d66e53dd1))
+
 ## [1.0.1-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.0-beta.1...v1.0.1-beta.1) (2026-05-10)
 
 
