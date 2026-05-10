@@ -242,10 +242,11 @@ func buildBinary(t *testing.T, root string) string {
 		binaryName += ".exe"
 	}
 	binaryPath := filepath.Join(root, binaryName)
+	repoCLIPath := repoCLIPath(t)
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "go", "build", "-o", binaryPath, "./main.go")
-	cmd.Dir = "/works/opensource/skill-organizer/packages/cli"
+	cmd.Dir = repoCLIPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("go build error = %v\n%s", err, string(output))
@@ -336,11 +337,21 @@ func (e *cliEnv) writeFakeSkillsFixtures(source string, skills map[string]fakeFi
 
 func (e *cliEnv) writeFakeSkillsShim() {
 	e.t.Helper()
-	shim := fmt.Sprintf("#!/usr/bin/env sh\nset -eu\ncd \"%s\"\nexec \"%s\" run ./testdata/fake-skills-cli.go \"$@\"\n", filepath.Join("/works/opensource/skill-organizer", "packages/cli"), commandForShell("go"))
+	repoCLIPath := repoCLIPath(e.t)
+	shim := fmt.Sprintf("#!/usr/bin/env sh\nset -eu\ncd \"%s\"\nexec \"%s\" run ./testdata/fake-skills-cli.go \"$@\"\n", repoCLIPath, commandForShell("go"))
 	e.writeExecutable(filepath.Join(e.binDir, "skills"), shim)
 	if runtime.GOOS == "windows" {
-		e.writeExecutable(filepath.Join(e.binDir, "skills.cmd"), "@echo off\r\ngo run \"/works/opensource/skill-organizer/packages/cli/testdata/fake-skills-cli.go\" %*\r\n")
+		e.writeExecutable(filepath.Join(e.binDir, "skills.cmd"), fmt.Sprintf("@echo off\r\ngo run \"%s\" %%*\r\n", filepath.Join(repoCLIPath, "testdata", "fake-skills-cli.go")))
 	}
+}
+
+func repoCLIPath(t *testing.T) string {
+	t.Helper()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd() error = %v", err)
+	}
+	return wd
 }
 
 func (e *cliEnv) removeFakeSkillsShim() {
