@@ -16,9 +16,10 @@ func newSkillDeleteCommand() *cobra.Command {
 	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <source-path>",
-		Short: "Delete a managed source skill by moving it into the .old backup area",
-		Args:  cobra.ExactArgs(1),
+		Use:     "delete <source-path>",
+		Aliases: []string{"remove", "rm"},
+		Short:   "Delete a managed source skill by moving it into the .old backup area",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			configFile, location, err := loadResolvedLocation()
 			if err != nil {

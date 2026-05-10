@@ -13,6 +13,7 @@ import (
 	"time"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
+	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,7 +28,7 @@ type Sandbox struct {
 	runner     *SkillsCLIRunner
 }
 
-type skillsCLIInstalledEntry struct {
+type InstalledSkill struct {
 	Name   string   `json:"name"`
 	Path   string   `json:"path"`
 	Scope  string   `json:"scope"`
@@ -119,6 +120,21 @@ func (r *SkillsCLIRunner) RunIn(dir string, env []string, args ...string) (strin
 	return text, nil
 }
 
+func sandboxEnv(homeDir string, extra ...string) []string {
+	env := []string{
+		"HOME=" + homeDir,
+		"FORCE_COLOR=0",
+		"NO_COLOR=1",
+		"CI=1",
+		"npm_config_update_notifier=false",
+		"NPM_CONFIG_UPDATE_NOTIFIER=false",
+	}
+	if len(extra) > 0 {
+		env = append(env, extra...)
+	}
+	return env
+}
+
 func NewSandbox() (*Sandbox, error) {
 	runner, err := DetectSkillsCLI()
 	if err != nil {
@@ -146,7 +162,20 @@ func (s *Sandbox) Close() {
 }
 
 func (s *Sandbox) Run(args ...string) (string, error) {
-	return s.runner.RunIn(s.projectDir, []string{"HOME=" + s.homeDir, "FORCE_COLOR=0", "NO_COLOR=1", "CI=1"}, args...)
+	return s.runner.RunIn(s.projectDir, sandboxEnv(s.homeDir), args...)
+}
+
+func (s *Sandbox) RunInteractive(args ...string) error {
+	command := exec.Command(s.runner.command[0], append(s.runner.command[1:], args...)...)
+	command.Dir = s.projectDir
+	command.Env = append(os.Environ(), sandboxEnv(s.homeDir)...)
+	command.Stdin = os.Stdin
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	if err := command.Run(); err != nil {
+		return fmt.Errorf("run %s: %w", strings.Join(append(s.runner.command, args...), " "), err)
+	}
+	return nil
 }
 
 func (s *Sandbox) ListRepoSkills(source string) ([]SkillSummary, error) {
@@ -184,17 +213,55 @@ func (s *Sandbox) InstallSkill(skill SkillSummary) (string, error) {
 	return s.Run(args...)
 }
 
-func (s *Sandbox) InstalledSkills() ([]skillsCLIInstalledEntry, error) {
+func (s *Sandbox) InstalledSkills() ([]InstalledSkill, error) {
 	output, err := s.Run("list", "--json")
 	if err != nil {
-		return nil, err
+		return s.discoverInstalledSkills()
 	}
 
-	var entries []skillsCLIInstalledEntry
-	if err := json.Unmarshal([]byte(output), &entries); err != nil {
-		return nil, fmt.Errorf("parse skills list output: %w", err)
+	var entries []InstalledSkill
+	jsonText := extractJSONArray(output)
+	if err := json.Unmarshal([]byte(jsonText), &entries); err != nil {
+		return s.discoverInstalledSkills()
+	}
+	if len(entries) == 0 {
+		return s.discoverInstalledSkills()
 	}
 	return entries, nil
+}
+
+func (s *Sandbox) discoverInstalledSkills() ([]InstalledSkill, error) {
+	root := filepath.Join(s.homeDir, ".agents", "skills")
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read installed skills directory: %w", err)
+	}
+
+	results := make([]InstalledSkill, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		dir := filepath.Join(root, entry.Name())
+		doc, err := skills.LoadDocument(filepath.Join(dir, "SKILL.md"))
+		if err != nil {
+			continue
+		}
+		name := strings.TrimSpace(doc.Name())
+		if name == "" {
+			name = strings.TrimSpace(entry.Name())
+		}
+		results = append(results, InstalledSkill{
+			Name:  name,
+			Path:  dir,
+			Scope: "global",
+		})
+	}
+	sort.Slice(results, func(i, j int) bool { return results[i].Name < results[j].Name })
+	return results, nil
 }
 
 func (s *Sandbox) LoadInstalledBundle(skill SkillSummary) (SkillBundle, error) {
@@ -203,7 +270,7 @@ func (s *Sandbox) LoadInstalledBundle(skill SkillSummary) (SkillBundle, error) {
 		return SkillBundle{}, err
 	}
 
-	var installed skillsCLIInstalledEntry
+	var installed InstalledSkill
 	found := false
 	for _, entry := range entries {
 		if entry.Name == skill.Name {
@@ -398,6 +465,16 @@ func loadSkillsCLILock(path string) (skillsCLILockFile, error) {
 
 func stripANSI(value string) string {
 	return ansiPattern.ReplaceAllString(value, "")
+}
+
+func extractJSONArray(value string) string {
+	clean := strings.TrimSpace(stripANSI(value))
+	start := strings.Index(clean, "[")
+	end := strings.LastIndex(clean, "]")
+	if start == -1 || end == -1 || end < start {
+		return clean
+	}
+	return clean[start : end+1]
 }
 
 func sourceToGitHubURL(source string) string {

@@ -31,6 +31,38 @@ func cliLogo() string {
 	return renderGradientASCII()
 }
 
+func cliBrandText(text string) string {
+	if strings.EqualFold(os.Getenv("TERM"), "dumb") {
+		return text
+	}
+	if os.Getenv("NO_COLOR") != "" {
+		return text
+	}
+	img, err := decodeLogoImage()
+	if err != nil {
+		return text
+	}
+	gradient := sampleGradient(img, len([]rune(text)))
+	if len(gradient) == 0 {
+		return text
+	}
+	var builder strings.Builder
+	for i, r := range text {
+		if r == ' ' {
+			builder.WriteRune(r)
+			continue
+		}
+		idx := i
+		if idx >= len(gradient) {
+			idx = len(gradient) - 1
+		}
+		builder.WriteString(ansiForeground(gradient[idx]))
+		builder.WriteRune(r)
+	}
+	builder.WriteString("\x1b[0m")
+	return builder.String()
+}
+
 func cliHeader() string {
 	return fmt.Sprintf("skill-organizer v%s", version)
 }

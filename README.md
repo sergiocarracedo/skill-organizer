@@ -235,12 +235,19 @@ skill-organizer skill check-overlap
 - `skill check-overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only and shows only `partial` and `duplicate` overlap groups. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, `--tool <id>` to choose one explicitly, `--min-overlap-type` to include weaker matches, or `--no-ask-to-apply` to skip the follow-up planning prompt.
 - `skill check-overlap --print-prompt` prints the generated analysis prompt without invoking any external CLI. This bypasses tool selection and the one-time cost notice.
 
+Aliases:
+- Root shortcuts: `skill-organizer add`, `skill-organizer delete`, `skill-organizer enable`, `skill-organizer disable`, and `skill-organizer check-updates` map to their `skill ...` counterparts.
+- Skill subcommand aliases: `skill add` also supports `install` and `import`; `skill delete` supports `remove` and `rm`; `skill check-updates` supports `updates` and `upgrade`; `skill enable` supports `on`; `skill disable` supports `off`.
+
 ### Imported Skills
 
 ```bash
 skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder
+skill-organizer add https://github.com/terrylica/cc-skills --skill asciinema-recorder
 skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
+skill-organizer delete thirdparty/asciinema/asciinema-recorder
 skill-organizer skill check-updates
+skill-organizer check-updates
 ```
 
 When `skill add` runs, the CLI prints `Using skills.sh cli tool to add the skills` before invoking `skills.sh`. The imported skill is written directly into the managed source tree, not left behind as an unmanaged target entry.

@@ -39,8 +39,9 @@ func newCheckUpdatesCommand() *cobra.Command {
 	var yes bool
 
 	cmd := &cobra.Command{
-		Use:   "check-updates",
-		Short: "Check imported skills for upstream updates",
+		Use:     "check-updates",
+		Aliases: []string{"updates", "upgrade"},
+		Short:   "Check imported skills for upstream updates",
 		RunE: func(_ *cobra.Command, _ []string) error {
 			configFile, location, err := loadResolvedLocation()
 			if err != nil {

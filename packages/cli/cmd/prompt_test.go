@@ -63,6 +63,32 @@ func TestAutocompleteSuggestionAtCursorUsesTokenBeforeCursor(t *testing.T) {
 	}
 }
 
+func TestAutocompleteSuggestionAtCursorReplacesTokenWhenCursorIsMidLine(t *testing.T) {
+	state := editableInputState{}
+	state.setValue("thirdparty/asc more words")
+	state.cursor = len([]rune("thirdparty/asc"))
+
+	updated := autocompleteSuggestionAtCursor(state, []string{"thirdparty/asciinema", "thirdparty/go"})
+
+	if got := updated.String(); got != "thirdparty/asciinema more words" {
+		t.Fatalf("updated.String() = %q, want %q", got, "thirdparty/asciinema more words")
+	}
+	if updated.cursor != len([]rune("thirdparty/asciinema")) {
+		t.Fatalf("updated.cursor = %d", updated.cursor)
+	}
+}
+
+func TestAutocompleteHintAtCursorUsesTokenBeforeCursor(t *testing.T) {
+	state := editableInputState{}
+	state.setValue("thirdparty/asc more words")
+	state.cursor = len([]rune("thirdparty/asc"))
+
+	hint := autocompleteHintAtCursor(state, []string{"thirdparty/asciinema", "thirdparty/go"})
+	if hint != "thirdparty/asciinema" {
+		t.Fatalf("autocompleteHintAtCursor() = %q, want %q", hint, "thirdparty/asciinema")
+	}
+}
+
 func TestPathTokenBounds(t *testing.T) {
 	start, end := pathTokenBounds("foo bar baz", len([]rune("foo bar")))
 	if start != 4 || end != 7 {

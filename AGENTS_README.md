@@ -146,6 +146,7 @@ Use this command when the user wants to install a skill from a `skills.sh` sourc
 
 ```bash
 skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder
+skill-organizer add https://github.com/terrylica/cc-skills --skill asciinema-recorder
 ```
 
 Behavior:
@@ -160,6 +161,7 @@ Use this command to remove a managed imported skill safely:
 
 ```bash
 skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
+skill-organizer delete thirdparty/asciinema/asciinema-recorder
 ```
 
 The CLI confirms first, then moves the skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` and syncs the project.
@@ -168,9 +170,16 @@ Use this command to review updates for imported skills:
 
 ```bash
 skill-organizer skill check-updates
+skill-organizer check-updates
 ```
 
 The interactive list lets you press `d` to inspect the full folder diff before selecting skills to update.
+
+Alias notes:
+
+1. Keep the canonical `skill-organizer skill ...` commands in docs and automation.
+2. Root shortcuts such as `skill-organizer add` and `skill-organizer delete` are available for convenience.
+3. Local aliases also exist: `skill add` supports `install` and `import`; `skill delete` supports `remove` and `rm`; `skill check-updates` supports `updates` and `upgrade`.
 
 ## Evaluate Skill Overlap
 

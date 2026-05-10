@@ -78,7 +78,7 @@ func promptTextWithSuggestionsBelow(prompt string, defaultValue string, suggesti
 			_, _ = fmt.Fprintln(os.Stdout)
 			return true, nil
 		case keys.Tab:
-			state.applyAutocomplete(cleanSuggestions)
+			state = autocompleteSuggestionAtCursor(state, cleanSuggestions)
 			renderAutocompleteInput(state, cleanSuggestions)
 			return false, nil
 		case keys.Left:
@@ -235,6 +235,21 @@ func autocompleteSuggestionAtCursor(state editableInputState, suggestions []stri
 	return updated
 }
 
+func autocompleteHintAtCursor(state editableInputState, suggestions []string) string {
+	current := state.String()
+	start, _ := pathTokenBounds(current, state.cursor)
+	prefix := strings.TrimSpace(string([]rune(current)[start:state.cursor]))
+	if prefix == "" {
+		return firstSuggestion(suggestions)
+	}
+	for _, suggestion := range suggestions {
+		if strings.HasPrefix(suggestion, prefix) && suggestion != prefix {
+			return suggestion
+		}
+	}
+	return ""
+}
+
 func pathTokenBounds(current string, cursor int) (int, int) {
 	runes := []rune(current)
 	if cursor < 0 {
@@ -258,15 +273,8 @@ func pathTokenBounds(current string, cursor int) (int, int) {
 }
 
 func renderAutocompleteInput(state editableInputState, suggestions []string) {
-	hint := ""
+	hint := autocompleteHintAtCursor(state, suggestions)
 	current := state.String()
-	trimmed := strings.TrimSpace(current)
-	for _, suggestion := range suggestions {
-		if strings.HasPrefix(suggestion, trimmed) && suggestion != trimmed {
-			hint = suggestion
-			break
-		}
-	}
 
 	line := "> " + current
 	if hint != "" {

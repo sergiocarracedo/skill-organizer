@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	maintenancepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/maintenance"
@@ -64,11 +65,22 @@ func init() {
 	rootCmd.AddCommand(newCompletionCommand())
 	rootCmd.AddCommand(newOnboardCommand())
 	rootCmd.AddCommand(newProjectCommand())
-	rootCmd.AddCommand(newSkillCommand())
+	skillCmd := newSkillCommand()
+	rootCmd.AddCommand(skillCmd)
 	rootCmd.AddCommand(newWatchedCommand())
 	rootCmd.AddCommand(newWatchCommand())
 	rootCmd.AddCommand(newServiceCommand())
 	rootCmd.AddCommand(newUpdateCommand())
+
+	for _, child := range skillCmd.Commands() {
+		switch child.Name() {
+		case "add", "delete", "enable", "disable", "check-updates":
+			use := child.Use
+			if fields := strings.Fields(use); len(fields) > 0 {
+				addRootAlias(fields[0], child)
+			}
+		}
+	}
 
 	rootCmd.SetOut(os.Stdout)
 	rootCmd.SetErr(os.Stderr)

@@ -96,3 +96,23 @@ func TestRefreshSkillUpdateCacheWritesPendingEntries(t *testing.T) {
 		}
 	}
 }
+
+func TestExistingSkillNamesIncludesOriginalAndManagedNames(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "thirdparty", "asciinema")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+	content := "---\nname: thirdparty--asciinema\ndescription: test\nmetadata:\n  skill-organizer:\n    original-name: asciinema-recorder\n---\n\n# Test\n"
+	path := filepath.Join(dir, "SKILL.md")
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	items := existingSkillsByName([]skills.Skill{{RelativePath: "thirdparty/asciinema", SkillFile: path}})
+	for _, key := range []string{"asciinema", "asciinema-recorder", "thirdparty--asciinema"} {
+		if _, ok := items[key]; !ok {
+			t.Fatalf("existingSkillNames() missing %q", key)
+		}
+	}
+}

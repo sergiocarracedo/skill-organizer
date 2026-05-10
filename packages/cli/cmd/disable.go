@@ -10,9 +10,10 @@ import (
 
 func newDisableCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "disable <source-path>",
-		Short: "Disable a source skill by source path",
-		Args:  cobra.ExactArgs(1),
+		Use:     "disable <source-path>",
+		Aliases: []string{"off"},
+		Short:   "Disable a source skill by source path",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			configFile, location, err := loadResolvedLocation()
 			if err != nil {
