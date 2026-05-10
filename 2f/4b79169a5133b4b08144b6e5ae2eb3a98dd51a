@@ -1,0 +1,67 @@
+packages/cli/internal/remote/skillscli_test.go
+  s_18bd58fc9e60f0::t_6ab37222d2876b 54-67
+packages/cli/cmd/skill_check_updates_test.go
+  s_18bd58fc9e60f0::t_86097ecc820380 9,42,49-66
+  s_18bd58fc9e60f0::t_c57eb029e5ab45 187-200,202-215,217-230
+  s_18bd58fc9e60f0::t_b611f8312d65b9 11,23,30-41
+  s_18bd58fc9e60f0::t_b21599890d4e6e 4,116-127,129-136,138-148,272-292,294-309,312,315-329
+  s_18bd58fc9e60f0::t_6aa6460fc884e0 149-162,164-171,173-186
+  s_18bd58fc9e60f0::t_060bb185701144 128,137,163,172,201,216,245,260,293,311
+  s_18bd58fc9e60f0::t_96d1e741c44b29 231-244,246-259,261-271
+  s_18bd58fc9e60f0::t_78baa9cc352115 310,313-314,330-336,339-341
+  s_18bd58fc9e60f0::t_b49ed8612a7772 337-338
+  s_18bd58fc9e60f0::t_9599ce0bf0b80a 43-48
+packages/cli/cmd/skill_check_updates.go
+  s_18bd58fc9e60f0::t_85655de59f6660 36-46,48-53,69,80-90,158,161-166,176,180-183,193-197,202,204,207-210,223-226,229-232,236-240
+  s_18bd58fc9e60f0::t_fbe19875443115 423,589-596,617
+  s_18bd58fc9e60f0::t_2f8ebdca5570f0 4,102,284,293-294,669-685
+  s_18bd58fc9e60f0::t_b28c8589951a4c 190,219,257-264
+  s_18bd58fc9e60f0::t_797eb9dae507a2 343,557,615-616
+  s_18bd58fc9e60f0::t_8b37648c797f3f 347
+  s_18bd58fc9e60f0::t_4e49a2570ad72c 635-641,643-646
+  s_18bd58fc9e60f0::t_da8371d6f2819b 73,75,77-79,171-173
+  s_18bd58fc9e60f0::t_72fe63e43be793 350-352,354-356,686-712
+  s_18bd58fc9e60f0::t_e7d1801f7a4d48 74,647-668
+  s_18bd58fc9e60f0::t_fe477002d42b5b 609-614,618-634
+  s_18bd58fc9e60f0::t_5a6d24afb91468 63
+  s_18bd58fc9e60f0::t_04bc598087c678 76,155,168-170,191
+  s_18bd58fc9e60f0::t_bee931c6de852c 205,233-235,241-256
+  s_18bd58fc9e60f0::t_5a1a27751937f0 376
+  s_18bd58fc9e60f0::t_eafc942b291127 13,16,299-300,303,306,312,318,322,389,510-518,520,526-533,542-556,558-588,597-608
+  s_18bd58fc9e60f0::t_804ae61dc9f4c6 272-273,296-298,323,373-375,377-388,390-396,398-402,404-409,411-419,421-422,424,426-480
+  s_18bd58fc9e60f0::t_882c4aa8416ddd 642
+  s_18bd58fc9e60f0::t_b393b398a33e0d 179
+  s_18bd58fc9e60f0::t_9a611c1c88cc66 534-541
+packages/cli/cmd/editable_path_selector_test.go
+  s_18bd58fc9e60f0::t_aff25d6ffc8eb9 28
+packages/cli/cmd/editable_path_selector.go
+  s_18bd58fc9e60f0::t_af3289b7b36d05 14,68,70,74,403-408
+packages/cli/cmd/skill_add.go
+  s_18bd58fc9e60f0::t_d0b4b5b6ebb3b9 28-37
+  s_18bd58fc9e60f0::t_d9d2fd66db0af3 255
+packages/cli/go.sum
+  ai_agent 55
+packages/cli/internal/remote/skillscli.go
+  s_18bd58fc9e60f0::t_d37b44f69e9fd6 4,108-112,169,404,418
+  s_18bd58fc9e60f0::t_6ab37222d2876b 436-437
+packages/cli/go.mod
+  s_18bd58fc9e60f0::t_d6b2aa94d4a041 23
+AGENTS.md
+  s_18bd58fc9e60f0::t_e2c4daec2d37a2 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "2f4b79169a5133b4b08144b6e5ae2eb3a98dd51a",
+  "prompts": {},
+  "sessions": {
+    "s_18bd58fc9e60f0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1f1983b66ffeilhuzHsh3XzKUH",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
