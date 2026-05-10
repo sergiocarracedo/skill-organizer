@@ -48,7 +48,7 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
     files:
-      - ../README.md
+      - README.md
 
 checksum:
   name_template: checksums.txt
