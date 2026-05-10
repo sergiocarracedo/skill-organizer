@@ -1,0 +1,137 @@
+.github/workflows/cli-e2e.yml
+  s_4ed5196a097e03::t_5c51290ec34abe 1-74
+packages/cli/internal/selfupdate/selfupdate_test.go
+  s_4ed5196a097e03::t_26a06697bba4ff 18
+package.json
+  s_4ed5196a097e03::t_cc00ae94c207e7 19-21
+  s_4ed5196a097e03::t_f7b82243327140 18,23-25
+  s_4ed5196a097e03::t_52d7bd23617c66 22
+  s_4ed5196a097e03::t_c89438e4364124 15-17
+lefthook.yml
+  s_4ed5196a097e03::t_4402318ab7a986 1-3,10
+  s_4ed5196a097e03::t_0d2f699f72c6e7 4-9
+packages/cli/internal/watch/watch.go
+  s_18bd58fc9e60f0::t_c63a7d35008832 4,16-17,21-22,105-152,154-234,236
+packages/cli/packages/npm/scripts/postinstall.js
+  s_4ed5196a097e03::t_78f384240d5190 28-32,77-98
+  s_4ed5196a097e03::t_eb7ecb7bf60ed7 105-110,112
+  s_4ed5196a097e03::t_26a06697bba4ff 13-14
+packages/cli/cmd/skill_delete.go
+  s_18bd58fc9e60f0::t_1158026bf78a0f 5-8,15,31,52,56,59-66,76-83,85-92,100-102,104,106-113,120,123-154
+  s_18bd58fc9e60f0::t_fae79512498864 32,37,155-169
+  s_18bd58fc9e60f0::t_7469bfb2fdcd8d 20-28,47,67,84,95,103,105
+  s_18bd58fc9e60f0::t_f5299fd0ea468c 35,38,40-41,44
+  s_18bd58fc9e60f0::t_48dc26488edee0 39,42-43
+  s_18bd58fc9e60f0::t_99d2c262282608 45
+packages/web/src/content/docs/reference/update.mdx
+  s_4ed5196a097e03::t_5476542a5e398c 1-30
+.github/workflows/auto-merge-release-please.yml
+  s_4ed5196a097e03::t_78f384240d5190 22-58,60
+packages/cli/cmd/skill_add.go
+  s_4ed5196a097e03::t_1d4fe14b58818c 23,102-103
+scripts/release-common.sh
+  s_4ed5196a097e03::t_415549658d68e1 100-104
+docs/releasing.md
+  s_4ed5196a097e03::t_7fdda55551bf17 95-99,121-125,144-148,158,165-168
+  s_4ed5196a097e03::t_26a06697bba4ff 192-193
+packages/cli/go.mod
+  s_4ed5196a097e03::t_c680427b3e732c 19
+packages/cli/internal/config/cache.go
+  s_18bd58fc9e60f0::t_36bbbfdae3d044 21,56-63,89-105,165-205
+  s_18bd58fc9e60f0::t_b461f369533959 14-18,22-25,38-44
+packages/cli/cmd/skill_add_test.go
+  s_4ed5196a097e03::t_1d4fe14b58818c 38,41,131,269
+packages/cli/cmd/root.go
+  s_18bd58fc9e60f0::t_7fefbd3180823c 11,62-68
+  s_18bd58fc9e60f0::t_9e8d33341e7cb1 35-39,41-43,45-58
+  s_18bd58fc9e60f0::t_5e14d02c623da2 40,44
+  s_18bd58fc9e60f0::t_b461f369533959 14
+packages/cli/cmd/skill_check_updates_test.go
+  s_18bd58fc9e60f0::t_a7e70ad3933685 349-352,364,369,371
+  s_18bd58fc9e60f0::t_060bb185701144 4,85,104,131,140,166,175,204,219,248,263,296,314
+packages/web/src/content/docs/reference/watched.mdx
+  s_18bd58fc9e60f0::t_24ea3b69c6455e 24
+packages/web/src/data/commands.ts
+  s_4ed5196a097e03::t_5476542a5e398c 153-165
+packages/cli/packages/npm/README.md
+  s_4ed5196a097e03::t_26a06697bba4ff 22
+packages/cli/cmd/aliases.go
+  s_18bd58fc9e60f0::t_f5299fd0ea468c 3-7,11,30-37
+  s_18bd58fc9e60f0::t_d0376decbb7036 13-14
+packages/web/src/content/docs/reference/about.mdx
+  s_4ed5196a097e03::t_5476542a5e398c 5
+packages/cli/cmd/watched.go
+  s_18bd58fc9e60f0::t_24ea3b69c6455e 51-55,100-104
+  s_18bd58fc9e60f0::t_c0f7d72182435c 56,105
+  s_18bd58fc9e60f0::t_3fbde3bede924e 6
+packages/cli/internal/maintenance/maintenance.go
+  s_18bd58fc9e60f0::t_1f20de2281adb9 16,31
+  s_18bd58fc9e60f0::t_4bc223ad4b6aa7 14,19,23,27-30,32-37,40-46,88-94
+packages/cli/e2e_test.go
+  s_4ed5196a097e03::t_4c487dc2d0aa35 430,473-476
+  s_4ed5196a097e03::t_1d4fe14b58818c 171
+  s_4ed5196a097e03::t_07069d39c8ae37 25-36,38-42,50-52,54-56,107-108,110,122-123,125,181-182,184,209-220,222-224,360
+  s_4ed5196a097e03::t_cf419a05cbbcd0 7,63,67-68,114
+  s_4ed5196a097e03::t_68201516167068 1-6,8-24,37,43-49,53,57-62,69-74,76-106,109,111-113,119-121,124,126-129,133-147,151-165,167,169-170,172,174-176,178-180,183,185-208,221,225-231,233-262,264-338,340-359,361-371,386-389,391-402,404-405,411-412,422-425,427-428,472,477-606
+  s_4ed5196a097e03::t_a4f6e6f31bc4cb 166,168,372-385
+  s_4ed5196a097e03::t_acf464e5bdd1dd 64-66,442-449,455-459,463
+  s_4ed5196a097e03::t_9632f445ed1160 232,263,339
+  s_4ed5196a097e03::t_12e032c7b99d12 117,130,132,148-149
+  s_4ed5196a097e03::t_1d3faa4e4b59b0 115-116,118,131,150,173,177
+  s_4ed5196a097e03::t_d6474c82a20d7b 75
+  s_4ed5196a097e03::t_d68181c4ffd47a 390,403,406-410,413,419-421,426,429,431-441,450-454,460-462,464-471
+  s_4ed5196a097e03::t_872e8394fa1794 414-418
+README.md
+  s_18bd58fc9e60f0::t_48dc26488edee0 232,249
+  s_18bd58fc9e60f0::t_3fbde3bede924e 404-405
+  s_18bd58fc9e60f0::t_24ea3b69c6455e 222,409
+packages/cli/internal/service/service.go
+  s_18bd58fc9e60f0::t_378c330b0dc27b 283-290
+packages/web/src/content/docs/reference/skill.mdx
+  s_18bd58fc9e60f0::t_24ea3b69c6455e 19
+  s_18bd58fc9e60f0::t_48dc26488edee0 20,45-46,76
+  s_4ed5196a097e03::t_1a9f67c1551549 31-32,39-40,51-53,59,94,96
+packages/web/src/content/docs/guides/watch-mode-and-service.mdx
+  s_18bd58fc9e60f0::t_3fbde3bede924e 21-22
+packages/cli/internal/selfupdate/selfupdate.go
+  s_4ed5196a097e03::t_26a06697bba4ff 49-51,74-78,201,280-282,305-307
+packages/cli/cmd/skill_check_updates.go
+  s_18bd58fc9e60f0::t_328d9e8cc98ff8 49,718,722,739-745
+  s_18bd58fc9e60f0::t_01ba1fb79a2c79 136,140
+packages/cli/cmd/skill_delete_test.go
+  s_18bd58fc9e60f0::t_d95be415698b1c 8
+  s_18bd58fc9e60f0::t_55725f69d6f9cd 1-7,9,11-58,66-67,69-70,72-73,83,90-92,101-112
+  s_18bd58fc9e60f0::t_a9d9e6e115f947 10,59-65,68,71,74-82,84-89,93-100
+packages/cli/internal/config/registry_roundtrip_test.go
+  s_18bd58fc9e60f0::t_6c65d251df3341 157
+  s_18bd58fc9e60f0::t_3ae403fd14ff43 126-156,158-162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "89e0f218231bb5ff20621cb74af215ee9cc797a7",
+  "prompts": {},
+  "humans": {
+    "h_f90ee31b03fc41": {
+      "author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  },
+  "sessions": {
+    "s_18bd58fc9e60f0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1f1983b66ffeilhuzHsh3XzKUH",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_4ed5196a097e03": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1ecd06cc6ffeBnxxM5uT19PgNZ",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
