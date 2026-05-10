@@ -1,0 +1,19 @@
+packages/cli/e2e_test.go
+  s_4ed5196a097e03::t_58d91161952f02 245,249,340-341,344,348-354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "66bb5a523fa173ea5bfe142c640bc2533a0626e1",
+  "prompts": {},
+  "sessions": {
+    "s_4ed5196a097e03": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1ecd06cc6ffeBnxxM5uT19PgNZ",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
