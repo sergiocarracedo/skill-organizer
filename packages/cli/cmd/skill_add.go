@@ -25,16 +25,16 @@ type skillAddSandbox interface {
 }
 
 var (
-	skillAddLoadResolvedLocation          = loadResolvedLocation
-	detectSkillsCLIFunc                   = remotepkg.DetectSkillsCLI
-	newSkillAddSandbox                    = func() (skillAddSandbox, error) { return remotepkg.NewSandbox() }
-	skillAddSourceFolderSuggestions       = sourceFolderSuggestions
-	chooseSkillAddTargets                 = selectImportedSkillTargets
-	confirmSkillAddReinstall              = confirm
-	moveSkillToBackup                     = backuppkg.MoveSkill
-	latestSkillBundleModTime              = remotepkg.LatestFileModTime
-	rewriteManagedSkillMetadata           = skills.RewriteManagedFieldsWithMetadata
-	runSkillAddSync                       = syncpkg.Run
+	skillAddLoadResolvedLocation    = loadResolvedLocation
+	detectSkillsCLIFunc             = remotepkg.DetectSkillsCLI
+	newSkillAddSandbox              = func() (skillAddSandbox, error) { return remotepkg.NewSandbox() }
+	skillAddSourceFolderSuggestions = sourceFolderSuggestions
+	chooseSkillAddTargets           = selectImportedSkillTargets
+	confirmSkillAddReinstall        = confirm
+	moveSkillToBackup               = backuppkg.MoveSkill
+	latestSkillBundleModTime        = remotepkg.LatestFileModTime
+	rewriteManagedSkillMetadata     = skills.RewriteManagedFieldsWithMetadata
+	runSkillAddSync                 = syncpkg.Run
 )
 
 func newSkillAddCommand() *cobra.Command {
@@ -252,7 +252,7 @@ func selectImportedSkillTargets(installed []remotepkg.InstalledSkill, suggestion
 		BasePathLabel:  "skills-organized/",
 		ShowToggleAll:  false,
 		ShowCheckboxes: false,
-		HelpNavigate:   "🡩/🡫: Move, 🡪: Edit folder, Enter: Continue",
+		HelpNavigate:   "🡹/🡻: Move, 🡺: Edit folder, Enter: Continue",
 	})
 	if err := selector.Run(); err != nil {
 		return nil, err

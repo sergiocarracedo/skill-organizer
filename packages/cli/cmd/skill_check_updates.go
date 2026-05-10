@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sort"
@@ -9,8 +10,10 @@ import (
 
 	"atomicgo.dev/keyboard"
 	"atomicgo.dev/keyboard/keys"
+	"github.com/pmezard/go-difflib/difflib"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	backuppkg "github.com/sergiocarracedo/skill-organizer/cli/internal/backup"
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
@@ -30,9 +33,24 @@ type skillUpdateCandidate struct {
 	InstalledFiles remotepkg.SkillBundle
 }
 
+type skillUpdateCheckFailure struct {
+	RelativePath string
+	Reason       string
+}
+
+type skillUpdateScanResult struct {
+	Candidates []skillUpdateCandidate
+	Checked    int
+	Failures   []skillUpdateCheckFailure
+}
+
 var (
-	fetchSkillBundleFunc = remotepkg.FetchSkillBundle
-	cachePathFunc        = configpkg.CachePath
+	fetchSkillBundleFunc     = remotepkg.FetchSkillBundle
+	cachePathFunc            = configpkg.CachePath
+	startCheckUpdatesSpinner = startDefaultSpinner
+	printCheckUpdatesWarning = func(format string, args ...any) {
+		pterm.Warning.Printfln(format, args...)
+	}
 )
 
 func newCheckUpdatesCommand() *cobra.Command {
@@ -42,16 +60,34 @@ func newCheckUpdatesCommand() *cobra.Command {
 		Use:     "check-updates",
 		Aliases: []string{"updates", "upgrade"},
 		Short:   "Check imported skills for upstream updates",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			configFile, location, err := loadResolvedLocation()
 			if err != nil {
 				return err
 			}
 
-			candidates, err := collectUpdateCandidates(location)
+			spinner, err := startCheckUpdatesSpinner("Checking for skill updates (checked 0/0). Found: 0")
 			if err != nil {
 				return err
 			}
+			progressStep := func(prefix string, checked int, total int, found int, relativePath string) {
+				spinner.UpdateText(renderCheckUpdatesProgressText(prefix, checked, total, found, relativePath))
+			}
+			scan, err := collectUpdateCandidates(cmd.Context(), location, func(checked int, total int, found int) {
+				progressStep("checked", checked, total, found, "")
+			}, func(checked int, total int, found int, relativePath string) {
+				progressStep("checking", checked+1, total, found, relativePath)
+			})
+			if err != nil {
+				spinner.Fail("Checking for skill updates failed")
+				return err
+			}
+			spinner.Success(fmt.Sprintf("Checked %d skills. Found: %d", scan.Checked, len(scan.Candidates)))
+			for _, failure := range scan.Failures {
+				printCheckUpdatesWarning("Could not check updates for %s: %s", failure.RelativePath, failure.Reason)
+			}
+
+			candidates := scan.Candidates
 			if len(candidates) == 0 {
 				pterm.Info.Println("No skill updates found")
 				if err := refreshSkillUpdateCache(nil); err != nil {
@@ -63,7 +99,7 @@ func newCheckUpdatesCommand() *cobra.Command {
 			selected := candidates
 			if !yes {
 				selector := newSkillUpdateSelector(candidates)
-				if err := selector.Run(); err != nil {
+				if err := selector.Run(cmd.Context()); err != nil {
 					return err
 				}
 				selected = selector.Selected()
@@ -116,36 +152,62 @@ func newCheckUpdatesCommand() *cobra.Command {
 	return cmd
 }
 
-func collectUpdateCandidates(location configpkg.Location) ([]skillUpdateCandidate, error) {
+func collectUpdateCandidates(ctx context.Context, location configpkg.Location, progress func(checked int, total int, found int), active func(checked int, total int, found int, relativePath string)) (skillUpdateScanResult, error) {
 	scanned, err := skills.ScanSource(location.Source)
 	if err != nil {
-		return nil, err
+		return skillUpdateScanResult{}, err
 	}
 	results := make([]skillUpdateCandidate, 0)
+	failures := make([]skillUpdateCheckFailure, 0)
+	total := len(scanned)
+	checked := 0
+	if progress != nil {
+		progress(0, total, 0)
+	}
 	for _, skill := range scanned {
+		if err := ctx.Err(); err != nil {
+			return skillUpdateScanResult{}, err
+		}
+		if active != nil {
+			active(checked, total, len(results), skill.RelativePath)
+		}
 		doc, err := skills.LoadDocument(skill.SkillFile)
 		if err != nil {
-			return nil, err
+			return skillUpdateScanResult{}, err
 		}
 		metadata := doc.ManagedMetadata()
-		if strings.TrimSpace(metadata.Source) == "" || strings.TrimSpace(metadata.RepoSkillPath) == "" {
+		if strings.TrimSpace(metadata.Source) == "" {
+			checked++
+			if progress != nil {
+				progress(checked, total, len(results))
+			}
 			continue
 		}
 		upstreamName := strings.TrimSpace(metadata.OriginalName)
 		if upstreamName == "" {
 			upstreamName = strings.TrimSpace(doc.Name())
 		}
-		bundle, err := fetchSkillBundleFunc(metadata.Source, upstreamName)
+		normalizedSource := normalizeSkillUpdateSource(metadata.Source)
+		bundle, err := fetchSkillBundleFunc(ctx, normalizedSource, upstreamName)
 		if err != nil {
+			failures = append(failures, skillUpdateCheckFailure{RelativePath: skill.RelativePath, Reason: err.Error()})
+			checked++
+			if progress != nil {
+				progress(checked, total, len(results))
+			}
 			continue
 		}
 		installedBundle, err := remotepkg.LoadBundleFromDir(skill.Dir)
 		if err != nil {
-			return nil, err
+			return skillUpdateScanResult{}, err
 		}
-		installed := strings.TrimSpace(metadata.InstalledVersion)
-		latest := remotepkg.ResolveVersion(bundle.Skill, bundle.Files)
+		installed := resolveInstalledSkillVersion(metadata, installedBundle)
+		latest := resolveLatestSkillVersion(bundle)
 		if installed == "" || latest == "" || installed == latest {
+			checked++
+			if progress != nil {
+				progress(checked, total, len(results))
+			}
 			continue
 		}
 		results = append(results, skillUpdateCandidate{
@@ -154,13 +216,52 @@ func collectUpdateCandidates(location configpkg.Location) ([]skillUpdateCandidat
 			InstalledPath:  skill.Dir,
 			Installed:      installed,
 			Latest:         latest,
-			Source:         metadata.Source,
+			Source:         normalizedSource,
 			Bundle:         bundle,
 			InstalledFiles: installedBundle,
 		})
+		checked++
+		if progress != nil {
+			progress(checked, total, len(results))
+		}
 	}
 	sort.Slice(results, func(i, j int) bool { return results[i].Skill.RelativePath < results[j].Skill.RelativePath })
-	return results, nil
+	return skillUpdateScanResult{Candidates: results, Checked: checked, Failures: failures}, nil
+}
+
+func resolveInstalledSkillVersion(metadata skills.ManagedMetadata, installedBundle remotepkg.SkillBundle) string {
+	if version := strings.TrimSpace(remotepkg.SkillVersionFromSkillFile(skillFileContents(installedBundle.Files))); version != "" {
+		return version
+	}
+	installed := strings.TrimSpace(metadata.InstalledVersion)
+	if installed != "" {
+		return installed
+	}
+	return strings.TrimSpace(remotepkg.ResolveVersion(installedBundle.Skill, installedBundle.Files))
+}
+
+func resolveLatestSkillVersion(bundle remotepkg.SkillBundle) string {
+	if version := strings.TrimSpace(remotepkg.SkillVersionFromSkillFile(skillFileContents(bundle.Files))); version != "" {
+		return version
+	}
+	return strings.TrimSpace(remotepkg.ResolveVersion(bundle.Skill, bundle.Files))
+}
+
+func skillFileContents(files []remotepkg.File) string {
+	for _, file := range files {
+		if file.Path == "SKILL.md" {
+			return file.Contents
+		}
+	}
+	return ""
+}
+
+func normalizeSkillUpdateSource(source string) string {
+	trimmed := strings.TrimSpace(source)
+	trimmed = strings.TrimSuffix(trimmed, ".git")
+	trimmed = strings.TrimPrefix(trimmed, "https://github.com/")
+	trimmed = strings.TrimPrefix(trimmed, "http://github.com/")
+	return strings.Trim(trimmed, "/")
 }
 
 type skillUpdateSelector struct {
@@ -168,6 +269,8 @@ type skillUpdateSelector struct {
 	selected        map[int]bool
 	active          int
 	lastRenderLines int
+	diffActive      bool
+	diffOffset      int
 }
 
 func newSkillUpdateSelector(items []skillUpdateCandidate) *skillUpdateSelector {
@@ -178,7 +281,7 @@ func newSkillUpdateSelector(items []skillUpdateCandidate) *skillUpdateSelector {
 	return &skillUpdateSelector{items: items, selected: selected}
 }
 
-func (s *skillUpdateSelector) Run() error {
+func (s *skillUpdateSelector) Run(ctx context.Context) error {
 	defer showTerminalCursor()
 	if _, err := fmt.Fprintln(os.Stdout, "Select skills to update. Press d to inspect the diff for the highlighted skill."); err != nil {
 		return err
@@ -187,37 +290,37 @@ func (s *skillUpdateSelector) Run() error {
 		return err
 	}
 	s.render()
+	stopInterruptForwarding := forwardContextInterrupt(ctx)
+	defer stopInterruptForwarding()
 	return keyboard.Listen(func(key keys.Key) (bool, error) {
-		switch key.Code {
-		case keys.CtrlC:
+		if s.diffActive {
+			return s.handleDiffKey(key)
+		}
+		switch {
+		case isInterruptKey(key):
 			_, _ = fmt.Fprintln(os.Stdout)
 			return true, fmt.Errorf("interrupted")
-		case keys.Enter:
+		case isConfirmKey(key):
 			_, _ = fmt.Fprintln(os.Stdout)
 			return true, nil
-		case keys.Up:
+		case isUpKey(key):
 			if s.active > 0 {
 				s.active--
 				s.render()
 			}
 			return false, nil
-		case keys.Down:
+		case isDownKey(key):
 			if s.active < len(s.items)-1 {
 				s.active++
 				s.render()
 			}
 			return false, nil
-		case keys.Space:
+		case isToggleKey(key):
 			s.selected[s.active] = !s.selected[s.active]
 			s.render()
 			return false, nil
-		case keys.RuneKey:
-			if len(key.Runes) == 1 && (key.Runes[0] == 'd' || key.Runes[0] == 'D') {
-				if err := s.showDiff(); err != nil {
-					return false, err
-				}
-				s.render()
-			}
+		case isOpenDiffKey(key):
+			s.openDiff()
 			return false, nil
 		default:
 			return false, nil
@@ -237,15 +340,20 @@ func (s *skillUpdateSelector) Selected() []skillUpdateCandidate {
 
 func (s *skillUpdateSelector) render() {
 	hideTerminalCursor()
-	lines := []string{"Space: Toggle, Up/Down: Move, d: Diff, Enter: Continue"}
+	lines := []string{checkUpdatesHelpLine("Space: Toggle, 🡹/🡻: Move, d: Diff, Enter: Continue, Ctrl+C: Abort")}
 	for i, item := range s.items {
 		prefix := "  "
 		if i == s.active {
-			prefix = "> "
+			prefix = activeSelectorPrefix
 		}
 		marker := styledSelectionMarker(s.selected[i])
-		lines = append(lines, fmt.Sprintf("%s%s %s [%s] -> [%s] [%s]", prefix, marker, item.Skill.RelativePath, item.Installed, item.Latest, item.Source))
+		line := fmt.Sprintf("%s%s %s [%s] -> [%s]", prefix, marker, item.Skill.RelativePath, displayVersion(item.Installed), displayVersion(item.Latest))
+		if updatedAt := displayUpdateDate(item.Bundle.Skill.VersionDate); updatedAt != "" {
+			line += " [updated " + updatedAt + "]"
 		}
+		line += " [" + item.Source + "]"
+		lines = append(lines, line)
+	}
 	if s.lastRenderLines > 0 {
 		fmt.Printf("\033[%dA", s.lastRenderLines)
 	}
@@ -262,51 +370,114 @@ func (s *skillUpdateSelector) render() {
 	s.lastRenderLines = len(lines)
 }
 
-func (s *skillUpdateSelector) showDiff() error {
-	showTerminalCursor()
-	defer hideTerminalCursor()
+func (s *skillUpdateSelector) openDiff() {
+	s.diffActive = true
+	s.diffOffset = 0
+	enterAlternateScreen()
+	s.renderDiff()
+}
+
+func (s *skillUpdateSelector) closeDiff() {
+	if !s.diffActive {
+		return
+	}
+	s.diffActive = false
+	s.diffOffset = 0
+	exitAlternateScreen()
+	s.render()
+}
+
+func (s *skillUpdateSelector) handleDiffKey(key keys.Key) (bool, error) {
+	lines := s.diffLines()
+	switch {
+	case isUpKey(key):
+		if s.diffOffset > 0 {
+			s.diffOffset--
+			s.renderDiff()
+		}
+		return false, nil
+	case isDownKey(key):
+		if s.diffOffset+diffContentHeight() < len(lines) {
+			s.diffOffset++
+			s.renderDiff()
+		}
+		return false, nil
+	case isPageUpKey(key):
+		if s.diffOffset > 0 {
+			s.diffOffset -= diffContentHeight()
+			if s.diffOffset < 0 {
+				s.diffOffset = 0
+			}
+			s.renderDiff()
+		}
+		return false, nil
+	case isPageDownKey(key):
+		if s.diffOffset+diffContentHeight() < len(lines) {
+			s.diffOffset += diffContentHeight()
+			maxOffset := len(lines) - diffContentHeight()
+			if maxOffset < 0 {
+				maxOffset = 0
+			}
+			if s.diffOffset > maxOffset {
+				s.diffOffset = maxOffset
+			}
+			s.renderDiff()
+		}
+		return false, nil
+	case isBackKey(key):
+		s.closeDiff()
+		return false, nil
+	case isInterruptKey(key):
+		s.closeDiff()
+		_, _ = fmt.Fprintln(os.Stdout)
+		return true, fmt.Errorf("interrupted")
+	default:
+		return false, nil
+	}
+}
+
+func (s *skillUpdateSelector) diffLines() []string {
 	item := s.items[s.active]
 	lines := diffLines(item.InstalledFiles.Files, item.Bundle.Files)
 	if len(lines) == 0 {
-		lines = []string{"No textual diff available."}
+		return []string{"No textual diff available."}
 	}
-	offset := 0
-	render := func() {
-		fmt.Print("\r\033[J")
-		fmt.Printf("Diff: %s [%s -> %s]\n", item.Skill.RelativePath, item.Installed, item.Latest)
-		fmt.Println("Up/Down: Scroll, Esc/Enter: Back")
-		max := offset + 20
-		if max > len(lines) {
-			max = len(lines)
-		}
-		for _, line := range lines[offset:max] {
-			fmt.Println(line)
-		}
+	return lines
+}
+
+func (s *skillUpdateSelector) renderDiff() {
+	hideTerminalCursor()
+	item := s.items[s.active]
+	lines := s.diffLines()
+	height := diffViewportHeight()
+	contentHeight := height - 2
+	if contentHeight < 1 {
+		contentHeight = 1
 	}
-	render()
-	return keyboard.Listen(func(key keys.Key) (bool, error) {
-		switch key.Code {
-		case keys.Up:
-			if offset > 0 {
-				offset--
-				render()
-			}
-			return false, nil
-		case keys.Down:
-			if offset+20 < len(lines) {
-				offset++
-				render()
-			}
-			return false, nil
-		case keys.Enter, keys.Escape:
-			fmt.Print("\r\033[J")
-			return true, nil
-		case keys.CtrlC:
-			return true, fmt.Errorf("interrupted")
-		default:
-			return false, nil
-		}
-	})
+	maxOffset := len(lines) - contentHeight
+	if maxOffset < 0 {
+		maxOffset = 0
+	}
+	if s.diffOffset > maxOffset {
+		s.diffOffset = maxOffset
+	}
+	max := s.diffOffset + contentHeight
+	if max > len(lines) {
+		max = len(lines)
+	}
+
+	fmt.Print("\033[H\033[2J")
+	fmt.Println(diffHeaderLine(item))
+	shown := 0
+	for _, line := range lines[s.diffOffset:max] {
+		fmt.Println(colorizeDiffLine(line))
+		shown++
+	}
+	for shown < contentHeight {
+		fmt.Println()
+		shown++
+	}
+	fmt.Print(diffFooterLine())
 }
 
 func diffLines(oldFiles []remotepkg.File, newFiles []remotepkg.File) []string {
@@ -336,21 +507,209 @@ func diffLines(oldFiles []remotepkg.File, newFiles []remotepkg.File) []string {
 		if oldOK && newOK && oldContent == newContent {
 			continue
 		}
-		lines = append(lines, "--- "+path)
-		lines = append(lines, "+++ "+path)
-		if oldOK {
-			for _, line := range strings.Split(strings.TrimSuffix(oldContent, "\n"), "\n") {
-				lines = append(lines, "- "+line)
-			}
+		text, err := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
+			A:        difflib.SplitLines(oldContent),
+			B:        difflib.SplitLines(newContent),
+			FromFile: "a/" + path,
+			ToFile:   "b/" + path,
+			Context:  3,
+		})
+		if err != nil {
+			continue
 		}
-		if newOK {
-			for _, line := range strings.Split(strings.TrimSuffix(newContent, "\n"), "\n") {
-				lines = append(lines, "+ "+line)
-			}
-		}
+		lines = append(lines, strings.Split(strings.TrimSuffix(text, "\n"), "\n")...)
 		lines = append(lines, "")
 	}
 	return lines
+}
+
+func diffViewportHeight() int {
+	_, height, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil || height <= 0 {
+		return 24
+	}
+	return height
+}
+
+func terminalWidth() int {
+	width, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil || width <= 0 {
+		return statusLineWidthFallback
+	}
+	return width
+}
+
+func diffContentHeight() int {
+	height := diffViewportHeight() - 2
+	if height < 1 {
+		return 1
+	}
+	return height
+}
+
+func diffHeaderLine(item skillUpdateCandidate) string {
+	return pterm.NewStyle(pterm.Bold, pterm.FgLightWhite).Sprint(
+		fmt.Sprintf("Diff: %s [%s -> %s]", item.Skill.RelativePath, displayVersion(item.Installed), displayVersion(item.Latest)),
+	)
+}
+
+func diffFooterLine() string {
+	return pterm.NewStyle(pterm.BgDarkGray, pterm.FgLightWhite, pterm.Bold).Sprint(" " + checkUpdatesHelpLine("Esc: Back  🡹/🡻: Scroll  PgUp/PgDown: Page  Ctrl+C: Abort") + " ")
+}
+
+func colorizeDiffLine(line string) string {
+	switch {
+	case strings.HasPrefix(line, "@@"):
+		return pterm.NewStyle(pterm.FgYellow, pterm.Bold).Sprint(line)
+	case strings.HasPrefix(line, "+++") || strings.HasPrefix(line, "---"):
+		return pterm.NewStyle(pterm.FgCyan, pterm.Bold).Sprint(line)
+	case strings.HasPrefix(line, "+"):
+		return pterm.NewStyle(pterm.FgGreen).Sprint(line)
+	case strings.HasPrefix(line, "-"):
+		return pterm.NewStyle(pterm.FgRed).Sprint(line)
+	default:
+		return line
+	}
+}
+
+func isInterruptKey(key keys.Key) bool {
+	return key.Code == keys.CtrlC || key.Code == keys.Break || key.String() == "ctrl+c"
+}
+
+func isConfirmKey(key keys.Key) bool {
+	return key.Code == keys.Enter
+}
+
+func isUpKey(key keys.Key) bool {
+	return key.Code == keys.Up
+}
+
+func isDownKey(key keys.Key) bool {
+	return key.Code == keys.Down
+}
+
+func isPageUpKey(key keys.Key) bool {
+	return key.Code == keys.PgUp
+}
+
+func isPageDownKey(key keys.Key) bool {
+	return key.Code == keys.PgDown
+}
+
+func isToggleKey(key keys.Key) bool {
+	return key.Code == keys.Space || (key.Code == keys.RuneKey && len(key.Runes) == 1 && key.Runes[0] == ' ')
+}
+
+func isOpenDiffKey(key keys.Key) bool {
+	return key.Code == keys.RuneKey && len(key.Runes) == 1 && (key.Runes[0] == 'd' || key.Runes[0] == 'D')
+}
+
+func isBackKey(key keys.Key) bool {
+	return key.Code == keys.Escape || key.Code == keys.Esc
+}
+
+func checkUpdatesHelpLine(text string) string {
+	baseStyle := pterm.NewStyle(pterm.FgDarkGray)
+	keyStyle := pterm.NewStyle(pterm.FgYellow, pterm.Bold)
+	replacer := strings.NewReplacer(
+		"🡹/🡻", keyStyle.Sprint("🡹/🡻"),
+		"🡸/🡺", keyStyle.Sprint("🡸/🡺"),
+		"PgUp/PgDown", keyStyle.Sprint("PgUp/PgDown"),
+		"Space", keyStyle.Sprint("Space"),
+		"Enter", keyStyle.Sprint("Enter"),
+		"Esc", keyStyle.Sprint("Esc"),
+		"Ctrl+C", keyStyle.Sprint("Ctrl+C"),
+		"Tab", keyStyle.Sprint("Tab"),
+		"Home/End", keyStyle.Sprint("Home/End"),
+		"d", keyStyle.Sprint("d"),
+	)
+	return replacer.Replace(baseStyle.Sprint(text))
+}
+
+func enterAlternateScreen() {
+	fmt.Print("\033[?1049h")
+}
+
+func exitAlternateScreen() {
+	fmt.Print("\033[?1049l")
+}
+
+func styledProgressState(value string) string {
+	return pterm.NewStyle(pterm.FgMagenta, pterm.Bold).Sprint(value)
+}
+
+func styledProgressCount(value int) string {
+	return pterm.NewStyle(pterm.FgLightGreen, pterm.Bold).Sprint(fmt.Sprintf("%d", value))
+}
+
+func styledProgressPath(value string) string {
+	return pterm.NewStyle(pterm.FgLightMagenta).Sprint(value)
+}
+
+func renderCheckUpdatesProgressText(prefix string, checked int, total int, found int, relativePath string) string {
+	baseText := fmt.Sprintf("Checking for skill updates (%s %d/%d). Found: %d", prefix, checked, total, found)
+	message := fmt.Sprintf("Checking for skill updates (%s %d/%d). Found: %s", styledProgressState(prefix), checked, total, styledProgressCount(found))
+
+	path := strings.Join(strings.Fields(strings.TrimSpace(relativePath)), " ")
+	if path == "" {
+		return message
+	}
+
+	maxWidth := terminalWidth() - 12
+	if maxWidth < 20 {
+		maxWidth = 20
+	}
+	prefixWidth := visibleRuneWidth(baseText + " - ")
+	availablePathWidth := maxWidth - prefixWidth
+	if availablePathWidth <= 0 {
+		return message
+	}
+
+	return message + " - " + styledProgressPath(limitSpinnerText(path, availablePathWidth))
+}
+
+func forwardContextInterrupt(ctx context.Context) func() {
+	if ctx == nil {
+		return func() {}
+	}
+	stopped := make(chan struct{})
+	go func() {
+		select {
+		case <-ctx.Done():
+			_ = keyboard.SimulateKeyPress(keys.CtrlC)
+		case <-stopped:
+		}
+	}()
+	return func() {
+		close(stopped)
+	}
+}
+
+func displayVersion(value string) string {
+	trimmed := strings.TrimSpace(value)
+	if isHexHash(trimmed) && len(trimmed) > 7 {
+		return trimmed[:7]
+	}
+	return trimmed
+}
+
+func displayUpdateDate(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+	return value.UTC().Format("2006-01-02")
+}
+
+func isHexHash(value string) bool {
+	if len(value) < 8 {
+		return false
+	}
+	for _, r := range value {
+		if (r < '0' || r > '9') && (r < 'a' || r > 'f') && (r < 'A' || r > 'F') {
+			return false
+		}
+	}
+	return true
 }
 
 func refreshSkillUpdateCache(candidates []skillUpdateCandidate) error {

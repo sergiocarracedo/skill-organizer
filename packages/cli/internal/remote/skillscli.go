@@ -1,6 +1,7 @@
 package remote
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -104,8 +105,11 @@ func (r *SkillsCLIRunner) Label() string {
 	return strings.Join(r.command, " ")
 }
 
-func (r *SkillsCLIRunner) RunIn(dir string, env []string, args ...string) (string, error) {
-	command := exec.Command(r.command[0], append(r.command[1:], args...)...)
+func (r *SkillsCLIRunner) RunIn(ctx context.Context, dir string, env []string, args ...string) (string, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	command := exec.CommandContext(ctx, r.command[0], append(r.command[1:], args...)...)
 	if strings.TrimSpace(dir) != "" {
 		command.Dir = dir
 	}
@@ -162,7 +166,7 @@ func (s *Sandbox) Close() {
 }
 
 func (s *Sandbox) Run(args ...string) (string, error) {
-	return s.runner.RunIn(s.projectDir, sandboxEnv(s.homeDir), args...)
+	return s.runner.RunIn(context.Background(), s.projectDir, sandboxEnv(s.homeDir), args...)
 }
 
 func (s *Sandbox) RunInteractive(args ...string) error {
@@ -397,7 +401,7 @@ func CheckForSkillUpdate(ctx SkillSummary) (SkillsUpdate, bool, error) {
 	return SkillsUpdate{Skill: ctx, InstalledPath: ctx.ID, InstalledBundle: installedBundle, LatestBundle: latestBundle}, true, nil
 }
 
-func FetchSkillBundle(source string, name string) (SkillBundle, error) {
+func FetchSkillBundle(ctx context.Context, source string, name string) (SkillBundle, error) {
 	sandbox, err := NewSandbox()
 	if err != nil {
 		return SkillBundle{}, err
@@ -411,16 +415,13 @@ func FetchSkillBundle(source string, name string) (SkillBundle, error) {
 		SourceURL:  sourceToGitHubURL(source),
 		SourceType: sourceTypeFromSource(source),
 	}
-	if _, err := sandbox.InstallSkill(summary); err != nil {
+	if _, err := sandbox.runner.RunIn(ctx, sandbox.projectDir, sandboxEnv(sandbox.homeDir), "add", summary.SourceURL, "--skill", summary.Name, "-y", "--copy"); err != nil {
 		return SkillBundle{}, err
 	}
 	return sandbox.LoadInstalledBundle(summary)
 }
 
 func ResolveVersion(skill SkillSummary, files []File) string {
-	if strings.TrimSpace(skill.Hash) != "" {
-		return strings.TrimSpace(skill.Hash)
-	}
 	if strings.TrimSpace(skill.Version) != "" {
 		return strings.TrimSpace(skill.Version)
 	}
@@ -431,6 +432,9 @@ func ResolveVersion(skill SkillSummary, files []File) string {
 			}
 			break
 		}
+	}
+	if strings.TrimSpace(skill.Hash) != "" {
+		return strings.TrimSpace(skill.Hash)
 	}
 	return "unknown"
 }

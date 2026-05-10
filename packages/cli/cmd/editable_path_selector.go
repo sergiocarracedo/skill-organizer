@@ -11,7 +11,7 @@ import (
 	"github.com/pterm/pterm"
 )
 
-const activeSelectorPrefix = "🡲 "
+const activeSelectorPrefix = "🡺 "
 
 type editablePathSelectorMode string
 
@@ -65,13 +65,13 @@ func newEditablePathSelector(items []editablePathSelectorItem, suggestions []str
 	}
 	if strings.TrimSpace(options.HelpNavigate) == "" {
 		if options.ShowCheckboxes {
-			options.HelpNavigate = "Space: Toggle, 🡩/🡫: Move, 🡪: Edit folder, Enter: Continue"
+			options.HelpNavigate = "Space: Toggle, 🡹/🡻: Move, 🡺: Edit folder, Enter: Continue"
 		} else {
-			options.HelpNavigate = "🡩/🡫: Move, 🡪: Edit folder, Enter: Continue"
+			options.HelpNavigate = "🡹/🡻: Move, 🡺: Edit folder, Enter: Continue"
 		}
 	}
 	if strings.TrimSpace(options.HelpEdit) == "" {
-		options.HelpEdit = "Edit mode: Type, Tab autocomplete, 🡨/🡪 move cursor, Home/End, Enter save, Esc cancel"
+		options.HelpEdit = "Edit mode: Type, Tab autocomplete, 🡸/🡺 move cursor, Home/End, Enter save, Esc cancel"
 	}
 	if strings.TrimSpace(options.ToggleAllLabel) == "" {
 		options.ToggleAllLabel = "Toggle all"
@@ -400,12 +400,12 @@ func selectorHelpLine(mode editablePathSelectorMode, options editablePathSelecto
 	baseStyle := pterm.NewStyle(pterm.FgDarkGray)
 	keyStyle := pterm.NewStyle(pterm.FgYellow, pterm.Bold)
 	replacer := strings.NewReplacer(
-		"🡨/🡪", keyStyle.Sprint("🡨/🡪"),
-		"🡩/🡫", keyStyle.Sprint("🡩/🡫"),
-		"🡨", keyStyle.Sprint("🡨"),
-		"🡪", keyStyle.Sprint("🡪"),
-		"🡩", keyStyle.Sprint("🡩"),
-		"🡫", keyStyle.Sprint("🡫"),
+		"🡸/🡺", keyStyle.Sprint("🡸/🡺"),
+		"🡹/🡻", keyStyle.Sprint("🡹/🡻"),
+		"🡸", keyStyle.Sprint("🡸"),
+		"🡺", keyStyle.Sprint("🡺"),
+		"🡹", keyStyle.Sprint("🡹"),
+		"🡻", keyStyle.Sprint("🡻"),
 		"🡬", keyStyle.Sprint("🡬"),
 		"🡭", keyStyle.Sprint("🡭"),
 		"🡮", keyStyle.Sprint("🡮"),

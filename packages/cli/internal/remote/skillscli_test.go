@@ -51,3 +51,17 @@ func TestInstalledSkillsFallsBackToDiscoveredSkillDirectories(t *testing.T) {
 		t.Fatalf("InstalledSkills()[0].Path = %q, want %q", got[0].Path, skillDir)
 	}
 }
+
+func TestResolveVersionPrefersSemanticVersionOverHash(t *testing.T) {
+	got := ResolveVersion(SkillSummary{Hash: "deadbeef", Version: "0.22.4"}, []File{{Path: "SKILL.md", Contents: "---\nmetadata:\n  version: 0.22.3\n---\n"}})
+	if got != "0.22.4" {
+		t.Fatalf("ResolveVersion() = %q, want %q", got, "0.22.4")
+	}
+}
+
+func TestResolveVersionFallsBackToSkillFileVersionBeforeHash(t *testing.T) {
+	got := ResolveVersion(SkillSummary{Hash: "deadbeef"}, []File{{Path: "SKILL.md", Contents: "---\nmetadata:\n  version: 0.22.4\n---\n"}})
+	if got != "0.22.4" {
+		t.Fatalf("ResolveVersion() = %q, want %q", got, "0.22.4")
+	}
+}

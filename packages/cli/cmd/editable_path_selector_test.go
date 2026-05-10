@@ -25,7 +25,7 @@ func TestEditablePathSelectorLinesWithoutCheckboxesHideToggleAndMarkers(t *testi
 	if len(lines) != 2 {
 		t.Fatalf("lines() len = %d, want 2", len(lines))
 	}
-	if got := stripANSI(lines[1]); got != "🡲 alpha -> skills-organized/alpha/" {
+	if got := stripANSI(lines[1]); got != "🡺 alpha -> skills-organized/alpha/" {
 		t.Fatalf("stripANSI(lines()[1]) = %q", got)
 	}
 }
