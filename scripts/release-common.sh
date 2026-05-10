@@ -97,7 +97,9 @@ release_print_reminder() {
   local flavor="$2"
   printf '\n%s release workflow reminder:\n' "$flavor"
   printf '1. Commit using a conventional commit message.\n'
-  printf '2. Push the %s branch.\n' "$branch"
-  printf '3. Wait for Release Please to open/update the release PR.\n'
-  printf '4. Merge the release PR to create the next %s tag and GitHub release.\n' "$flavor"
+  printf '2. Run the manual GitHub Actions workflow `cli-e2e` before releasing.\n'
+  printf '3. Enable at least binary e2e and the real `npx skills` smoke lane.\n'
+  printf '4. Push the %s branch.\n' "$branch"
+  printf '5. Wait for Release Please to open/update the release PR.\n'
+  printf '6. Merge the release PR to create the next %s tag and GitHub release.\n' "$flavor"
 }

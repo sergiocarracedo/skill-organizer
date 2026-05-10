@@ -46,7 +46,7 @@ type skillUpdateScanResult struct {
 
 var (
 	fetchSkillBundleFunc     = remotepkg.FetchSkillBundle
-	cachePathFunc            = configpkg.CachePath
+	updatesPathFunc          = configpkg.UpdatesPath
 	startCheckUpdatesSpinner = startDefaultSpinner
 	printCheckUpdatesWarning = func(format string, args ...any) {
 		pterm.Warning.Printfln(format, args...)
@@ -133,9 +133,11 @@ func newCheckUpdatesCommand() *cobra.Command {
 				}); err != nil {
 					return err
 				}
+				pterm.Info.Printfln("Updating %s", item.Skill.RelativePath)
 				pterm.Success.Printfln("Updated skill: %s (%s -> %s)", item.Skill.RelativePath, item.Installed, item.Latest)
 				pterm.Info.Printfln("Backup: %s", backupPath)
 			}
+			pterm.Info.Printfln("Updated skills: %d", len(selected))
 
 			result, err := syncpkg.Run(location)
 			if err != nil {
@@ -713,11 +715,11 @@ func isHexHash(value string) bool {
 }
 
 func refreshSkillUpdateCache(candidates []skillUpdateCandidate) error {
-	cachePath, err := cachePathFunc()
+	updatesPath, err := updatesPathFunc()
 	if err != nil {
 		return err
 	}
-	cache, err := configpkg.LoadUpdateCacheOrDefault(cachePath)
+	state, err := configpkg.LoadUpdatesStateOrDefault(updatesPath)
 	if err != nil {
 		return err
 	}
@@ -734,6 +736,11 @@ func refreshSkillUpdateCache(candidates []skillUpdateCandidate) error {
 			CheckedAt:        now,
 		})
 	}
-	cache.SkillUpdates = configpkg.SkillUpdateCache{LastCheckedAt: now, Pending: pending}
-	return configpkg.SaveUpdateCache(cachePath, cache)
+	state.LastCheckedAt = now
+	state.UpdateCount = len(candidates)
+	state.Pending = pending
+	if len(candidates) == 0 {
+		state.LastRemindedAt = ""
+	}
+	return configpkg.SaveUpdatesState(updatesPath, state)
 }

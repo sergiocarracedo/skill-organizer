@@ -20,7 +20,7 @@ import (
 type skillAddSandbox interface {
 	Close()
 	InstalledSkills() ([]remotepkg.InstalledSkill, error)
-	RunInteractive(args ...string) error
+	Run(args ...string) (string, error)
 	LoadInstalledBundle(skill remotepkg.SkillSummary) (remotepkg.SkillBundle, error)
 }
 
@@ -99,7 +99,8 @@ func newSkillAddCommand() *cobra.Command {
 				}
 				commandArgs = append(commandArgs, "--skill", trimmed)
 			}
-			if err := sandbox.RunInteractive(commandArgs...); err != nil {
+			commandArgs = append(commandArgs, "-y", "--copy")
+			if _, err := sandbox.Run(commandArgs...); err != nil {
 				return err
 			}
 			pterm.Info.Println("Returned to " + cliBrandText("skill-organizer") + ". Importing installed skills...")

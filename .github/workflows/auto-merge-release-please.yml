@@ -19,7 +19,45 @@ jobs:
       startsWith(github.event.workflow_run.head_branch, 'release-please--branches--')
     runs-on: ubuntu-latest
     steps:
+      - name: Validate release-please PR provenance
+        id: validate
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          head_ref="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json headRefName --jq '.headRefName')"
+          is_cross_repo="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json isCrossRepository --jq '.isCrossRepository')"
+          head_repo="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json headRepositoryOwner,headRepository --jq '.headRepositoryOwner.login + "/" + .headRepository.name')"
+          state="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json state --jq '.state')"
+
+          if [ "$is_cross_repo" != "false" ]; then
+            echo "Refusing to auto-merge cross-repository PR #$PR_NUMBER"
+            exit 1
+          fi
+
+          if [ "$head_repo" != "$GH_REPO" ]; then
+            echo "Refusing to auto-merge PR #$PR_NUMBER from unexpected repo: $head_repo"
+            exit 1
+          fi
+
+          if [ "$state" != "OPEN" ]; then
+            echo "Refusing to auto-merge PR #$PR_NUMBER because it is not open: $state"
+            exit 1
+          fi
+
+          case "$head_ref" in
+            release-please--branches--*) ;;
+            *)
+              echo "Refusing to auto-merge PR #$PR_NUMBER from unexpected branch: $head_ref"
+              exit 1
+              ;;
+          esac
+
+          echo "safe=true" >> "$GITHUB_OUTPUT"
+
       - name: Merge release-please PR
+        if: steps.validate.outputs.safe == 'true'
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}

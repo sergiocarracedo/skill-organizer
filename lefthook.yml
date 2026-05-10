@@ -1,0 +1,10 @@
+pre-commit:
+  commands:
+    cli-e2e:
+      glob:
+        - package.json
+        - pnpm-lock.yaml
+        - lefthook.yml
+        - .github/workflows/cli-e2e.yml
+        - packages/cli/**
+      run: pnpm run test:cli:e2e

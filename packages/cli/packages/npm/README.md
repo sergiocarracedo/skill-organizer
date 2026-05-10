@@ -19,6 +19,7 @@ skill-organizer --version
 ## Notes
 
 - The install script downloads a release artifact for your current OS and architecture.
+- The install script only downloads from `sergiocarracedo/skill-organizer` GitHub Releases.
 - The package version must match an existing GitHub release and its uploaded assets.
 - Installs with `--ignore-scripts` are not supported.
 

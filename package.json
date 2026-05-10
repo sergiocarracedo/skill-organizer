@@ -12,7 +12,17 @@
     "type-check:web": "pnpm --filter web type-check",
     "test": "pnpm run test:cli && pnpm run test:web",
     "test:cli": "sh -c 'cd packages/cli && go test ./...'",
-    "test:web": "pnpm --filter web test"
+    "test:cli:e2e": "sh -c 'cd packages/cli && go test -run \"TestMoveUnmanagedBinary|TestSkillDeleteWildcardBinary|TestSkillAddAndCheckUpdatesBinary\" ./...'",
+    "test:cli:e2e:real-npx": "sh -c 'cd packages/cli && SKILL_ORGANIZER_E2E_REAL_NPX=1 go test -run TestSkillAddWithRealNpxSkillsSmoke ./...'",
+    "test:cli:e2e:all": "pnpm run test:cli:e2e && pnpm run test:cli:e2e:real-npx",
+    "test:web": "pnpm --filter web test",
+    "hooks:install": "pnpm exec lefthook install",
+    "hooks:run:pre-commit": "pnpm exec lefthook run pre-commit",
+    "hooks:run:pre-commit:all": "pnpm exec lefthook run pre-commit --all-files --force",
+    "prepare": "pnpm run hooks:install"
+  },
+  "devDependencies": {
+    "lefthook": "^2.1.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

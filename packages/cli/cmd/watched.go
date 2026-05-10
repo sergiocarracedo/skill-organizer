@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -47,7 +48,12 @@ func newWatchedCommand() *cobra.Command {
 	cmd.AddCommand(&cobra.Command{
 		Use:   "add [config-path]",
 		Short: "Register a project config path for watching",
-		Args:  cobra.MaximumNArgs(1),
+		Long:  "Register a project config path for watching. If no path is provided, the command prompts for one interactively.",
+		Example: strings.Join([]string{
+			"skill-organizer watched add ~/.agents/.skill-organizer.yml",
+			"skill-organizer watched add",
+		}, "\n"),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			var path string
 			var err error
@@ -91,7 +97,12 @@ func newWatchedCommand() *cobra.Command {
 	cmd.AddCommand(&cobra.Command{
 		Use:   "remove [config-path]",
 		Short: "Remove a watched project config path",
-		Args:  cobra.MaximumNArgs(1),
+		Long:  "Remove a watched project config path. If no path is provided, the command shows an interactive selector.",
+		Example: strings.Join([]string{
+			"skill-organizer watched remove ~/.agents/.skill-organizer.yml",
+			"skill-organizer watched remove",
+		}, "\n"),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			registryPath, err := configpkg.RegistryPath()
 			if err != nil {

@@ -11,11 +11,18 @@ import (
 )
 
 type UpdateCache struct {
-	LastCheckedAt string `yaml:"last-checked-at,omitempty"`
-	LatestVersion string `yaml:"latest-version,omitempty"`
-	LatestPageURL string `yaml:"latest-page-url,omitempty"`
-	SkillUpdates   SkillUpdateCache `yaml:"skill-updates,omitempty"`
-	BackupGC       TaskCache        `yaml:"backup-gc,omitempty"`
+	LastCheckedAt string           `yaml:"last-checked-at,omitempty"`
+	LatestVersion string           `yaml:"latest-version,omitempty"`
+	LatestPageURL string           `yaml:"latest-page-url,omitempty"`
+	SkillUpdates  SkillUpdateCache `yaml:"skill-updates,omitempty"`
+	BackupGC      TaskCache        `yaml:"backup-gc,omitempty"`
+}
+
+type UpdatesState struct {
+	LastCheckedAt  string              `yaml:"last-checked-at,omitempty"`
+	UpdateCount    int                 `yaml:"update-count,omitempty"`
+	LastRemindedAt string              `yaml:"last-reminded-at,omitempty"`
+	Pending        []SkillUpdateRecord `yaml:"pending,omitempty"`
 }
 
 type TaskCache struct {
@@ -28,13 +35,13 @@ type SkillUpdateCache struct {
 }
 
 type SkillUpdateRecord struct {
-	RelativePath      string `yaml:"relative-path,omitempty"`
-	FlattenedName     string `yaml:"flattened-name,omitempty"`
-	InstalledVersion  string `yaml:"installed-version,omitempty"`
-	LatestVersion     string `yaml:"latest-version,omitempty"`
-	Source            string `yaml:"source,omitempty"`
-	RepoSkillPath     string `yaml:"repo-skill-path,omitempty"`
-	CheckedAt         string `yaml:"checked-at,omitempty"`
+	RelativePath     string `yaml:"relative-path,omitempty"`
+	FlattenedName    string `yaml:"flattened-name,omitempty"`
+	InstalledVersion string `yaml:"installed-version,omitempty"`
+	LatestVersion    string `yaml:"latest-version,omitempty"`
+	Source           string `yaml:"source,omitempty"`
+	RepoSkillPath    string `yaml:"repo-skill-path,omitempty"`
+	CheckedAt        string `yaml:"checked-at,omitempty"`
 }
 
 func CachePath() (string, error) {
@@ -44,6 +51,14 @@ func CachePath() (string, error) {
 	}
 
 	return filepath.Join(filepath.Dir(registryPath), ".cache.yml"), nil
+}
+
+func UpdatesPath() (string, error) {
+	appDir, err := AppDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(appDir, ".updates"), nil
 }
 
 func (c *UpdateCache) Normalize() {
@@ -69,6 +84,23 @@ func (c *SkillUpdateCache) Normalize() {
 		cleaned = append(cleaned, pending)
 	}
 	c.Pending = cleaned
+}
+
+func (s *UpdatesState) Normalize() {
+	s.LastCheckedAt = strings.TrimSpace(s.LastCheckedAt)
+	s.LastRemindedAt = strings.TrimSpace(s.LastRemindedAt)
+	if s.UpdateCount < 0 {
+		s.UpdateCount = 0
+	}
+	cleaned := make([]SkillUpdateRecord, 0, len(s.Pending))
+	for _, pending := range s.Pending {
+		pending.Normalize()
+		if pending.RelativePath == "" && pending.FlattenedName == "" {
+			continue
+		}
+		cleaned = append(cleaned, pending)
+	}
+	s.Pending = cleaned
 }
 
 func (r *SkillUpdateRecord) Normalize() {
@@ -128,5 +160,48 @@ func ClearUpdateCache(path string) error {
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("remove update cache: %w", err)
 	}
+	return nil
+}
+
+func LoadUpdatesState(path string) (UpdatesState, error) {
+	var state UpdatesState
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return state, fmt.Errorf("read updates state: %w", err)
+	}
+
+	if err := yaml.Unmarshal(content, &state); err != nil {
+		return state, fmt.Errorf("parse updates state: %w", err)
+	}
+	state.Normalize()
+	return state, nil
+}
+
+func LoadUpdatesStateOrDefault(path string) (UpdatesState, error) {
+	state, err := LoadUpdatesState(path)
+	if errors.Is(err, os.ErrNotExist) {
+		state.Normalize()
+		return state, nil
+	}
+	return state, err
+}
+
+func SaveUpdatesState(path string, state UpdatesState) error {
+	state.Normalize()
+
+	content, err := yaml.Marshal(state)
+	if err != nil {
+		return fmt.Errorf("marshal updates state: %w", err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return fmt.Errorf("create updates directory: %w", err)
+	}
+
+	if err := os.WriteFile(path, content, 0o644); err != nil {
+		return fmt.Errorf("write updates state: %w", err)
+	}
+
 	return nil
 }

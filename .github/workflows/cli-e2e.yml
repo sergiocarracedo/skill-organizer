@@ -1,0 +1,74 @@
+name: cli-e2e
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_binary_e2e:
+        description: Run compiled-binary CLI e2e tests with fake skills fixtures
+        required: false
+        default: true
+        type: boolean
+      run_real_npx_smoke:
+        description: Run real npx skills compatibility smoke against vercel-labs/agent-browser
+        required: false
+        default: false
+        type: boolean
+      run_service_e2e:
+        description: Reserved for the future Docker/systemd service e2e lane
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  binary-e2e:
+    if: ${{ inputs.run_binary_e2e }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: packages/cli/go.mod
+
+      - name: Run compiled-binary CLI e2e tests
+        run: go test -run 'TestMoveUnmanagedBinary|TestSkillDeleteWildcardBinary|TestSkillAddAndCheckUpdatesBinary' ./...
+
+  real-npx-smoke:
+    if: ${{ inputs.run_real_npx_smoke }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: packages/cli/go.mod
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Run real npx skills smoke test
+        env:
+          SKILL_ORGANIZER_E2E_REAL_NPX: "1"
+        run: go test -run TestSkillAddWithRealNpxSkillsSmoke ./...
+
+  service-e2e-placeholder:
+    if: ${{ inputs.run_service_e2e }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Service e2e not implemented yet
+        run: |
+          echo "The Docker/systemd service e2e lane is not implemented yet."
+          echo "Run binary e2e and real npx smoke before release."
+          exit 1

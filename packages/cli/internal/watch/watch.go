@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,8 +13,12 @@ import (
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	loggingpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/logging"
+	remotepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/remote"
+	skillspkg "github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
 )
+
+const updatesCheckInterval = 24 * time.Hour
 
 type Runner struct {
 	registryPath string
@@ -97,8 +102,138 @@ func (r *Runner) Run() error {
 				r.logger.Errorf("watch flush failed: %v", err)
 				return err
 			}
+			if err := r.maybeCheckSkillUpdates(); err != nil {
+				r.logger.Warnf("background skill update check failed: %v", err)
+			}
 		}
 	}
+}
+
+func (r *Runner) maybeCheckSkillUpdates() error {
+	updatesPath, err := configpkg.UpdatesPath()
+	if err != nil {
+		return err
+	}
+	state, err := configpkg.LoadUpdatesStateOrDefault(updatesPath)
+	if err != nil {
+		return err
+	}
+	now := time.Now().UTC()
+	if checkedAt, ok := parseUpdatesTimestamp(state.LastCheckedAt); ok && now.Sub(checkedAt) < updatesCheckInterval {
+		return nil
+	}
+
+	r.mu.Lock()
+	locations := make([]configpkg.Location, 0, len(r.locations))
+	for _, location := range r.locations {
+		locations = append(locations, location)
+	}
+	r.mu.Unlock()
+
+	count, pending, err := collectSkillUpdates(context.Background(), locations)
+	if err != nil {
+		return err
+	}
+	state.LastCheckedAt = now.Format(time.RFC3339)
+	state.UpdateCount = count
+	state.Pending = pending
+	if count == 0 {
+		state.LastRemindedAt = ""
+	}
+	return configpkg.SaveUpdatesState(updatesPath, state)
+}
+
+func collectSkillUpdates(ctx context.Context, locations []configpkg.Location) (int, []configpkg.SkillUpdateRecord, error) {
+	pending := make([]configpkg.SkillUpdateRecord, 0)
+	now := time.Now().UTC().Format(time.RFC3339)
+	for _, location := range locations {
+		scanned, err := skillspkg.ScanSource(location.Source)
+		if err != nil {
+			return 0, nil, err
+		}
+		for _, skill := range scanned {
+			if err := ctx.Err(); err != nil {
+				return 0, nil, err
+			}
+			doc, err := skillspkg.LoadDocument(skill.SkillFile)
+			if err != nil {
+				return 0, nil, err
+			}
+			metadata := doc.ManagedMetadata()
+			if strings.TrimSpace(metadata.Source) == "" {
+				continue
+			}
+			upstreamName := strings.TrimSpace(metadata.OriginalName)
+			if upstreamName == "" {
+				upstreamName = strings.TrimSpace(doc.Name())
+			}
+			bundle, err := remotepkg.FetchSkillBundle(ctx, normalizeUpdateSource(metadata.Source), upstreamName)
+			if err != nil {
+				continue
+			}
+			installedBundle, err := remotepkg.LoadBundleFromDir(skill.Dir)
+			if err != nil {
+				return 0, nil, err
+			}
+			installed := resolveInstalledVersion(metadata, installedBundle)
+			latest := resolveLatestVersion(bundle)
+			if installed == "" || latest == "" || installed == latest {
+				continue
+			}
+			pending = append(pending, configpkg.SkillUpdateRecord{
+				RelativePath:     skill.RelativePath,
+				FlattenedName:    skill.FlattenedName,
+				InstalledVersion: installed,
+				LatestVersion:    latest,
+				Source:           normalizeUpdateSource(metadata.Source),
+				RepoSkillPath:    metadata.RepoSkillPath,
+				CheckedAt:        now,
+			})
+		}
+	}
+	return len(pending), pending, nil
+}
+
+func resolveInstalledVersion(metadata skillspkg.ManagedMetadata, installedBundle remotepkg.SkillBundle) string {
+	if version := strings.TrimSpace(remotepkg.SkillVersionFromSkillFile(skillFileContents(installedBundle.Files))); version != "" {
+		return version
+	}
+	if installed := strings.TrimSpace(metadata.InstalledVersion); installed != "" {
+		return installed
+	}
+	return strings.TrimSpace(remotepkg.ResolveVersion(installedBundle.Skill, installedBundle.Files))
+}
+
+func resolveLatestVersion(bundle remotepkg.SkillBundle) string {
+	if version := strings.TrimSpace(remotepkg.SkillVersionFromSkillFile(skillFileContents(bundle.Files))); version != "" {
+		return version
+	}
+	return strings.TrimSpace(remotepkg.ResolveVersion(bundle.Skill, bundle.Files))
+}
+
+func skillFileContents(files []remotepkg.File) string {
+	for _, file := range files {
+		if file.Path == "SKILL.md" {
+			return file.Contents
+		}
+	}
+	return ""
+}
+
+func normalizeUpdateSource(source string) string {
+	trimmed := strings.TrimSpace(source)
+	trimmed = strings.TrimSuffix(trimmed, ".git")
+	trimmed = strings.TrimPrefix(trimmed, "https://github.com/")
+	trimmed = strings.TrimPrefix(trimmed, "http://github.com/")
+	return strings.Trim(trimmed, "/")
+}
+
+func parseUpdatesTimestamp(value string) (time.Time, bool) {
+	parsed, err := time.Parse(time.RFC3339, strings.TrimSpace(value))
+	if err != nil {
+		return time.Time{}, false
+	}
+	return parsed, true
 }
 
 func (r *Runner) enqueue(path string) {

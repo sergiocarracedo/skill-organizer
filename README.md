@@ -219,7 +219,7 @@ skill-organizer status
 skill-organizer skill add <source>
 skill-organizer skill enable <source-path>
 skill-organizer skill disable <source-path>
-skill-organizer skill delete <source-path>
+skill-organizer skill delete <skill-path-or-pattern>
 skill-organizer skill move-unmanaged
 skill-organizer skill check-updates
 skill-organizer skill check-overlap
@@ -229,7 +229,7 @@ skill-organizer skill check-overlap
 - `status` reports source skills, flattened names, disabled skills, target drift, and unmanaged target entries.
 - `skill add` uses `skills.sh` through `skills` or `npx skills`, imports selected skills into `skills-organized`, writes import metadata, and syncs immediately.
 - `skill enable` and `skill disable` update `metadata.skill-organizer.disabled` in the source `SKILL.md`.
-- `skill delete` moves a managed source skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` after confirmation, then syncs the project.
+- `skill delete` moves a managed source skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` after confirmation, then syncs the project. Quote wildcard patterns such as `"google/gws-*"` so the shell passes them through unchanged.
 - `skill move-unmanaged` previews moves from unmanaged target entries into the source tree and applies them after confirmation, or immediately with `--yes`.
 - `skill check-updates` checks imported managed skills for upstream updates, lets you inspect diffs with `d`, backs up selected skills into `.old/`, applies updates, and syncs afterward.
 - `skill check-overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only and shows only `partial` and `duplicate` overlap groups. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, `--tool <id>` to choose one explicitly, `--min-overlap-type` to include weaker matches, or `--no-ask-to-apply` to skip the follow-up planning prompt.
@@ -246,6 +246,7 @@ skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciine
 skill-organizer add https://github.com/terrylica/cc-skills --skill asciinema-recorder
 skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
 skill-organizer delete thirdparty/asciinema/asciinema-recorder
+skill-organizer delete "google/gws-*"
 skill-organizer skill check-updates
 skill-organizer check-updates
 ```
@@ -400,12 +401,12 @@ Drifted:          0
 
 ```bash
 skill-organizer watched list
-skill-organizer watched add /path/to/.skill-organizer.yml
-skill-organizer watched remove
+skill-organizer watched add [config-path]
+skill-organizer watched remove [config-path]
 ```
 
 - `watched list` shows watched project config paths.
-- `watched add` validates a project config path and registers it.
+- `watched add` validates a project config path and registers it. If you omit the path, it prompts for one.
 - `watched remove` accepts a path or lets you choose one interactively.
 
 ### Foreground Watch

@@ -123,3 +123,40 @@ func TestSaveBackupConfigPreservesWatchedEntries(t *testing.T) {
 		t.Fatalf("LoadBackupConfig().RetentionDays = %d, want 21", backup.RetentionDays)
 	}
 }
+
+func TestSaveAndLoadUpdatesState(t *testing.T) {
+	path := filepath.Join(t.TempDir(), ".updates")
+	state := UpdatesState{
+		LastCheckedAt:  "2026-05-10T13:49:48Z",
+		UpdateCount:    2,
+		LastRemindedAt: "2026-05-11T13:49:48Z",
+		Pending: []SkillUpdateRecord{{
+			RelativePath:     "google/gws-admin-reports",
+			InstalledVersion: "0.22.3",
+			LatestVersion:    "0.22.5",
+		}},
+	}
+	if err := SaveUpdatesState(path, state); err != nil {
+		t.Fatalf("SaveUpdatesState() error = %v", err)
+	}
+	loaded, err := LoadUpdatesState(path)
+	if err != nil {
+		t.Fatalf("LoadUpdatesState() error = %v", err)
+	}
+	if loaded.UpdateCount != 2 {
+		t.Fatalf("LoadUpdatesState().UpdateCount = %d, want 2", loaded.UpdateCount)
+	}
+	if len(loaded.Pending) != 1 || loaded.Pending[0].RelativePath != "google/gws-admin-reports" {
+		t.Fatalf("LoadUpdatesState().Pending = %#v", loaded.Pending)
+	}
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+	text := string(content)
+	for _, want := range []string{"update-count: 2", "last-reminded-at: \"2026-05-11T13:49:48Z\"", "relative-path: google/gws-admin-reports"} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("updates file missing %q\n%s", want, text)
+		}
+	}
+}

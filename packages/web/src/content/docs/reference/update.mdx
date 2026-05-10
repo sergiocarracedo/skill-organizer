@@ -1,0 +1,30 @@
+---
+title: update
+description: Update the skill-organizer CLI.
+section: reference
+order: 10
+commandSlug: update
+summary: Refresh the installed CLI using the supported distribution channel.
+---
+
+## Synopsis
+
+```bash
+skill-organizer update
+```
+
+## Behavior
+
+`update` checks the latest published release and then uses the detected install method:
+
+- npm installs run `npm i -g skill-organizer@latest`
+- Homebrew installs run `brew upgrade skill-organizer`
+- direct binary installs must be updated manually from the GitHub Releases page
+
+Direct in-place self-update is intentionally disabled until release integrity verification is anchored to an independent trust root.
+
+## Notes
+
+If the current install is already up to date, the command prints the current version and exits without changing anything.
+
+When a newer version is available for a direct binary install, the CLI prints the release page URL so you can replace the binary manually.

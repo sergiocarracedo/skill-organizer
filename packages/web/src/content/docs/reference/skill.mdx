@@ -16,8 +16,8 @@ skill-organizer skill enable <source-path>
 skill-organizer enable <source-path>
 skill-organizer skill disable <source-path>
 skill-organizer disable <source-path>
-skill-organizer skill delete <source-path>
-skill-organizer delete <source-path>
+skill-organizer skill delete <skill-path-or-pattern>
+skill-organizer delete <skill-path-or-pattern>
 skill-organizer skill move-unmanaged
 skill-organizer skill check-updates
 skill-organizer check-updates
@@ -28,27 +28,35 @@ skill-organizer skill check-overlap
 
 `skill add` uses `skills.sh` via `skills` or `npx skills`, prints `Using skills.sh cli tool to add the skills`, imports the selected skills into the managed source tree, writes source metadata, and runs sync immediately.
 
+During import it asks where each selected skill should live under `skills-organized/`.
+
 Aliases: root shortcut `skill-organizer add`; local aliases `skill-organizer skill install` and `skill-organizer skill import`.
 
 ## enable and disable
 
 These commands resolve a source skill, rewrite the managed metadata in its `SKILL.md`, and run sync immediately afterward.
 
+Aliases: `enable` also supports `on`; `disable` also supports `off`.
+
 ## delete
 
 `delete` confirms first, then moves the managed source skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` before running sync.
+
+Quote wildcard patterns such as `"google/gws-*"` so the shell passes the pattern to `skill-organizer` instead of expanding it first.
 
 Aliases: root shortcut `skill-organizer delete`; local aliases `skill-organizer skill remove` and `skill-organizer skill rm`.
 
 ## move-unmanaged
 
-`move-unmanaged` discovers target entries that are not currently managed and offers to move them into the organized source tree.
+`move-unmanaged` discovers target entries that are not currently managed and offers to move them into the `skills-organized/` source tree.
+
+In interactive mode you can toggle selections, edit destination folders, and use `[Toggle all]` to select or clear every unmanaged entry.
 
 ## check-updates
 
 `check-updates` scans imported managed skills for newer upstream versions. In interactive mode you can press `d` to inspect the full folder diff before selecting which skills to update.
 
-Selected skills are backed up into `.old/`, updated in source, and then synchronized.
+Selected skills are backed up into `.old/`, updated in source, and then synchronized. `--yes` skips the interactive selector and updates every detected candidate.
 
 Aliases: root shortcut `skill-organizer check-updates`; local aliases `skill-organizer skill updates` and `skill-organizer skill upgrade`.
 
@@ -65,6 +73,7 @@ skill-organizer skill check-updates
 skill-organizer check-updates
 skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
 skill-organizer delete thirdparty/asciinema/asciinema-recorder
+skill-organizer delete "google/gws-*"
 skill-organizer skill check-overlap
 skill-organizer skill check-overlap --choose-tool
 skill-organizer skill check-overlap --tool claude
@@ -82,8 +91,9 @@ If it does not, the CLI asks whether it should generate a remediation prompt, sa
 ### Flags
 
 ```text
---yes  Apply unmanaged moves without confirmation
+--yes  With check-updates, update all detected skills; with delete, skip confirmation; with move-unmanaged, apply selected moves without confirmation
 --skill  Add one or more specific skills from a skills.sh source
+--no-backup  Delete without moving the skill into the backup area first
 --to   Move a single unmanaged skill to a custom path relative to the source root
 --include-disabled  Include disabled skills when using check-overlap
 --min-overlap-type  adjacent|partial|duplicate or 1|2|3

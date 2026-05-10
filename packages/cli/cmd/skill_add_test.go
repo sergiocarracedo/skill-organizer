@@ -35,10 +35,10 @@ func (f *fakeSkillAddSandbox) InstalledSkills() ([]remotepkg.InstalledSkill, err
 	return f.after, nil
 }
 
-func (f *fakeSkillAddSandbox) RunInteractive(args ...string) error {
+func (f *fakeSkillAddSandbox) Run(args ...string) (string, error) {
 	f.runCalls++
 	f.runArgs = append([]string{}, args...)
-	return nil
+	return "", nil
 }
 
 func (f *fakeSkillAddSandbox) LoadInstalledBundle(skill remotepkg.SkillSummary) (remotepkg.SkillBundle, error) {
@@ -128,7 +128,7 @@ func TestSkillAddSkipsReinstallWhenDeclined(t *testing.T) {
 	if sandbox.runCalls != 1 {
 		t.Fatalf("RunInteractive() calls = %d, want 1", sandbox.runCalls)
 	}
-	if got, want := sandbox.runArgs, []string{"add", "owner/repo"}; strings.Join(got, "|") != strings.Join(want, "|") {
+	if got, want := sandbox.runArgs, []string{"add", "owner/repo", "-y", "--copy"}; strings.Join(got, "|") != strings.Join(want, "|") {
 		t.Fatalf("RunInteractive() args = %#v, want %#v", got, want)
 	}
 	if !sandbox.closed {
@@ -266,7 +266,7 @@ func TestSkillAddExplicitExistingSkillConfirmsReinstallOnlyOnce(t *testing.T) {
 	if sandbox.runCalls != 1 {
 		t.Fatalf("RunInteractive() calls = %d, want 1", sandbox.runCalls)
 	}
-	if got, want := sandbox.runArgs, []string{"add", "owner/repo", "--skill", "demo-skill"}; strings.Join(got, "|") != strings.Join(want, "|") {
+	if got, want := sandbox.runArgs, []string{"add", "owner/repo", "--skill", "demo-skill", "-y", "--copy"}; strings.Join(got, "|") != strings.Join(want, "|") {
 		t.Fatalf("RunInteractive() args = %#v, want %#v", got, want)
 	}
 }

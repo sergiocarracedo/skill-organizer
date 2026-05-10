@@ -15,7 +15,7 @@ func TestUpdateCommandForInstallMethod(t *testing.T) {
 	}{
 		{name: "npm", method: InstallMethodNPM, want: "npm i -g skill-organizer@latest"},
 		{name: "homebrew", method: InstallMethodHomebrew, want: "brew upgrade skill-organizer"},
-		{name: "direct", method: InstallMethodDirect, want: "skill-organizer update"},
+		{name: "direct", method: InstallMethodDirect, want: "download the latest release from GitHub"},
 	}
 
 	for _, tt := range tests {

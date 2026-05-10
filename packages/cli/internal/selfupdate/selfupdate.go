@@ -5,8 +5,6 @@ import (
 	"archive/zip"
 	"compress/gzip"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -48,10 +46,9 @@ type releaseResponse struct {
 }
 
 type latestRelease struct {
-	version      string
-	pageURL      string
-	assetURL     string
-	checksumsURL string
+	version  string
+	pageURL  string
+	assetURL string
 }
 
 type VersionInfo struct {
@@ -74,12 +71,12 @@ func MaybeNotify(ctx context.Context, currentVersion string, stdout io.Writer) {
 	}
 
 	_, _ = fmt.Fprintf(stdout, "\nNew skill-organizer version available: %s -> %s\n", info.CurrentVersion, info.LatestVersion)
-	_, _ = fmt.Fprintf(stdout, "Run `skill-organizer update` to update.\n")
-	if info.InstallMethod == InstallMethodDirect {
-		_, _ = fmt.Fprintf(stdout, "Release page: %s\n", info.LatestPageURL)
+		_, _ = fmt.Fprintf(stdout, "Run `skill-organizer update` to update.\n")
+		if info.InstallMethod == InstallMethodDirect {
+			_, _ = fmt.Fprintf(stdout, "Direct installs must be updated manually from the release page: %s\n", info.LatestPageURL)
+		}
+		_, _ = fmt.Fprintln(stdout)
 	}
-	_, _ = fmt.Fprintln(stdout)
-}
 
 func Check(ctx context.Context, currentVersion string) (VersionInfo, error) {
 	method := DetectInstallMethod()
@@ -201,7 +198,7 @@ func updateCommandFor(method InstallMethod) string {
 	case InstallMethodHomebrew:
 		return "brew upgrade skill-organizer"
 	default:
-		return "skill-organizer update"
+		return "download the latest release from GitHub"
 	}
 }
 
@@ -280,10 +277,9 @@ func fetchLatestRelease(ctx context.Context) (latestRelease, error) {
 	}
 
 	return latestRelease{
-		version:      version,
-		pageURL:      pageURLOrDefault(payload.HTMLURL),
-		assetURL:     fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s", githubOwner, githubRepo, tagName, archiveName),
-		checksumsURL: fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/checksums.txt", githubOwner, githubRepo, tagName),
+		version:  version,
+		pageURL:  pageURLOrDefault(payload.HTMLURL),
+		assetURL: fmt.Sprintf("https://github.com/%s/%s/releases/download/%s/%s", githubOwner, githubRepo, tagName, archiveName),
 	}, nil
 }
 
@@ -306,40 +302,9 @@ func archiveNameFor(version string) string {
 }
 
 func updateDirectBinary(ctx context.Context, latest latestRelease) error {
-	exePath, err := os.Executable()
-	if err != nil {
-		return fmt.Errorf("resolve executable path: %w", err)
-	}
-
-	tmpDir, err := os.MkdirTemp("", "skill-organizer-update-")
-	if err != nil {
-		return fmt.Errorf("create temporary update directory: %w", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	archivePath := filepath.Join(tmpDir, path.Base(latest.assetURL))
-	checksumsPath := filepath.Join(tmpDir, "checksums.txt")
-
-	if err := downloadToFile(ctx, latest.assetURL, archivePath); err != nil {
-		return err
-	}
-	if err := downloadToFile(ctx, latest.checksumsURL, checksumsPath); err != nil {
-		return err
-	}
-	if err := verifyChecksum(archivePath, checksumsPath, filepath.Base(archivePath)); err != nil {
-		return err
-	}
-
-	binaryPath, err := extractBinary(archivePath, tmpDir)
-	if err != nil {
-		return err
-	}
-
-	if err := replaceExecutable(binaryPath, exePath); err != nil {
-		return err
-	}
-
-	return nil
+	_ = ctx
+	_ = latest
+	return fmt.Errorf("direct self-update is disabled until release integrity verification is anchored to an independent trust root; download the latest release from %s", latest.pageURL)
 }
 
 func runCommand(ctx context.Context, stdout, stderr io.Writer, name string, args ...string) error {
@@ -379,49 +344,6 @@ func downloadToFile(ctx context.Context, url, destination string) error {
 
 	if _, err := io.Copy(file, resp.Body); err != nil {
 		return fmt.Errorf("write %s: %w", destination, err)
-	}
-
-	return nil
-}
-
-func verifyChecksum(archivePath, checksumsPath, archiveName string) error {
-	checksums, err := os.ReadFile(checksumsPath)
-	if err != nil {
-		return fmt.Errorf("read checksums: %w", err)
-	}
-
-	var expected string
-	for _, line := range strings.Split(string(checksums), "\n") {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			continue
-		}
-		fields := strings.Fields(trimmed)
-		if len(fields) < 2 {
-			continue
-		}
-		if fields[len(fields)-1] == archiveName {
-			expected = fields[0]
-			break
-		}
-	}
-	if expected == "" {
-		return fmt.Errorf("checksum entry not found for %s", archiveName)
-	}
-
-	file, err := os.Open(archivePath)
-	if err != nil {
-		return fmt.Errorf("open archive: %w", err)
-	}
-	defer file.Close()
-
-	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return fmt.Errorf("hash archive: %w", err)
-	}
-	actual := hex.EncodeToString(hash.Sum(nil))
-	if !strings.EqualFold(expected, actual) {
-		return fmt.Errorf("checksum mismatch for %s", archiveName)
 	}
 
 	return nil

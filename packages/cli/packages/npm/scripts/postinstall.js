@@ -10,8 +10,8 @@ const { spawn } = require("node:child_process");
 
 const pkg = require("../package.json");
 
-const owner = process.env.SKILL_ORGANIZER_GITHUB_OWNER || "sergiocarracedo";
-const repo = process.env.SKILL_ORGANIZER_GITHUB_REPO || "skill-organizer";
+const owner = "sergiocarracedo";
+const repo = "skill-organizer";
 const version = pkg.version;
 const tag = `v${version}`;
 const osMap = {
@@ -25,6 +25,11 @@ const archMap = {
 };
 
 async function main() {
+  if (isSourceCheckoutInstall()) {
+    console.log("Skipping binary download for source checkout install.");
+    return;
+  }
+
   const osName = osMap[process.platform];
   const archName = archMap[process.arch];
   if (!osName || !archName) {
@@ -69,12 +74,42 @@ async function main() {
   await fsp.rm(tmpDir, { recursive: true, force: true });
 }
 
+function isSourceCheckoutInstall() {
+  let current = path.resolve(__dirname, "..");
+
+  while (true) {
+    const manifestPath = path.join(current, "package.json");
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        if (manifest.name === "skill-organizer-monorepo" && manifest.private === true) {
+          return true;
+        }
+      } catch {
+        return false;
+      }
+    }
+
+    const parent = path.dirname(current);
+    if (parent === current) {
+      return false;
+    }
+    current = parent;
+  }
+}
+
 function download(url, destination) {
   return new Promise((resolve, reject) => {
     https.get(url, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        const redirect = new URL(response.headers.location, url);
+        if (redirect.protocol !== "https:" || redirect.hostname !== "github.com") {
+          reject(new Error(`refusing redirect to unexpected host: ${redirect.origin}`));
+          response.resume();
+          return;
+        }
         response.resume();
-        download(response.headers.location, destination).then(resolve, reject);
+        download(redirect.toString(), destination).then(resolve, reject);
         return;
       }
 

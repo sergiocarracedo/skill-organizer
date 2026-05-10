@@ -92,6 +92,11 @@ This helper validates:
 - `go build ./...` from `packages/cli`
 - npm wrapper script syntax
 
+Before merging the release PR, also run the manual GitHub Actions workflow `cli-e2e` with:
+
+- `run_binary_e2e = true`
+- `run_real_npx_smoke = true`
+
 It does not require `NPM_TOKEN` for CI publishing because npm uses trusted publishing.
 
 ### Beta releases
@@ -113,6 +118,11 @@ This helper validates the same shared checks as alpha, but requires:
 - current branch is `beta`
 - current version is a beta prerelease
 
+Before merging the release PR, also run the manual GitHub Actions workflow `cli-e2e` with:
+
+- `run_binary_e2e = true`
+- `run_real_npx_smoke = true`
+
 ### Stable releases
 
 1. Merge release-ready changes into `main`.
@@ -131,6 +141,11 @@ This helper validates the same shared checks, but requires:
 - current branch is `main`
 - current version is stable with no prerelease suffix
 
+Before merging the release PR, also run the manual GitHub Actions workflow `cli-e2e` with:
+
+- `run_binary_e2e = true`
+- `run_real_npx_smoke = true`
+
 It also warns if this environment variable is missing:
 
 - `HOMEBREW_TAP_GITHUB_TOKEN`
@@ -140,11 +155,17 @@ It also warns if this environment variable is missing:
 Workflows:
 
 - `.github/workflows/ci.yml`
+- `.github/workflows/cli-e2e.yml`
 - `.github/workflows/release-please.yml`
 - `.github/workflows/release.yml`
 - `.github/workflows/publish-npm.yml`
 
 The CI workflow also validates pull request titles against a conventional commit pattern.
+
+The `cli-e2e` workflow is manual on purpose. Use it on demand and before every release. It currently covers:
+
+- compiled-binary CLI e2e with isolated HOME/XDG state and a fake `skills` CLI
+- real `npx skills` compatibility smoke against `vercel-labs/agent-browser`
 
 ## GoReleaser
 
@@ -168,8 +189,8 @@ This repository now includes an npm wrapper package in:
 packages/cli/packages/npm
 ```
 
-The npm package downloads the matching prebuilt GitHub Release binary during `postinstall`.
-It verifies the archive against the published `checksums.txt` file before extraction.
+The npm package downloads the matching prebuilt GitHub Release binary during `postinstall` from the official `sergiocarracedo/skill-organizer` release path.
+It does not allow environment-variable overrides for the GitHub owner or repository.
 Publishing uses GitHub Actions trusted publishing instead of an `NPM_TOKEN`.
 
 Recommended tags:

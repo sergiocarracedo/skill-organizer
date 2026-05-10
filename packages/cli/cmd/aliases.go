@@ -1,11 +1,17 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"strings"
+
+	"github.com/spf13/cobra"
+)
 
 func addRootAlias(use string, target *cobra.Command) {
 	alias := &cobra.Command{
-		Use:                use,
+		Use:                aliasUse(use, target.Use),
 		Short:              target.Short,
+		Long:               target.Long,
+		Example:            target.Example,
 		Args:               target.Args,
 		DisableFlagParsing: false,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -20,4 +26,13 @@ func addRootAlias(use string, target *cobra.Command) {
 	alias.Flags().AddFlagSet(target.Flags())
 	alias.PersistentFlags().AddFlagSet(target.PersistentFlags())
 	rootCmd.AddCommand(alias)
+}
+
+func aliasUse(alias string, targetUse string) string {
+	fields := strings.Fields(targetUse)
+	if len(fields) == 0 {
+		return alias
+	}
+	fields[0] = alias
+	return strings.Join(fields, " ")
 }

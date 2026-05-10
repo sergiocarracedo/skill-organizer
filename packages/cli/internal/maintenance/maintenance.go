@@ -11,21 +11,39 @@ import (
 )
 
 const checkInterval = 12 * time.Hour
+const skillUpdateReminderInterval = 30 * 24 * time.Hour
+
+var IsServiceRunningFunc = func() (bool, error) { return false, nil }
 
 func MaybeNotifySkillUpdates(_ context.Context, stdout io.Writer) {
-	cachePath, err := configpkg.CachePath()
+	updatesPath, err := configpkg.UpdatesPath()
 	if err != nil {
 		return
 	}
-	cache, err := configpkg.LoadUpdateCacheOrDefault(cachePath)
+	state, err := configpkg.LoadUpdatesStateOrDefault(updatesPath)
 	if err != nil {
 		return
 	}
-	if len(cache.SkillUpdates.Pending) == 0 {
+	if state.UpdateCount > 0 {
+		_, _ = fmt.Fprintf(stdout, "\nThere are %d updates. Run skill-organizer check-updates to update skills.\n\n", state.UpdateCount)
 		return
 	}
-	_, _ = fmt.Fprintf(stdout, "\nSkill updates available: %d\n", len(cache.SkillUpdates.Pending))
-	_, _ = fmt.Fprintf(stdout, "Run `skill-organizer skill check-updates` to review them.\n\n")
+	running, err := IsServiceRunningFunc()
+	if err == nil && running {
+		return
+	}
+	now := time.Now().UTC()
+	checkedAt, checkedOK := parseOptionalRFC3339(state.LastCheckedAt)
+	if checkedOK && now.Sub(checkedAt) < skillUpdateReminderInterval {
+		return
+	}
+	remindedAt, remindedOK := parseOptionalRFC3339(state.LastRemindedAt)
+	if remindedOK && now.Sub(remindedAt) < skillUpdateReminderInterval {
+		return
+	}
+	_, _ = fmt.Fprintf(stdout, "\nSkill updates have not been checked in 30 days. Run skill-organizer check-updates to review updates.\n\n")
+	state.LastRemindedAt = now.Format(time.RFC3339)
+	_ = configpkg.SaveUpdatesState(updatesPath, state)
 }
 
 func MaybeRunBackupGC(_ context.Context) {
@@ -66,4 +84,12 @@ func checkedRecently(value string, now time.Time) bool {
 		return false
 	}
 	return now.Sub(parsed) < checkInterval
+}
+
+func parseOptionalRFC3339(value string) (time.Time, bool) {
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return parsed, true
 }

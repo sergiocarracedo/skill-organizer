@@ -169,19 +169,6 @@ func (s *Sandbox) Run(args ...string) (string, error) {
 	return s.runner.RunIn(context.Background(), s.projectDir, sandboxEnv(s.homeDir), args...)
 }
 
-func (s *Sandbox) RunInteractive(args ...string) error {
-	command := exec.Command(s.runner.command[0], append(s.runner.command[1:], args...)...)
-	command.Dir = s.projectDir
-	command.Env = append(os.Environ(), sandboxEnv(s.homeDir)...)
-	command.Stdin = os.Stdin
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-	if err := command.Run(); err != nil {
-		return fmt.Errorf("run %s: %w", strings.Join(append(s.runner.command, args...), " "), err)
-	}
-	return nil
-}
-
 func (s *Sandbox) ListRepoSkills(source string) ([]SkillSummary, error) {
 	output, err := s.Run("add", source, "-l")
 	if err != nil {

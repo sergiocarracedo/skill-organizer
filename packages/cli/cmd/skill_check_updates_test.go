@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -81,7 +82,7 @@ func TestCollectUpdateCandidatesUsesOriginalNameWhenPresent(t *testing.T) {
 	}
 
 	originalFetch := fetchSkillBundleFunc
-	fetchSkillBundleFunc = func(source string, name string) (remotepkg.SkillBundle, error) {
+	fetchSkillBundleFunc = func(_ context.Context, source string, name string) (remotepkg.SkillBundle, error) {
 		if source != "terrylica/cc-skills" {
 			t.Fatalf("source = %q, want %q", source, "terrylica/cc-skills")
 		}
@@ -100,7 +101,7 @@ func TestCollectUpdateCandidatesUsesOriginalNameWhenPresent(t *testing.T) {
 	}
 	t.Cleanup(func() { fetchSkillBundleFunc = originalFetch })
 
-	scan, err := collectUpdateCandidates(configpkg.Location{Source: source, Target: target}, nil, nil)
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, nil, nil)
 	if err != nil {
 		t.Fatalf("collectUpdateCandidates() error = %v", err)
 	}
@@ -127,7 +128,7 @@ func TestCollectUpdateCandidatesUsesInstalledVersionMetadataWhenPresent(t *testi
 	}
 
 	originalFetch := fetchSkillBundleFunc
-	fetchSkillBundleFunc = func(source string, name string) (remotepkg.SkillBundle, error) {
+	fetchSkillBundleFunc = func(_ context.Context, source string, name string) (remotepkg.SkillBundle, error) {
 		return remotepkg.SkillBundle{
 			Root:  dir,
 			Skill: remotepkg.SkillSummary{Source: source, Hash: "new-installed", RepoSkillPath: "skills/gws-admin-reports"},
@@ -136,7 +137,7 @@ func TestCollectUpdateCandidatesUsesInstalledVersionMetadataWhenPresent(t *testi
 	}
 	t.Cleanup(func() { fetchSkillBundleFunc = originalFetch })
 
-	scan, err := collectUpdateCandidates(configpkg.Location{Source: source, Target: target}, nil, nil)
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, nil, nil)
 	if err != nil {
 		t.Fatalf("collectUpdateCandidates() error = %v", err)
 	}
@@ -162,7 +163,7 @@ func TestCollectUpdateCandidatesUsesSkillFileVersionWhenPresent(t *testing.T) {
 	}
 
 	originalFetch := fetchSkillBundleFunc
-	fetchSkillBundleFunc = func(source string, name string) (remotepkg.SkillBundle, error) {
+	fetchSkillBundleFunc = func(_ context.Context, source string, name string) (remotepkg.SkillBundle, error) {
 		return remotepkg.SkillBundle{
 			Root:  dir,
 			Skill: remotepkg.SkillSummary{Source: source, Hash: "opaque-hash", RepoSkillPath: "skills/gws-admin-reports"},
@@ -171,7 +172,7 @@ func TestCollectUpdateCandidatesUsesSkillFileVersionWhenPresent(t *testing.T) {
 	}
 	t.Cleanup(func() { fetchSkillBundleFunc = originalFetch })
 
-	scan, err := collectUpdateCandidates(configpkg.Location{Source: source, Target: target}, nil, nil)
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, nil, nil)
 	if err != nil {
 		t.Fatalf("collectUpdateCandidates() error = %v", err)
 	}
@@ -200,7 +201,7 @@ func TestCollectUpdateCandidatesNormalizesGitHubSourceURL(t *testing.T) {
 	}
 
 	originalFetch := fetchSkillBundleFunc
-	fetchSkillBundleFunc = func(source string, name string) (remotepkg.SkillBundle, error) {
+	fetchSkillBundleFunc = func(_ context.Context, source string, name string) (remotepkg.SkillBundle, error) {
 		if source != "googleworkspace/cli" {
 			t.Fatalf("source = %q, want %q", source, "googleworkspace/cli")
 		}
@@ -215,7 +216,7 @@ func TestCollectUpdateCandidatesNormalizesGitHubSourceURL(t *testing.T) {
 	}
 	t.Cleanup(func() { fetchSkillBundleFunc = originalFetch })
 
-	scan, err := collectUpdateCandidates(configpkg.Location{Source: source, Target: target}, nil, nil)
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, nil, nil)
 	if err != nil {
 		t.Fatalf("collectUpdateCandidates() error = %v", err)
 	}
@@ -244,7 +245,7 @@ func TestCollectUpdateCandidatesDoesNotRequireRepoSkillPath(t *testing.T) {
 	}
 
 	originalFetch := fetchSkillBundleFunc
-	fetchSkillBundleFunc = func(source string, name string) (remotepkg.SkillBundle, error) {
+	fetchSkillBundleFunc = func(_ context.Context, source string, name string) (remotepkg.SkillBundle, error) {
 		if source != "googleworkspace/cli" {
 			t.Fatalf("source = %q, want %q", source, "googleworkspace/cli")
 		}
@@ -259,7 +260,7 @@ func TestCollectUpdateCandidatesDoesNotRequireRepoSkillPath(t *testing.T) {
 	}
 	t.Cleanup(func() { fetchSkillBundleFunc = originalFetch })
 
-	scan, err := collectUpdateCandidates(configpkg.Location{Source: source, Target: target}, nil, nil)
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, nil, nil)
 	if err != nil {
 		t.Fatalf("collectUpdateCandidates() error = %v", err)
 	}
@@ -292,7 +293,7 @@ func TestCollectUpdateCandidatesReportsFetchFailuresAndProgress(t *testing.T) {
 	}
 
 	originalFetch := fetchSkillBundleFunc
-	fetchSkillBundleFunc = func(source string, name string) (remotepkg.SkillBundle, error) {
+	fetchSkillBundleFunc = func(_ context.Context, source string, name string) (remotepkg.SkillBundle, error) {
 		switch name {
 		case "gws-admin-reports":
 			return remotepkg.SkillBundle{
@@ -310,7 +311,7 @@ func TestCollectUpdateCandidatesReportsFetchFailuresAndProgress(t *testing.T) {
 
 	var progress []string
 	var active []string
-	scan, err := collectUpdateCandidates(configpkg.Location{Source: source, Target: target}, func(checked int, total int, found int) {
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, func(checked int, total int, found int) {
 		progress = append(progress, fmt.Sprintf("%d/%d/%d", checked, total, found))
 	}, func(checked int, total int, found int, relativePath string) {
 		active = append(active, fmt.Sprintf("%d/%d/%d:%s", checked, total, found, relativePath))
@@ -345,10 +346,10 @@ func TestCheckUpdatesHelpLineStylesKeys(t *testing.T) {
 }
 
 func TestRefreshSkillUpdateCacheWritesPendingEntries(t *testing.T) {
-	cachePath := filepath.Join(t.TempDir(), ".cache.yml")
-	original := cachePathFunc
-	cachePathFunc = func() (string, error) { return cachePath, nil }
-	t.Cleanup(func() { cachePathFunc = original })
+	updatesPath := filepath.Join(t.TempDir(), ".updates")
+	original := updatesPathFunc
+	updatesPathFunc = func() (string, error) { return updatesPath, nil }
+	t.Cleanup(func() { updatesPathFunc = original })
 
 	err := refreshSkillUpdateCache([]skillUpdateCandidate{{
 		Skill:     skills.Skill{RelativePath: "thirdparty/example", FlattenedName: "thirdparty--example"},
@@ -360,14 +361,14 @@ func TestRefreshSkillUpdateCacheWritesPendingEntries(t *testing.T) {
 	if err != nil {
 		t.Fatalf("refreshSkillUpdateCache() error = %v", err)
 	}
-	content, err := os.ReadFile(cachePath)
+	content, err := os.ReadFile(updatesPath)
 	if err != nil {
 		t.Fatalf("ReadFile() error = %v", err)
 	}
 	text := string(content)
-	for _, want := range []string{"relative-path: thirdparty/example", "installed-version: old", "latest-version: new", "source: owner/repo"} {
+	for _, want := range []string{"update-count: 1", "relative-path: thirdparty/example", "installed-version: old", "latest-version: new", "source: owner/repo"} {
 		if !strings.Contains(text, want) {
-			t.Fatalf("cache content missing %q\n%s", want, text)
+			t.Fatalf("updates content missing %q\n%s", want, text)
 		}
 	}
 }

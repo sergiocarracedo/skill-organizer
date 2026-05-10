@@ -150,6 +150,19 @@ export const commandGroups: CommandGroup[] = [
       "skill-organizer service start",
       "skill-organizer service log-level set debug",
       "skill-organizer service status",
+      ],
+  },
+  {
+    slug: "update",
+    title: "Update",
+    command: "skill-organizer update",
+    summary: "Update the installed CLI.",
+    whyItMatters:
+      "Update uses the detected distribution channel for safe upgrades and gives direct binary installs an explicit manual release path.",
+    examples: [
+      "skill-organizer update",
+      "npm i -g skill-organizer@latest",
+      "brew upgrade skill-organizer",
     ],
   },
   {

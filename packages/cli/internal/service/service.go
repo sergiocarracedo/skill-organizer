@@ -280,3 +280,11 @@ func userSystemdStatus() (string, error) {
 	}
 	return text, nil
 }
+
+func IsRunning(registryPath string) (bool, error) {
+	status, err := Control(registryPath, "status")
+	if err != nil {
+		return false, err
+	}
+	return status == "running", nil
+}

@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      lefthook:
+        specifier: ^2.1.6
+        version: 2.1.6
 
   packages/cli/packages/npm: {}
 

@@ -8,8 +8,10 @@ import (
 	"strings"
 	"syscall"
 
+	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	maintenancepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/maintenance"
 	selfupdatepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/selfupdate"
+	servicepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/service"
 	"github.com/spf13/cobra"
 )
 
@@ -30,10 +32,40 @@ var rootCmd = &cobra.Command{
 func Execute() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	return rootCmd.ExecuteContext(ctx)
+	err := rootCmd.ExecuteContext(ctx)
+	if err == nil {
+		return nil
+	}
+	if shouldPrintCommandHelp(err) {
+		_, _ = fmt.Fprintf(rootCmd.ErrOrStderr(), "ERROR   %v\n\n", err)
+		cmd, _, findErr := rootCmd.Find(os.Args[1:])
+		if findErr == nil && cmd != nil {
+			_ = cmd.Help()
+			return nil
+		}
+	}
+	return err
+}
+
+func shouldPrintCommandHelp(err error) bool {
+	if err == nil {
+		return false
+	}
+	text := strings.TrimSpace(err.Error())
+	if strings.Contains(text, "accepts ") && strings.Contains(text, " arg(s), received ") {
+		return true
+	}
+	return false
 }
 
 func init() {
+	maintenancepkg.IsServiceRunningFunc = func() (bool, error) {
+		registryPath, err := configpkg.RegistryPath()
+		if err != nil {
+			return false, err
+		}
+		return servicepkg.IsRunning(registryPath)
+	}
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a project config file")
 	rootCmd.Version = version
 	rootCmd.SetVersionTemplate(fmt.Sprintf("%s\n%s\ncommit %s, built %s\n", cliLogo(), version, commit, date))
