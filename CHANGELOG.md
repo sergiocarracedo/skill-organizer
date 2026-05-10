@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.5...v1.0.0-beta.1) (2026-05-10)
+
+
+### Features
+
+* add cli self-update command ([bb29d2e](https://github.com/sergiocarracedo/skill-organizer/commit/bb29d2e29ce104600333df1354955b5aef7e9755))
+* add cli self-update command ([5980803](https://github.com/sergiocarracedo/skill-organizer/commit/5980803b314a615dae7b89a83e456f33eae77dc2))
+* add managed skills.sh import and update workflow ([9048e84](https://github.com/sergiocarracedo/skill-organizer/commit/9048e843a3e7cd3445cceb61f8c5ecc05ff20f5b))
+* add workflow ([12473ef](https://github.com/sergiocarracedo/skill-organizer/commit/12473eff9211b909212eb0034704621f591b5bf1))
+* check updates ([2f4b791](https://github.com/sergiocarracedo/skill-organizer/commit/2f4b79169a5133b4b08144b6e5ae2eb3a98dd51a))
+* prepare beta release candidate ([89e0f21](https://github.com/sergiocarracedo/skill-organizer/commit/89e0f218231bb5ff20621cb74af215ee9cc797a7))
+
+
+### Bug Fixes
+
+* make cli e2e portable in CI ([66bb5a5](https://github.com/sergiocarracedo/skill-organizer/commit/66bb5a523fa173ea5bfe142c640bc2533a0626e1))
+
 ## [0.0.5](https://github.com/sergiocarracedo/skill-organizer/compare/v0.0.4...v0.0.5) (2026-04-29)
 
 
