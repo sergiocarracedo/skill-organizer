@@ -1,0 +1,19 @@
+.github/workflows/release.yml
+  s_1f4857cc6cbfac::t_176e2100b17ff6 25,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "e52cacfb1a0cd82da5e196dfe4fe440de328ea19",
+  "prompts": {},
+  "sessions": {
+    "s_1f4857cc6cbfac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1e9ded94dffeqsF2PgK3Ybrb8w",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
