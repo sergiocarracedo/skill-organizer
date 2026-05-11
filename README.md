@@ -343,25 +343,17 @@ This is a good terminal demo flow for an asciinema recording:
 ```bash
 cd ~/.agents
 
-npx skills add https://github.com/terrylica/cc-skills --skill asciinema-recorder
+skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciinema-recorder
 
 skill-organizer status --config ~/.agents/.skill-organizer.yml
-
-skill-organizer skill move-unmanaged --config ~/.agents/.skill-organizer.yml
-```
-
-Move `asciinema-recorder` into:
-
-```text
-thirdparty/asciinema/asciinema-recorder
 ```
 
 Then show:
 
-- the source now lives under `~/.agents/skills-organized/thirdparty/asciinema/asciinema-recorder`
-- the flat target contains the generated entry
+- the source now lives under `~/.agents/skills-organized/asciinema-recorder`
+- the flat target contains the generated managed entry
 - `IMPORTANT.md` is still present in the generated folder
-- `skill-organizer status` is clean after the move
+- `skill-organizer status` is clean after the import
 
 Recorded example:
 

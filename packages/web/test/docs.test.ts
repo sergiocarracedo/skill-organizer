@@ -1,9 +1,14 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { cliVersion } from "@/lib/cli-version";
+vi.stubEnv(
+  "PUBLIC_CLI_VERSION",
+  readFileSync(fileURLToPath(new URL("../../../VERSION", import.meta.url)), "utf8").trim(),
+);
+
+import { getCliVersion } from "@/lib/cli-version";
 import { getCommandBySlug, trimCollectionSlug } from "@/lib/docs";
 
 const cliVersionFilePath = fileURLToPath(
@@ -12,7 +17,7 @@ const cliVersionFilePath = fileURLToPath(
 
 describe("docs helpers", () => {
   it("keeps the displayed CLI version in sync with the repo VERSION", () => {
-    expect(cliVersion).toBe(readFileSync(cliVersionFilePath, "utf8").trim());
+    expect(getCliVersion()).toBe(readFileSync(cliVersionFilePath, "utf8").trim());
   });
 
   it("returns the correct command metadata", () => {
