@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.2...v1.0.3) (2026-05-11)
+
+
+### Bug Fixes
+
+* refresh service unit before start ([7a5c154](https://github.com/sergiocarracedo/skill-organizer/commit/7a5c1546f43d19617b99d1d5a646297a5145af16))
+
 ## [1.0.2](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.1...v1.0.2) (2026-05-11)
 
 
