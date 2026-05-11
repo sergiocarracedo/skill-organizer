@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.1...v1.0.2) (2026-05-11)
+
+
+### Bug Fixes
+
+* sync web version badge and command docs ([7f55e08](https://github.com/sergiocarracedo/skill-organizer/commit/7f55e08e8f171c6e72da9548ed2357578d5574f7))
+
 ## [1.0.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.0...v1.0.1) (2026-05-11)
 
 
