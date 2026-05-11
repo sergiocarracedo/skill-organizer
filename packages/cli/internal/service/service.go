@@ -27,6 +27,10 @@ type Program struct {
 	logger       loggingpkg.Logger
 }
 
+var serviceExecutablePath = func() (string, error) {
+	return os.Executable()
+}
+
 func NewProgram(registryPath string) *Program {
 	return &Program{RegistryPath: registryPath}
 }
@@ -161,6 +165,9 @@ func controlLinuxUserSystemd(action string) (string, error) {
 		}
 		return "installed", nil
 	case "start":
+		if err := installUserUnit(unitPath); err != nil {
+			return "", fmt.Errorf("refresh service unit: %w", err)
+		}
 		if err := runUserSystemctl("start", serviceName+".service"); err != nil {
 			return "", fmt.Errorf("start service: %w", err)
 		}
@@ -171,6 +178,9 @@ func controlLinuxUserSystemd(action string) (string, error) {
 		}
 		return "stopped", nil
 	case "restart":
+		if err := installUserUnit(unitPath); err != nil {
+			return "", fmt.Errorf("refresh service unit: %w", err)
+		}
 		if err := runUserSystemctl("restart", serviceName+".service"); err != nil {
 			return "", fmt.Errorf("restart service: %w", err)
 		}
@@ -201,7 +211,7 @@ func installUserUnit(unitPath string) error {
 		return fmt.Errorf("create user systemd directory: %w", err)
 	}
 
-	executable, err := os.Executable()
+	executable, err := serviceExecutablePath()
 	if err != nil {
 		return fmt.Errorf("resolve executable: %w", err)
 	}
@@ -245,7 +255,8 @@ func userUnitPath() (string, error) {
 	return filepath.Join(home, ".config", "systemd", "user", serviceName+".service"), nil
 }
 
-func runUserSystemctl(args ...string) error {
+
+var runUserSystemctl = func(args ...string) error {
 	command := exec.Command("systemctl", append([]string{"--user"}, args...)...)
 	output, err := command.CombinedOutput()
 	if err != nil {
