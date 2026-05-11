@@ -21,6 +21,7 @@ skill-organizer delete <skill-path-or-pattern>
 skill-organizer skill move-unmanaged
 skill-organizer skill check-updates
 skill-organizer check-updates
+skill-organizer skill try-find-metadata
 skill-organizer skill check-overlap
 ```
 
@@ -58,7 +59,15 @@ In interactive mode you can toggle selections, edit destination folders, and use
 
 Selected skills are backed up into `.old/`, updated in source, and then synchronized. `--yes` skips the interactive selector and updates every detected candidate.
 
+Managed skills that are missing tracked import metadata are reported as skipped with a reminder to prefer `skill-organizer skill add` for future imports.
+
 Aliases: root shortcut `skill-organizer check-updates`; local aliases `skill-organizer skill updates` and `skill-organizer skill upgrade`.
+
+## try-find-metadata
+
+`try-find-metadata` scans managed source skills that are missing tracked import metadata, runs `skills find` to discover likely upstream candidates, fetches the candidate bundles, and only writes missing `metadata.skill-organizer` fields when the local and remote `SKILL.md` content match closely enough.
+
+Use it when a skill was originally installed outside `skill-organizer skill add` and now shows up as skipped during `check-updates`.
 
 ## check-overlap
 
@@ -71,6 +80,7 @@ skill-organizer skill add https://github.com/terrylica/cc-skills --skill asciine
 skill-organizer add https://github.com/terrylica/cc-skills --skill asciinema-recorder
 skill-organizer skill check-updates
 skill-organizer check-updates
+skill-organizer skill try-find-metadata
 skill-organizer skill delete thirdparty/asciinema/asciinema-recorder
 skill-organizer delete thirdparty/asciinema/asciinema-recorder
 skill-organizer delete "google/gws-*"

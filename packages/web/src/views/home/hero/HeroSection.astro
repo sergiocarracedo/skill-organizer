@@ -18,7 +18,7 @@ import HeroTransformPanel from './HeroTransformPanel/HeroTransformPanel.astro'
     <div class="flex flex-col items-center gap-4">
       <div class="inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/4 px-[0.85rem] py-[0.6rem] backdrop-blur-[18px]" data-reveal>
         <LogoMark className="h-7 w-auto" />
-        <span class="font-display text-[0.76rem] uppercase tracking-[0.28em] text-cyan-100/75">Version {cliVersion}</span>
+        <span class="font-display text-[0.76rem] uppercase tracking-[0.28em] text-cyan-100/75">CLI {cliVersion}</span>
       </div>
 
       <p class="font-display text-[0.76rem] uppercase tracking-[0.28em] text-cyan-100/75" data-reveal>
@@ -56,6 +56,26 @@ import HeroTransformPanel from './HeroTransformPanel/HeroTransformPanel.astro'
         company, or project in `skills-organized/`, then keep the generated
         tool-readable view synced automatically across one or many setups.
       </p>
+
+      <div
+        class="mt-[0.35rem] flex max-w-[58rem] flex-wrap items-center justify-center gap-x-[0.9rem] gap-y-[0.4rem] rounded-full border border-[rgba(124,211,255,0.16)] bg-[linear-gradient(180deg,rgba(7,14,27,0.68),rgba(7,14,27,0.38))] px-[1.05rem] py-[0.75rem] text-center shadow-[0_20px_50px_rgba(7,12,24,0.24)] max-[720px]:rounded-[1.15rem]"
+        data-reveal
+      >
+        <span class="font-display text-[0.72rem] uppercase tracking-[0.24em] text-cyan-200/76">
+          Managed skill updates
+        </span>
+        <p class="m-0 text-[0.98rem] leading-[1.75] text-slate-100/84">
+          Import skills with upstream version metadata, then run
+          <code class="font-code text-cyan-200/95"> skill-organizer check-updates </code>
+          to review new releases before you apply them.
+        </p>
+        <a
+          class="text-[0.92rem] text-cyan-300/92 no-underline transition hover:text-cyan-200"
+          href={withBase('/docs/reference/skill')}
+        >
+          See skill commands
+        </a>
+      </div>
 
       <div class="mt-[0.2rem] flex flex-wrap justify-center gap-[0.85rem]" data-reveal>
         <a

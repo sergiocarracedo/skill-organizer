@@ -102,7 +102,7 @@ func init() {
 	rootCmd.AddCommand(newWatchedCommand())
 	rootCmd.AddCommand(newWatchCommand())
 	rootCmd.AddCommand(newServiceCommand())
-	rootCmd.AddCommand(newUpdateCommand())
+	rootCmd.AddCommand(newSelfUpdateCommand())
 
 	for _, child := range skillCmd.Commands() {
 		switch child.Name() {

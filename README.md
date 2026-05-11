@@ -231,7 +231,8 @@ skill-organizer skill check-overlap
 - `skill enable` and `skill disable` update `metadata.skill-organizer.disabled` in the source `SKILL.md`.
 - `skill delete` moves a managed source skill into `~/.config/skill-organizer/.old/[timestamp]-[flattened-name]` after confirmation, then syncs the project. Quote wildcard patterns such as `"google/gws-*"` so the shell passes them through unchanged.
 - `skill move-unmanaged` previews moves from unmanaged target entries into the source tree and applies them after confirmation, or immediately with `--yes`.
-- `skill check-updates` checks imported managed skills for upstream updates, lets you inspect diffs with `d`, backs up selected skills into `.old/`, applies updates, and syncs afterward.
+- `skill check-updates` checks imported managed skills for upstream updates, lets you inspect diffs with `d`, reports managed skills that were skipped because they are missing tracked import metadata, backs up selected skills into `.old/`, applies updates, and syncs afterward.
+- `skill try-find-metadata` tries to recover missing import metadata for managed skills by searching `skills.sh`, verifying the matching upstream bundle, and rewriting the missing `metadata.skill-organizer` fields in place.
 - `skill check-overlap` runs an installed agent CLI to review the current project skills and report likely overlap or duplication. By default it analyzes enabled skills only and shows only `partial` and `duplicate` overlap groups. Use `--include-disabled` to include disabled skills, `--choose-tool` to pick a different installed tool on the next run, `--tool <id>` to choose one explicitly, `--min-overlap-type` to include weaker matches, or `--no-ask-to-apply` to skip the follow-up planning prompt.
 - `skill check-overlap --print-prompt` prints the generated analysis prompt without invoking any external CLI. This bypasses tool selection and the one-time cost notice.
 
@@ -249,11 +250,14 @@ skill-organizer delete thirdparty/asciinema/asciinema-recorder
 skill-organizer delete "google/gws-*"
 skill-organizer skill check-updates
 skill-organizer check-updates
+skill-organizer skill try-find-metadata
 ```
 
 When `skill add` runs, the CLI prints `Using skills.sh cli tool to add the skills` before invoking `skills.sh`. The imported skill is written directly into the managed source tree, not left behind as an unmanaged target entry.
 
 Imported skills store source metadata in `metadata.skill-organizer`, including source, source type, installed version, installed date, and repo skill path. That metadata powers `skill check-updates` and the periodic update notice shown on normal CLI runs when cached updates are available.
+
+If a skill was originally brought in through `npx skills add` or another workflow that did not write this organizer metadata, `skill check-updates` now reports it as skipped and reminds you to prefer `skill-organizer skill add`. You can also run `skill-organizer skill try-find-metadata` to attempt recovery of the missing metadata by matching the local skill against a `skills.sh` candidate.
 
 Deleted or updated skills are backed up under:
 

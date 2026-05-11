@@ -65,3 +65,17 @@ func TestResolveVersionFallsBackToSkillFileVersionBeforeHash(t *testing.T) {
 		t.Fatalf("ResolveVersion() = %q, want %q", got, "0.22.4")
 	}
 }
+
+func TestParseSkillFindOutputParsesRankedResults(t *testing.T) {
+	output := "Install with npx skills add <owner/repo@skill>\n\nowner/repo@demo-skill 1.0K installs\n└ https://skills.sh/owner/repo/demo-skill\n\nsecond/repo@other 0.5K installs\n└ https://skills.sh/second/repo/other\n"
+	results := parseSkillFindOutput(output)
+	if len(results) != 2 {
+		t.Fatalf("parseSkillFindOutput() len = %d, want 2", len(results))
+	}
+	if results[0].Skill.Source != "owner/repo" || results[0].Skill.Name != "demo-skill" {
+		t.Fatalf("first result = %#v", results[0])
+	}
+	if results[0].PageURL != "https://skills.sh/owner/repo/demo-skill" {
+		t.Fatalf("first page url = %q", results[0].PageURL)
+	}
+}

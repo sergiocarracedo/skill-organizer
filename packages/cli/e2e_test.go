@@ -57,7 +57,12 @@ type fakeInstalledSkill struct {
 }
 
 type updatesState struct {
-	UpdateCount int `yaml:"update-count,omitempty"`
+	UpdateCount int                  `yaml:"update-count,omitempty"`
+	Pending     []updatesStateRecord `yaml:"pending,omitempty"`
+}
+
+type updatesStateRecord struct {
+	Source string `yaml:"source,omitempty"`
 }
 
 type interactiveStep struct {
@@ -111,7 +116,7 @@ func TestSkillAddAndCheckUpdatesBinary(t *testing.T) {
 		},
 	})
 
-	addOutput := env.runInteractive(t, env.workspace, nil, []interactiveStep{{waitFor: "Set the target folders for the imported skills.", send: "\r"}}, "skill", "add", "owner/repo", "--skill", "demo-skill")
+	addOutput := env.runInteractive(t, env.workspace, nil, []interactiveStep{{waitForAny: []string{"Set the target folders for the imported skills.", "demo-skill -> skills-organized/"}, send: "\r"}}, "skill", "add", "owner/repo", "--skill", "demo-skill")
 	assertContains(t, addOutput, "Imported skill: demo-skill -> demo-skill")
 	installed := env.readFile(filepath.Join(env.source, "demo-skill", "SKILL.md"))
 	assertContains(t, installed, "installed-version: 1.0.0")
@@ -168,13 +173,82 @@ func TestSkillAddWithRealNpxSkillsSmoke(t *testing.T) {
 	listOutput := env.runRaw(t, env.workspace, env.realSkillsEnv(), "npx", "skills", "list", "--json")
 	assertContains(t, listOutput, "agent-browser")
 
-	cliOutput := env.runInteractive(t, env.workspace, env.realSkillsEnv(), []interactiveStep{{waitFor: "Set the target folders for the imported skills.", send: "\r"}}, "skill", "add", "vercel-labs/agent-browser", "--skill", "agent-browser")
+	cliOutput := env.runInteractive(t, env.workspace, env.realSkillsEnv(), []interactiveStep{{waitForAny: []string{"Set the target folders for the imported skills.", "agent-browser -> skills-organized/"}, send: "\r"}}, "skill", "add", "vercel-labs/agent-browser", "--skill", "agent-browser")
 	assertContains(t, cliOutput, "Imported skill: agent-browser")
 	installed := env.readFile(filepath.Join(env.source, "agent-browser", "SKILL.md"))
 	assertContains(t, installed, "original-name: agent-browser")
 	assertContains(t, installed, "source: vercel-labs/agent-browser")
 	assertContains(t, installed, "repo-skill-path: skills/agent-browser")
 	assertSymlinkTargetContains(t, filepath.Join(env.target, "agent-browser"), filepath.Join("..", "skills-organized", "agent-browser"))
+}
+
+func TestSkillTryFindMetadataBinary(t *testing.T) {
+	t.Parallel()
+	env := newCLIEnv(t)
+	env.writeProjectConfig()
+	env.writeFakeSkillsFixtures("owner/repo", map[string]fakeFixtureSkill{
+		"demo-skill": {
+			Version:       "1.1.0",
+			Hash:          "hash-110",
+			RepoSkillPath: "skills/demo-skill",
+			Body:          "# Demo\n",
+		},
+	})
+	env.writeSourceSkill("demo-skill", "demo-skill", map[string]any{
+		"metadata": map[string]any{
+			"skill-organizer": map[string]any{
+				"original-name": "demo-skill",
+			},
+		},
+	}, "# Demo\n")
+
+	output := env.run(t, env.workspace, nil, "skill", "try-find-metadata")
+	assertContains(t, output, "Updated metadata for demo-skill using owner/repo@demo-skill")
+	installed := env.readFile(filepath.Join(env.source, "demo-skill", "SKILL.md"))
+	assertContains(t, installed, "source: owner/repo")
+	assertContains(t, installed, "repo-skill-path: skills/demo-skill")
+	assertContains(t, installed, "installed-version: 1.1.0")
+
+	env.writeFakeSkillsFixtures("owner/repo", map[string]fakeFixtureSkill{
+		"demo-skill": {
+			Version:       "1.2.0",
+			Hash:          "hash-120",
+			RepoSkillPath: "skills/demo-skill",
+			Body:          "# Demo\n",
+		},
+	})
+	updateOutput := env.run(t, env.workspace, nil, "check-updates", "--yes")
+	assertContains(t, updateOutput, "Found: 1")
+	state := env.loadUpdatesState()
+	if state.UpdateCount != 1 {
+		t.Fatalf("update-count = %d, want 1", state.UpdateCount)
+	}
+	if len(state.Pending) != 1 || state.Pending[0].Source != "owner/repo" {
+		t.Fatalf("pending = %#v", state.Pending)
+	}
+}
+
+func TestSkillTryFindMetadataSkipsUnresolvedBinary(t *testing.T) {
+	t.Parallel()
+	env := newCLIEnv(t)
+	env.writeProjectConfig()
+	env.writeSourceSkill("demo-skill", "demo-skill", map[string]any{
+		"metadata": map[string]any{
+			"skill-organizer": map[string]any{
+				"original-name": "demo-skill",
+			},
+		},
+	}, "# Demo\n")
+	output := env.run(t, env.workspace, nil, "skill", "try-find-metadata")
+	assertContains(t, output, "Skipped demo-skill: could not identify upstream source")
+	installed := env.readFile(filepath.Join(env.source, "demo-skill", "SKILL.md"))
+	if strings.Contains(installed, "source:") {
+		t.Fatalf("expected SKILL.md not to gain source metadata\n%s", installed)
+	}
+	state := env.loadUpdatesState()
+	if state.UpdateCount != 0 {
+		t.Fatalf("update-count = %d, want 0", state.UpdateCount)
+	}
 }
 
 type fakeFixtureSkill struct {
@@ -338,10 +412,10 @@ func (e *cliEnv) writeFakeSkillsFixtures(source string, skills map[string]fakeFi
 func (e *cliEnv) writeFakeSkillsShim() {
 	e.t.Helper()
 	repoCLIPath := repoCLIPath(e.t)
-	shim := fmt.Sprintf("#!/usr/bin/env sh\nset -eu\ncd \"%s\"\nexec \"%s\" run ./testdata/fake-skills-cli.go \"$@\"\n", repoCLIPath, commandForShell("go"))
+	shim := fmt.Sprintf("#!/usr/bin/env sh\nset -eu\norig_dir=\"$PWD\"\ncd \"%s\"\nSKILL_ORGANIZER_FAKE_SKILLS_WORKDIR=\"$orig_dir\" exec \"%s\" run ./testdata/fake-skills-cli.go \"$@\"\n", repoCLIPath, commandForShell("go"))
 	e.writeExecutable(filepath.Join(e.binDir, "skills"), shim)
 	if runtime.GOOS == "windows" {
-		e.writeExecutable(filepath.Join(e.binDir, "skills.cmd"), fmt.Sprintf("@echo off\r\ngo run \"%s\" %%*\r\n", filepath.Join(repoCLIPath, "testdata", "fake-skills-cli.go")))
+		e.writeExecutable(filepath.Join(e.binDir, "skills.cmd"), fmt.Sprintf("@echo off\r\nset SKILL_ORGANIZER_FAKE_SKILLS_WORKDIR=%%CD%%\r\ncd /d \"%s\"\r\ngo run ./testdata/fake-skills-cli.go %%*\r\n", repoCLIPath))
 	}
 }
 

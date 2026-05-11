@@ -3,6 +3,7 @@ package status
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
@@ -33,6 +34,30 @@ func TestBuildReportsManagedAndUnmanagedEntries(t *testing.T) {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
 
+	originalConfigHome := os.Getenv("XDG_CONFIG_HOME")
+	if err := os.Setenv("XDG_CONFIG_HOME", root); err != nil {
+		t.Fatalf("Setenv() error = %v", err)
+	}
+	t.Cleanup(func() {
+		if originalConfigHome == "" {
+			_ = os.Unsetenv("XDG_CONFIG_HOME")
+			return
+		}
+		_ = os.Setenv("XDG_CONFIG_HOME", originalConfigHome)
+	})
+	updatesPath, err := configpkg.UpdatesPath()
+	if err != nil {
+		t.Fatalf("UpdatesPath() error = %v", err)
+	}
+	if err := configpkg.SaveUpdatesState(updatesPath, configpkg.UpdatesState{Pending: []configpkg.SkillUpdateRecord{{
+		RelativePath:  "personal/example",
+		FlattenedName: "example",
+		LatestVersion: "9a8b7c6d5e4f3a2b1c0d",
+		CheckedAt:     "2026-05-10T13:49:48Z",
+	}}}); err != nil {
+		t.Fatalf("SaveUpdatesState() error = %v", err)
+	}
+
 	report, err := Build(configpkg.Location{Source: source, Target: target})
 	if err != nil {
 		t.Fatalf("Build() error = %v", err)
@@ -52,6 +77,23 @@ func TestBuildReportsManagedAndUnmanagedEntries(t *testing.T) {
 	}
 	if states["personal/disabled"] != StateDisabled {
 		t.Fatalf("state for personal/disabled = %q, want %q", states["personal/disabled"], StateDisabled)
+	}
+
+	entries := map[string]SkillStatus{}
+	for _, entry := range report.Skills {
+		entries[entry.Skill.RelativePath] = entry
+	}
+	if entries["personal/example"].InstalledVersion != "1.0.0" {
+		t.Fatalf("installed version = %q, want %q", entries["personal/example"].InstalledVersion, "1.0.0")
+	}
+	if entries["personal/example"].InstalledDate != "2026-05-01T12:00:00Z" {
+		t.Fatalf("installed date = %q, want %q", entries["personal/example"].InstalledDate, "2026-05-01T12:00:00Z")
+	}
+	if entries["personal/example"].AvailableVersion != "9a8b7c6d5e4f3a2b1c0d" {
+		t.Fatalf("available version = %q, want %q", entries["personal/example"].AvailableVersion, "9a8b7c6d5e4f3a2b1c0d")
+	}
+	if entries["personal/example"].AvailableCheckedDate != "2026-05-10T13:49:48Z" {
+		t.Fatalf("available checked date = %q, want %q", entries["personal/example"].AvailableCheckedDate, "2026-05-10T13:49:48Z")
 	}
 
 	summary := report.Summary()
@@ -77,11 +119,16 @@ func createSkill(t *testing.T, dir string, name string, disabled bool) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatalf("MkdirAll() error = %v", err)
 	}
-	disabledLine := ""
-	if disabled {
-		disabledLine = "metadata:\n  skill-organizer:\n    disabled: true\n"
+	metadataLines := []string{
+		"metadata:",
+		"  skill-organizer:",
+		"    installed-version: 1.0.0",
+		"    last-updated-at: \"2026-05-01T12:00:00Z\"",
 	}
-	content := "---\nname: " + name + "\ndescription: test\n" + disabledLine + "---\n\n# Test\n"
+	if disabled {
+		metadataLines = append(metadataLines, "    disabled: true")
+	}
+	content := "---\nname: " + name + "\ndescription: test\n" + strings.Join(metadataLines, "\n") + "\n---\n\n# Test\n"
 	if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o644); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}

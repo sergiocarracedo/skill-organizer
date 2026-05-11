@@ -22,10 +22,14 @@ const (
 )
 
 type SkillStatus struct {
-	Skill      skills.Skill
-	State      SkillState
-	LinkPath   string
-	LinkTarget string
+	Skill                skills.Skill
+	State                SkillState
+	LinkPath             string
+	LinkTarget           string
+	InstalledVersion     string
+	InstalledDate        string
+	AvailableVersion     string
+	AvailableCheckedDate string
 }
 
 type Report struct {
@@ -85,6 +89,11 @@ func Build(location configpkg.Location) (Report, error) {
 		return Report{}, err
 	}
 
+	updateLookup, err := loadPendingUpdates()
+	if err != nil {
+		return Report{}, err
+	}
+
 	report := Report{}
 	managedNames := make(map[string]struct{}, len(manifest.Managed))
 	for name := range manifest.Managed {
@@ -99,6 +108,12 @@ func Build(location configpkg.Location) (Report, error) {
 
 		entry := SkillStatus{Skill: skill, LinkPath: filepath.Join(location.Target, skill.FlattenedName)}
 		metadata := doc.ManagedMetadata()
+		entry.InstalledVersion = metadata.InstalledVersion
+		entry.InstalledDate = metadata.LastUpdatedAt
+		if update, ok := lookupPendingUpdate(updateLookup, skill); ok {
+			entry.AvailableVersion = update.LatestVersion
+			entry.AvailableCheckedDate = update.CheckedAt
+		}
 		if metadata.Disabled {
 			entry.State = StateDisabled
 			report.Skills = append(report.Skills, entry)
@@ -171,6 +186,35 @@ func Build(location configpkg.Location) (Report, error) {
 	})
 
 	return report, nil
+}
+
+func loadPendingUpdates() (map[string]configpkg.SkillUpdateRecord, error) {
+	updatesPath, err := configpkg.UpdatesPath()
+	if err != nil {
+		return nil, fmt.Errorf("resolve updates path: %w", err)
+	}
+	state, err := configpkg.LoadUpdatesStateOrDefault(updatesPath)
+	if err != nil {
+		return nil, err
+	}
+	lookup := make(map[string]configpkg.SkillUpdateRecord, len(state.Pending)*2)
+	for _, pending := range state.Pending {
+		if pending.RelativePath != "" {
+			lookup[pending.RelativePath] = pending
+		}
+		if pending.FlattenedName != "" {
+			lookup[pending.FlattenedName] = pending
+		}
+	}
+	return lookup, nil
+}
+
+func lookupPendingUpdate(lookup map[string]configpkg.SkillUpdateRecord, skill skills.Skill) (configpkg.SkillUpdateRecord, bool) {
+	if update, ok := lookup[skill.RelativePath]; ok {
+		return update, true
+	}
+	update, ok := lookup[skill.FlattenedName]
+	return update, ok
 }
 
 func isUnmanagedSkillDir(targetRoot string, entry os.DirEntry) bool {

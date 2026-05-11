@@ -1,21 +1,21 @@
 ---
-title: update
+title: self-update
 description: Update the skill-organizer CLI.
 section: reference
 order: 10
-commandSlug: update
+commandSlug: self-update
 summary: Refresh the installed CLI using the supported distribution channel.
 ---
 
 ## Synopsis
 
 ```bash
-skill-organizer update
+skill-organizer self-update
 ```
 
 ## Behavior
 
-`update` checks the latest published release and then uses the detected install method:
+`self-update` checks the latest published release and then uses the detected install method:
 
 - npm installs run `npm i -g skill-organizer@latest`
 - Homebrew installs run `brew upgrade skill-organizer`

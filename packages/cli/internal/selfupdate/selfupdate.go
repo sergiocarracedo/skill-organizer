@@ -71,12 +71,12 @@ func MaybeNotify(ctx context.Context, currentVersion string, stdout io.Writer) {
 	}
 
 	_, _ = fmt.Fprintf(stdout, "\nNew skill-organizer version available: %s -> %s\n", info.CurrentVersion, info.LatestVersion)
-		_, _ = fmt.Fprintf(stdout, "Run `skill-organizer update` to update.\n")
-		if info.InstallMethod == InstallMethodDirect {
-			_, _ = fmt.Fprintf(stdout, "Direct installs must be updated manually from the release page: %s\n", info.LatestPageURL)
-		}
-		_, _ = fmt.Fprintln(stdout)
+	_, _ = fmt.Fprintf(stdout, "Run `skill-organizer self-update` to update.\n")
+	if info.InstallMethod == InstallMethodDirect {
+		_, _ = fmt.Fprintf(stdout, "Direct installs must be updated manually from the release page: %s\n", info.LatestPageURL)
 	}
+	_, _ = fmt.Fprintln(stdout)
+}
 
 func Check(ctx context.Context, currentVersion string) (VersionInfo, error) {
 	method := DetectInstallMethod()
@@ -215,7 +215,7 @@ func shouldSkipPeriodicCheck() bool {
 	}
 
 	switch args[0] {
-	case "completion", "help", "update":
+	case "completion", "help", "self-update":
 		return true
 	default:
 		return false

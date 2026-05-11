@@ -1,6 +1,7 @@
 package selfupdate
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -24,6 +25,18 @@ func TestUpdateCommandForInstallMethod(t *testing.T) {
 				t.Fatalf("updateCommandFor(%q) = %q, want %q", tt.method, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestShouldSkipPeriodicCheckForSelfUpdateCommand(t *testing.T) {
+	originalArgs := os.Args
+	os.Args = []string{"skill-organizer", "self-update"}
+	t.Cleanup(func() {
+		os.Args = originalArgs
+	})
+
+	if !shouldSkipPeriodicCheck() {
+		t.Fatalf("shouldSkipPeriodicCheck() = false, want true")
 	}
 }
 

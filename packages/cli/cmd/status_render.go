@@ -11,6 +11,7 @@ import (
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	statuspkg "github.com/sergiocarracedo/skill-organizer/cli/internal/status"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
+	versionfmtpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/versionfmt"
 )
 
 type statusTreeNode struct {
@@ -192,8 +193,43 @@ func flattenStatusTreeChildren(children map[string]*statusTreeNode, prefix strin
 
 func formatSkillLabel(entry statuspkg.SkillStatus, sourceLeaf string) string {
 	flattened := pterm.NewStyle(pterm.FgDarkGray).Sprint(entry.Skill.FlattenedName)
-	state := pterm.NewStyle(statusColor(entry.State), pterm.Bold).Sprint("[" + string(entry.State) + "]")
-	return sourceLeaf + " -> " + flattened + statusColumnSeparator() + state
+	parts := []string{pterm.NewStyle(statusColor(entry.State), pterm.Bold).Sprint("[" + string(entry.State) + "]")}
+	if installed := formatInstalledStatus(entry); installed != "" {
+		parts = append(parts, installed)
+	}
+	if available := formatAvailableStatus(entry); available != "" {
+		parts = append(parts, available)
+	}
+	return sourceLeaf + " -> " + flattened + statusColumnSeparator() + strings.Join(parts, " ")
+}
+
+func formatInstalledStatus(entry statuspkg.SkillStatus) string {
+	version := versionfmtpkg.DisplayVersion(entry.InstalledVersion)
+	date := versionfmtpkg.DisplayDate(entry.InstalledDate)
+	if version == "" && date == "" {
+		return ""
+	}
+	parts := []string{"installed"}
+	if version != "" {
+		parts = append(parts, version)
+	}
+	if date != "" {
+		parts = append(parts, date)
+	}
+	return pterm.NewStyle(pterm.FgMagenta).Sprint("[" + strings.Join(parts, " ") + "]")
+}
+
+func formatAvailableStatus(entry statuspkg.SkillStatus) string {
+	version := versionfmtpkg.DisplayVersion(entry.AvailableVersion)
+	date := versionfmtpkg.DisplayDate(entry.AvailableCheckedDate)
+	if version == "" {
+		return ""
+	}
+	parts := []string{"update", version}
+	if date != "" {
+		parts = append(parts, date)
+	}
+	return pterm.NewStyle(pterm.FgCyan).Sprint("[" + strings.Join(parts, " ") + "]")
 }
 
 func statusLineWidth() int {

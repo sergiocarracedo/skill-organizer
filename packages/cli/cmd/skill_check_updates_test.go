@@ -68,6 +68,16 @@ func TestDisplayUpdateDateFormatsVersionDate(t *testing.T) {
 	}
 }
 
+func TestRenderCheckUpdatesProgressTextIncludesSkippedCount(t *testing.T) {
+	got := renderCheckUpdatesProgressText("checking", 1, 4, 2, 3, "demo-skill")
+	plain := stripANSI(got)
+	for _, want := range []string{"checking 1/4", "Found: 2", "Skipped: 3", "demo-skill"} {
+		if !strings.Contains(plain, want) {
+			t.Fatalf("renderCheckUpdatesProgressText() missing %q in %q", want, plain)
+		}
+	}
+}
+
 func TestCollectUpdateCandidatesUsesOriginalNameWhenPresent(t *testing.T) {
 	root := t.TempDir()
 	source := filepath.Join(root, "skills-organized")
@@ -311,10 +321,10 @@ func TestCollectUpdateCandidatesReportsFetchFailuresAndProgress(t *testing.T) {
 
 	var progress []string
 	var active []string
-	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, func(checked int, total int, found int) {
-		progress = append(progress, fmt.Sprintf("%d/%d/%d", checked, total, found))
-	}, func(checked int, total int, found int, relativePath string) {
-		active = append(active, fmt.Sprintf("%d/%d/%d:%s", checked, total, found, relativePath))
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, func(checked int, total int, found int, skipped int) {
+		progress = append(progress, fmt.Sprintf("%d/%d/%d/%d", checked, total, found, skipped))
+	}, func(checked int, total int, found int, skipped int, relativePath string) {
+		active = append(active, fmt.Sprintf("%d/%d/%d/%d:%s", checked, total, found, skipped, relativePath))
 	})
 	if err != nil {
 		t.Fatalf("collectUpdateCandidates() error = %v", err)
@@ -328,11 +338,45 @@ func TestCollectUpdateCandidatesReportsFetchFailuresAndProgress(t *testing.T) {
 	if scan.Failures[0].RelativePath != "google/docs" || !strings.Contains(scan.Failures[0].Reason, "network down") {
 		t.Fatalf("Failures = %#v", scan.Failures)
 	}
-	if len(progress) == 0 || progress[0] != "0/2/0" || progress[len(progress)-1] != "2/2/1" {
+	if len(progress) == 0 || progress[0] != "0/2/0/0" || progress[len(progress)-1] != "2/2/1/0" {
 		t.Fatalf("progress = %#v", progress)
 	}
-	if len(active) == 0 || active[0] != "0/2/0:google/docs" && active[0] != "0/2/0:google/reports" {
+	if len(active) == 0 || active[0] != "0/2/0/0:google/docs" && active[0] != "0/2/0/0:google/reports" {
 		t.Fatalf("active = %#v", active)
+	}
+}
+
+func TestCollectUpdateCandidatesReportsSkippedMissingMetadata(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "skills-organized")
+	target := filepath.Join(root, "skills")
+	dir := filepath.Join(source, "thirdparty", "demo")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+	content := "---\nname: thirdparty--demo\ndescription: test\nmetadata:\n  skill-organizer:\n    original-name: demo-skill\n---\n\n# Demo\n"
+	if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	scan, err := collectUpdateCandidates(context.Background(), configpkg.Location{Source: source, Target: target}, nil, nil)
+	if err != nil {
+		t.Fatalf("collectUpdateCandidates() error = %v", err)
+	}
+	if len(scan.Candidates) != 0 {
+		t.Fatalf("Candidates len = %d, want 0", len(scan.Candidates))
+	}
+	if len(scan.Skipped) != 1 {
+		t.Fatalf("Skipped len = %d, want 1", len(scan.Skipped))
+	}
+	if scan.Skipped[0].RelativePath != "thirdparty/demo" {
+		t.Fatalf("Skipped relative path = %q, want %q", scan.Skipped[0].RelativePath, "thirdparty/demo")
+	}
+	if !strings.Contains(scan.Skipped[0].Reason, "metadata.skill-organizer.source") {
+		t.Fatalf("Skipped reason = %q", scan.Skipped[0].Reason)
+	}
+	if got := updateSkipReason(skills.ManagedMetadata{Source: "owner/repo"}); got != "" {
+		t.Fatalf("updateSkipReason() = %q, want empty", got)
 	}
 }
 

@@ -19,6 +19,7 @@ import (
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	remotepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/remote"
 	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
+	versionfmtpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/versionfmt"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
 )
 
@@ -38,10 +39,16 @@ type skillUpdateCheckFailure struct {
 	Reason       string
 }
 
+type skillUpdateSkip struct {
+	RelativePath string
+	Reason       string
+}
+
 type skillUpdateScanResult struct {
 	Candidates []skillUpdateCandidate
 	Checked    int
 	Failures   []skillUpdateCheckFailure
+	Skipped    []skillUpdateSkip
 }
 
 var (
@@ -66,25 +73,32 @@ func newCheckUpdatesCommand() *cobra.Command {
 				return err
 			}
 
-			spinner, err := startCheckUpdatesSpinner("Checking for skill updates (checked 0/0). Found: 0")
+			spinner, err := startCheckUpdatesSpinner("Checking for skill updates (checked 0/0). Found: 0. Skipped: 0")
 			if err != nil {
 				return err
 			}
-			progressStep := func(prefix string, checked int, total int, found int, relativePath string) {
-				spinner.UpdateText(renderCheckUpdatesProgressText(prefix, checked, total, found, relativePath))
+			progressStep := func(prefix string, checked int, total int, found int, skipped int, relativePath string) {
+				spinner.UpdateText(renderCheckUpdatesProgressText(prefix, checked, total, found, skipped, relativePath))
 			}
-			scan, err := collectUpdateCandidates(cmd.Context(), location, func(checked int, total int, found int) {
-				progressStep("checked", checked, total, found, "")
-			}, func(checked int, total int, found int, relativePath string) {
-				progressStep("checking", checked+1, total, found, relativePath)
+			scan, err := collectUpdateCandidates(cmd.Context(), location, func(checked int, total int, found int, skipped int) {
+				progressStep("checked", checked, total, found, skipped, "")
+			}, func(checked int, total int, found int, skipped int, relativePath string) {
+				progressStep("checking", checked+1, total, found, skipped, relativePath)
 			})
 			if err != nil {
 				spinner.Fail("Checking for skill updates failed")
 				return err
 			}
-			spinner.Success(fmt.Sprintf("Checked %d skills. Found: %d", scan.Checked, len(scan.Candidates)))
+			spinner.Success(fmt.Sprintf("Checked %d skills. Found: %d. Skipped: %d", scan.Checked, len(scan.Candidates), len(scan.Skipped)))
 			for _, failure := range scan.Failures {
 				printCheckUpdatesWarning("Could not check updates for %s: %s", failure.RelativePath, failure.Reason)
+			}
+			for _, skipped := range scan.Skipped {
+				printCheckUpdatesWarning("Skipped %s: %s", skipped.RelativePath, skipped.Reason)
+			}
+			if len(scan.Skipped) > 0 {
+				pterm.Info.Println("Tip: use skill-organizer skill add to import skills with tracked source/version metadata.")
+				pterm.Info.Println("Tip: run skill-organizer skill try-find-metadata to try recovering missing metadata for older imports.")
 			}
 
 			candidates := scan.Candidates
@@ -154,34 +168,37 @@ func newCheckUpdatesCommand() *cobra.Command {
 	return cmd
 }
 
-func collectUpdateCandidates(ctx context.Context, location configpkg.Location, progress func(checked int, total int, found int), active func(checked int, total int, found int, relativePath string)) (skillUpdateScanResult, error) {
+func collectUpdateCandidates(ctx context.Context, location configpkg.Location, progress func(checked int, total int, found int, skipped int), active func(checked int, total int, found int, skipped int, relativePath string)) (skillUpdateScanResult, error) {
 	scanned, err := skills.ScanSource(location.Source)
 	if err != nil {
 		return skillUpdateScanResult{}, err
 	}
 	results := make([]skillUpdateCandidate, 0)
 	failures := make([]skillUpdateCheckFailure, 0)
+	skipped := make([]skillUpdateSkip, 0)
 	total := len(scanned)
 	checked := 0
 	if progress != nil {
-		progress(0, total, 0)
+		progress(0, total, 0, 0)
 	}
 	for _, skill := range scanned {
 		if err := ctx.Err(); err != nil {
 			return skillUpdateScanResult{}, err
 		}
 		if active != nil {
-			active(checked, total, len(results), skill.RelativePath)
+			active(checked, total, len(results), len(skipped), skill.RelativePath)
 		}
 		doc, err := skills.LoadDocument(skill.SkillFile)
 		if err != nil {
 			return skillUpdateScanResult{}, err
 		}
 		metadata := doc.ManagedMetadata()
-		if strings.TrimSpace(metadata.Source) == "" {
+		skipReason := updateSkipReason(metadata)
+		if skipReason != "" {
+			skipped = append(skipped, skillUpdateSkip{RelativePath: skill.RelativePath, Reason: skipReason})
 			checked++
 			if progress != nil {
-				progress(checked, total, len(results))
+				progress(checked, total, len(results), len(skipped))
 			}
 			continue
 		}
@@ -195,7 +212,7 @@ func collectUpdateCandidates(ctx context.Context, location configpkg.Location, p
 			failures = append(failures, skillUpdateCheckFailure{RelativePath: skill.RelativePath, Reason: err.Error()})
 			checked++
 			if progress != nil {
-				progress(checked, total, len(results))
+				progress(checked, total, len(results), len(skipped))
 			}
 			continue
 		}
@@ -208,7 +225,7 @@ func collectUpdateCandidates(ctx context.Context, location configpkg.Location, p
 		if installed == "" || latest == "" || installed == latest {
 			checked++
 			if progress != nil {
-				progress(checked, total, len(results))
+				progress(checked, total, len(results), len(skipped))
 			}
 			continue
 		}
@@ -224,11 +241,12 @@ func collectUpdateCandidates(ctx context.Context, location configpkg.Location, p
 		})
 		checked++
 		if progress != nil {
-			progress(checked, total, len(results))
+			progress(checked, total, len(results), len(skipped))
 		}
 	}
 	sort.Slice(results, func(i, j int) bool { return results[i].Skill.RelativePath < results[j].Skill.RelativePath })
-	return skillUpdateScanResult{Candidates: results, Checked: checked, Failures: failures}, nil
+	sort.Slice(skipped, func(i, j int) bool { return skipped[i].RelativePath < skipped[j].RelativePath })
+	return skillUpdateScanResult{Candidates: results, Checked: checked, Failures: failures, Skipped: skipped}, nil
 }
 
 func resolveInstalledSkillVersion(metadata skills.ManagedMetadata, installedBundle remotepkg.SkillBundle) string {
@@ -264,6 +282,13 @@ func normalizeSkillUpdateSource(source string) string {
 	trimmed = strings.TrimPrefix(trimmed, "https://github.com/")
 	trimmed = strings.TrimPrefix(trimmed, "http://github.com/")
 	return strings.Trim(trimmed, "/")
+}
+
+func updateSkipReason(metadata skills.ManagedMetadata) string {
+	if strings.TrimSpace(metadata.Source) == "" {
+		return "missing metadata.skill-organizer.source"
+	}
+	return ""
 }
 
 type skillUpdateSelector struct {
@@ -644,13 +669,17 @@ func styledProgressCount(value int) string {
 	return pterm.NewStyle(pterm.FgLightGreen, pterm.Bold).Sprint(fmt.Sprintf("%d", value))
 }
 
+func styledSkippedCount(value int) string {
+	return pterm.NewStyle(pterm.FgYellow, pterm.Bold).Sprint(fmt.Sprintf("%d", value))
+}
+
 func styledProgressPath(value string) string {
 	return pterm.NewStyle(pterm.FgLightMagenta).Sprint(value)
 }
 
-func renderCheckUpdatesProgressText(prefix string, checked int, total int, found int, relativePath string) string {
-	baseText := fmt.Sprintf("Checking for skill updates (%s %d/%d). Found: %d", prefix, checked, total, found)
-	message := fmt.Sprintf("Checking for skill updates (%s %d/%d). Found: %s", styledProgressState(prefix), checked, total, styledProgressCount(found))
+func renderCheckUpdatesProgressText(prefix string, checked int, total int, found int, skipped int, relativePath string) string {
+	baseText := fmt.Sprintf("Checking for skill updates (%s %d/%d). Found: %d. Skipped: %d", prefix, checked, total, found, skipped)
+	message := fmt.Sprintf("Checking for skill updates (%s %d/%d). Found: %s. Skipped: %s", styledProgressState(prefix), checked, total, styledProgressCount(found), styledSkippedCount(skipped))
 
 	path := strings.Join(strings.Fields(strings.TrimSpace(relativePath)), " ")
 	if path == "" {
@@ -688,30 +717,11 @@ func forwardContextInterrupt(ctx context.Context) func() {
 }
 
 func displayVersion(value string) string {
-	trimmed := strings.TrimSpace(value)
-	if isHexHash(trimmed) && len(trimmed) > 7 {
-		return trimmed[:7]
-	}
-	return trimmed
+	return versionfmtpkg.DisplayVersion(value)
 }
 
 func displayUpdateDate(value time.Time) string {
-	if value.IsZero() {
-		return ""
-	}
-	return value.UTC().Format("2006-01-02")
-}
-
-func isHexHash(value string) bool {
-	if len(value) < 8 {
-		return false
-	}
-	for _, r := range value {
-		if (r < '0' || r > '9') && (r < 'a' || r > 'f') && (r < 'A' || r > 'F') {
-			return false
-		}
-	}
-	return true
+	return versionfmtpkg.DisplayTime(value)
 }
 
 func refreshSkillUpdateCache(candidates []skillUpdateCandidate) error {

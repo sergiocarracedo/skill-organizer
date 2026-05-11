@@ -111,6 +111,7 @@ export const commandGroups: CommandGroup[] = [
       "skill-organizer delete thirdparty/asciinema/asciinema-recorder",
       "skill-organizer skill check-updates",
       "skill-organizer check-updates",
+      "skill-organizer skill try-find-metadata",
       "skill-organizer skill move-unmanaged --config ~/.agents/.skill-organizer.yml",
       "skill-organizer skill check-overlap --tool claude",
       "skill-organizer skill check-overlap --min-overlap-type partial",
@@ -153,14 +154,14 @@ export const commandGroups: CommandGroup[] = [
       ],
   },
   {
-    slug: "update",
-    title: "Update",
-    command: "skill-organizer update",
+    slug: "self-update",
+    title: "Self Update",
+    command: "skill-organizer self-update",
     summary: "Update the installed CLI.",
     whyItMatters:
       "Update uses the detected distribution channel for safe upgrades and gives direct binary installs an explicit manual release path.",
     examples: [
-      "skill-organizer update",
+      "skill-organizer self-update",
       "npm i -g skill-organizer@latest",
       "brew upgrade skill-organizer",
     ],

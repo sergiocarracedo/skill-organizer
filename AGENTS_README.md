@@ -175,6 +175,16 @@ skill-organizer check-updates
 
 The interactive list lets you press `d` to inspect the full folder diff before selecting skills to update.
 
+If a managed skill is missing tracked import metadata, `check-updates` reports it as skipped instead of silently ignoring it and reminds the user that `skill-organizer skill add` preserves the metadata needed for future update tracking.
+
+Use this command to try to repair that metadata for already-managed skills:
+
+```bash
+skill-organizer skill try-find-metadata
+```
+
+It searches `skills.sh`, verifies plausible matches against the local `SKILL.md`, and fills missing `metadata.skill-organizer` fields when it can do so confidently.
+
 Alias notes:
 
 1. Keep the canonical `skill-organizer skill ...` commands in docs and automation.

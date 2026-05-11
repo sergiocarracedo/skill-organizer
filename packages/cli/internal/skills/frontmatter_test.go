@@ -148,3 +148,26 @@ func TestParseDocumentAcceptsUnquotedDescriptionWithColon(t *testing.T) {
 		t.Fatalf("Name() = %q, want %q", doc.Name(), "frontend-project-bootstrap")
 	}
 }
+
+func TestWithoutManagedMetadataRemovesOnlyOrganizerSection(t *testing.T) {
+	content := []byte("---\nname: demo-skill\ndescription: test\nmetadata:\n  version: 1.2.3\n  skill-organizer:\n    source: owner/repo\n    installed-version: 1.2.3\n---\n\n# Demo\n")
+
+	doc, err := ParseDocument(content)
+	if err != nil {
+		t.Fatalf("ParseDocument() error = %v", err)
+	}
+	marshaled, err := doc.WithoutManagedMetadata().Marshal()
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
+	output := string(marshaled)
+	if strings.Contains(output, "skill-organizer:") {
+		t.Fatalf("managed metadata still present\n%s", output)
+	}
+	if !strings.Contains(output, "version: 1.2.3") {
+		t.Fatalf("non-organizer metadata removed unexpectedly\n%s", output)
+	}
+	if !strings.Contains(output, "# Demo") {
+		t.Fatalf("body removed unexpectedly\n%s", output)
+	}
+}

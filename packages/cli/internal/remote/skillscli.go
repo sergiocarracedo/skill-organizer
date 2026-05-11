@@ -81,12 +81,18 @@ type SkillsUpdate struct {
 	LatestBundle    SkillBundle
 }
 
+type SkillSearchResult struct {
+	Skill   SkillSummary
+	PageURL string
+}
+
 type skillFrontmatter struct {
 	Metadata map[string]any `yaml:"metadata"`
 }
 
 var ansiPattern = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
 var listedSkillPattern = regexp.MustCompile(`^\s*[│|]\s{4}([a-z0-9][a-z0-9-]+)\s*$`)
+var findResultPattern = regexp.MustCompile(`^\s*([^\s@]+/[^\s@]+)@(.+?)\s+\S+\s+installs\s*$`)
 
 func DetectSkillsCLI() (*SkillsCLIRunner, error) {
 	if _, err := exec.LookPath("skills"); err == nil {
@@ -408,6 +414,39 @@ func FetchSkillBundle(ctx context.Context, source string, name string) (SkillBun
 	return sandbox.LoadInstalledBundle(summary)
 }
 
+func FindSkills(ctx context.Context, query string) ([]SkillSearchResult, error) {
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return nil, fmt.Errorf("find skills query cannot be empty")
+	}
+	runner, err := DetectSkillsCLI()
+	if err != nil {
+		return nil, err
+	}
+	root, err := os.MkdirTemp("", "skill-organizer-find-")
+	if err != nil {
+		return nil, fmt.Errorf("create skills find sandbox: %w", err)
+	}
+	defer func() { _ = os.RemoveAll(root) }()
+	homeDir := filepath.Join(root, "home")
+	projectDir := filepath.Join(root, "project")
+	if err := os.MkdirAll(homeDir, 0o755); err != nil {
+		return nil, fmt.Errorf("create skills find home directory: %w", err)
+	}
+	if err := os.MkdirAll(projectDir, 0o755); err != nil {
+		return nil, fmt.Errorf("create skills find project directory: %w", err)
+	}
+	output, err := runner.RunIn(ctx, projectDir, sandboxEnv(homeDir), "find", query)
+	if err != nil {
+		return nil, err
+	}
+	results := parseSkillFindOutput(output)
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no skills found for %q", query)
+	}
+	return results, nil
+}
+
 func ResolveVersion(skill SkillSummary, files []File) string {
 	if strings.TrimSpace(skill.Version) != "" {
 		return strings.TrimSpace(skill.Version)
@@ -518,4 +557,50 @@ func SkillVersionFromSkillFile(content string) string {
 		return strings.TrimSpace(version)
 	}
 	return ""
+}
+
+func SkillVersionFromMetadataFile(content string) string {
+	var metadata skillsCLIMetadata
+	if err := json.Unmarshal([]byte(content), &metadata); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(metadata.Version)
+}
+
+func parseSkillFindOutput(output string) []SkillSearchResult {
+	clean := stripANSI(output)
+	lines := strings.Split(clean, "\n")
+	results := make([]SkillSearchResult, 0)
+	for index := 0; index < len(lines); index++ {
+		line := strings.TrimSpace(lines[index])
+		matches := findResultPattern.FindStringSubmatch(line)
+		if len(matches) != 3 {
+			continue
+		}
+		source := strings.TrimSpace(matches[1])
+		name := strings.TrimSpace(matches[2])
+		if source == "" || name == "" {
+			continue
+		}
+		pageURL := ""
+		if index+1 < len(lines) {
+			next := strings.TrimSpace(lines[index+1])
+			next = strings.TrimPrefix(next, "└")
+			next = strings.TrimSpace(next)
+			if strings.HasPrefix(next, "https://") || strings.HasPrefix(next, "http://") {
+				pageURL = next
+			}
+		}
+		results = append(results, SkillSearchResult{
+			Skill: SkillSummary{
+				Provider:   "skills.sh",
+				Name:       name,
+				Source:     source,
+				SourceURL:  sourceToGitHubURL(source),
+				SourceType: sourceTypeFromSource(source),
+			},
+			PageURL: pageURL,
+		})
+	}
+	return results
 }

@@ -5,9 +5,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newUpdateCommand() *cobra.Command {
+func newSelfUpdateCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "update",
+		Use:   "self-update",
 		Short: "Update the skill-organizer CLI",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return selfupdatepkg.Run(cmd.Context(), version, cmd.OutOrStdout(), cmd.ErrOrStderr())

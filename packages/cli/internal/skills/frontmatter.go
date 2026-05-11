@@ -101,6 +101,24 @@ func (d *Document) Description() string {
 	return ""
 }
 
+func (d *Document) Body() string {
+	return d.body
+}
+
+func (d *Document) WithoutManagedMetadata() Document {
+	clone := d.clone()
+	root := clone.mapping()
+	metadataNode := mappingValue(root, "metadata")
+	if metadataNode == nil || metadataNode.Kind != yaml.MappingNode {
+		return clone
+	}
+	deleteMappingKey(metadataNode, managedMetadataKey)
+	if len(metadataNode.Content) == 0 {
+		deleteMappingKey(root, "metadata")
+	}
+	return clone
+}
+
 func (d *Document) ManagedMetadata() ManagedMetadata {
 	metadata := ManagedMetadata{}
 	root := d.mapping()
@@ -280,6 +298,18 @@ func (d *Document) mapping() *yaml.Node {
 	return d.frontmatter.Content[0]
 }
 
+func (d Document) clone() Document {
+	content, err := d.Marshal()
+	if err != nil {
+		return d
+	}
+	cloned, err := ParseDocument(content)
+	if err != nil {
+		return d
+	}
+	return cloned
+}
+
 func RewriteManagedFields(skill Skill, rename bool, disabled bool) error {
 	return RewriteManagedFieldsWithMetadata(skill, rename, disabled, ManagedMetadata{})
 }
@@ -326,5 +356,18 @@ func mergeManagedMetadata(target *ManagedMetadata, updates ManagedMetadata) {
 	}
 	if strings.TrimSpace(updates.LastUpdatedAt) != "" {
 		target.LastUpdatedAt = updates.LastUpdatedAt
+	}
+}
+
+func deleteMappingKey(mapping *yaml.Node, key string) {
+	if mapping == nil || mapping.Kind != yaml.MappingNode {
+		return
+	}
+	for i := 0; i < len(mapping.Content)-1; i += 2 {
+		if mapping.Content[i].Value != key {
+			continue
+		}
+		mapping.Content = append(mapping.Content[:i], mapping.Content[i+2:]...)
+		return
 	}
 }

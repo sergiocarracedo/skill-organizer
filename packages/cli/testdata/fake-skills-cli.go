@@ -59,6 +59,8 @@ func main() {
 		err = runAdd(st)
 	case "list":
 		err = runList(st)
+	case "find":
+		err = runFind()
 	default:
 		err = fmt.Errorf("unsupported fake skills command %q", os.Args[1])
 	}
@@ -110,6 +112,68 @@ func runList(st *state) error {
 	return nil
 }
 
+func runFind() error {
+	if len(os.Args) < 3 {
+		return fmt.Errorf("usage: skills find <query>")
+	}
+	query := strings.TrimSpace(os.Args[2])
+	if query == "" {
+		return fmt.Errorf("query cannot be empty")
+	}
+	base := strings.TrimSpace(os.Getenv("SKILL_ORGANIZER_FAKE_SKILLS_FIXTURES"))
+	if base == "" {
+		return fmt.Errorf("SKILL_ORGANIZER_FAKE_SKILLS_FIXTURES is required")
+	}
+	entries, err := os.ReadDir(base)
+	if err != nil {
+		return err
+	}
+	type result struct {
+		Source string
+		Name   string
+	}
+	results := make([]result, 0)
+	needle := strings.ToLower(query)
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		sourceRoot := filepath.Join(base, entry.Name())
+		lock, err := loadLock(filepath.Join(sourceRoot, "skills-lock.json"))
+		if err != nil {
+			continue
+		}
+		for name, item := range lock.Skills {
+			haystacks := []string{strings.ToLower(name), strings.ToLower(filepath.Base(strings.TrimSuffix(filepath.Dir(item.SkillPath), "/")))}
+			matched := false
+			for _, haystack := range haystacks {
+				if strings.Contains(haystack, needle) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				continue
+			}
+			results = append(results, result{Source: item.Source, Name: name})
+		}
+	}
+	if len(results) == 0 {
+		fmt.Printf("No skills found for %q\n", query)
+		return nil
+	}
+	sort.Slice(results, func(i, j int) bool {
+		left := results[i].Source + "@" + results[i].Name
+		right := results[j].Source + "@" + results[j].Name
+		return left < right
+	})
+	for _, item := range results {
+		fmt.Printf("%s@%s 1.0K installs\n", item.Source, item.Name)
+		fmt.Printf("└ https://skills.sh/%s/%s\n\n", item.Source, item.Name)
+	}
+	return nil
+}
+
 func listRepoSkills(source string) error {
 	root := fixtureRoot(source)
 	entries, err := os.ReadDir(filepath.Join(root, "skills"))
@@ -146,7 +210,7 @@ func installSkill(st *state, source string, name string) error {
 	if err := copyDir(skillRoot, installRoot); err != nil {
 		return err
 	}
-	lock, _ := loadLock("skills-lock.json")
+	lock, _ := loadLock(filepath.Join(workDir(), "skills-lock.json"))
 	fixtureLock, err := loadLock(filepath.Join(root, "skills-lock.json"))
 	if err != nil {
 		return err
@@ -159,7 +223,7 @@ func installSkill(st *state, source string, name string) error {
 		lock.Skills = map[string]lockEntry{}
 	}
 	lock.Skills[name] = entry
-	if err := saveLock("skills-lock.json", lock); err != nil {
+	if err := saveLock(filepath.Join(workDir(), "skills-lock.json"), lock); err != nil {
 		return err
 	}
 	metadata, _ := loadMetadata(filepath.Join(skillRoot, "metadata.json"))
@@ -173,6 +237,17 @@ func installSkill(st *state, source string, name string) error {
 		Date:          metadata.Date,
 	}
 	return nil
+}
+
+func workDir() string {
+	if value := strings.TrimSpace(os.Getenv("SKILL_ORGANIZER_FAKE_SKILLS_WORKDIR")); value != "" {
+		return value
+	}
+	wd, err := os.Getwd()
+	if err == nil {
+		return wd
+	}
+	return "."
 }
 
 func loadState() (*state, string) {

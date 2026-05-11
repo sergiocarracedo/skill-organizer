@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/pterm/pterm"
 	backuppkg "github.com/sergiocarracedo/skill-organizer/cli/internal/backup"
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 )
@@ -24,8 +25,9 @@ func MaybeNotifySkillUpdates(_ context.Context, stdout io.Writer) {
 	if err != nil {
 		return
 	}
+	commandHint := styleCheckUpdatesCommand("skill-organizer check-updates")
 	if state.UpdateCount > 0 {
-		_, _ = fmt.Fprintf(stdout, "\nThere are %d updates. Run skill-organizer check-updates to update skills.\n\n", state.UpdateCount)
+		_, _ = fmt.Fprintf(stdout, "\nThere are skill %d updates. Run %s to update skills.\n\n", state.UpdateCount, commandHint)
 		return
 	}
 	running, err := IsServiceRunningFunc()
@@ -41,9 +43,13 @@ func MaybeNotifySkillUpdates(_ context.Context, stdout io.Writer) {
 	if remindedOK && now.Sub(remindedAt) < skillUpdateReminderInterval {
 		return
 	}
-	_, _ = fmt.Fprintf(stdout, "\nSkill updates have not been checked in 30 days. Run skill-organizer check-updates to review updates.\n\n")
+	_, _ = fmt.Fprintf(stdout, "\nSkill updates have not been checked in 30 days. Run %s to review updates.\n\n", commandHint)
 	state.LastRemindedAt = now.Format(time.RFC3339)
 	_ = configpkg.SaveUpdatesState(updatesPath, state)
+}
+
+func styleCheckUpdatesCommand(value string) string {
+	return pterm.NewStyle(pterm.FgLightMagenta, pterm.Bold).Sprint(value)
 }
 
 func MaybeRunBackupGC(_ context.Context) {
