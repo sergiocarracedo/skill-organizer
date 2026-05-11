@@ -1,0 +1,22 @@
+packages/cli/internal/service/service.go
+  s_1f4857cc6cbfac::t_d5a0b3bf43ca32 258-259
+  s_1f4857cc6cbfac::t_1ac9aecba3014d 30-33,168-170,181-183,214
+packages/cli/internal/service/service_test.go
+  s_1f4857cc6cbfac::t_e3051f67b22338 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a4f9d9611273b48c1ad20d822f9f600989c8fefa",
+  "prompts": {},
+  "sessions": {
+    "s_1f4857cc6cbfac": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1e9ded94dffeqsF2PgK3Ybrb8w",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
