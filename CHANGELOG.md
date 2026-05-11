@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.0...v1.0.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* avoid pages deploy during tagged releases ([b985669](https://github.com/sergiocarracedo/skill-organizer/commit/b98566954c2173e096b9f4eda10f9a6269ca4124))
+* block prerelease auto-merges into main ([f6173c2](https://github.com/sergiocarracedo/skill-organizer/commit/f6173c2aca2eb73bb8c8800f456313805ef02f73))
+
 ## [1.0.2-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.1-beta.1...v1.0.2-beta.1) (2026-05-10)
 
 
