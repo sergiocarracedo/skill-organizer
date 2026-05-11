@@ -22,12 +22,13 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: packages/cli/go.mod
+          cache-dependency-path: packages/cli/go.sum
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
-          version: latest
+          version: '~> v2'
           workdir: packages/cli
           args: release --clean
         env:
@@ -40,13 +41,3 @@ jobs:
       contents: read
       id-token: write
     uses: ./.github/workflows/publish-npm.yml
-
-  deploy-web:
-    needs:
-      - goreleaser
-      - publish-npm
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/deploy-web.yml
