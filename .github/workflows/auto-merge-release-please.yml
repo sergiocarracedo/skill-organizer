@@ -30,6 +30,8 @@ jobs:
           is_cross_repo="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json isCrossRepository --jq '.isCrossRepository')"
           head_repo="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json headRepositoryOwner,headRepository --jq '.headRepositoryOwner.login + "/" + .headRepository.name')"
           state="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json state --jq '.state')"
+          base_ref="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json baseRefName --jq '.baseRefName')"
+          title="$(gh pr view "$PR_NUMBER" --repo "$GH_REPO" --json title --jq '.title')"
 
           if [ "$is_cross_repo" != "false" ]; then
             echo "Refusing to auto-merge cross-repository PR #$PR_NUMBER"
@@ -53,6 +55,11 @@ jobs:
               exit 1
               ;;
           esac
+
+          if [ "$base_ref" = "main" ] && printf '%s' "$title" | grep -Eq -- '-(alpha|beta)\.'; then
+            echo "Refusing to auto-merge prerelease PR #$PR_NUMBER into main: $title"
+            exit 1
+          fi
 
           echo "safe=true" >> "$GITHUB_OUTPUT"
 
