@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.0...v1.0.0-beta.1) (2026-05-11)
+
+
+### Features
+
+* add alpha-ready skill-organizer cli ([a72955f](https://github.com/sergiocarracedo/skill-organizer/commit/a72955fb06a73d31ed34a97e94000e783d168707))
+* add cli self-update command ([bb29d2e](https://github.com/sergiocarracedo/skill-organizer/commit/bb29d2e29ce104600333df1354955b5aef7e9755))
+* add cli self-update command ([5980803](https://github.com/sergiocarracedo/skill-organizer/commit/5980803b314a615dae7b89a83e456f33eae77dc2))
+* add managed skills.sh import and update workflow ([9048e84](https://github.com/sergiocarracedo/skill-organizer/commit/9048e843a3e7cd3445cceb61f8c5ecc05ff20f5b))
+* add self-update and skill metadata recovery ([16b3ece](https://github.com/sergiocarracedo/skill-organizer/commit/16b3ecec78ba23856b69015ff12cfba5b0082f91))
+* add skill overlap analysis command ([ff35371](https://github.com/sergiocarracedo/skill-organizer/commit/ff353714ec381e2dfd10d29401f07bfa1bba712a))
+* add skill overlap analysis workflow ([f11bf8d](https://github.com/sergiocarracedo/skill-organizer/commit/f11bf8db3e4cf36e8a6c4eba2f5c6282ea828593))
+* add workflow ([12473ef](https://github.com/sergiocarracedo/skill-organizer/commit/12473eff9211b909212eb0034704621f591b5bf1))
+* check updates ([2f4b791](https://github.com/sergiocarracedo/skill-organizer/commit/2f4b79169a5133b4b08144b6e5ae2eb3a98dd51a))
+* expand overlap workflows and shell completion ([3d1a3fd](https://github.com/sergiocarracedo/skill-organizer/commit/3d1a3fd90bef3e29b4d820d8449bcabd6dd37e83))
+* improve config discovery and move-unmanaged UX ([68afc24](https://github.com/sergiocarracedo/skill-organizer/commit/68afc24bb5b644f9bff0b5c7b9eea537bdb6e8e8))
+* polish command output and selector UX ([9f656de](https://github.com/sergiocarracedo/skill-organizer/commit/9f656de88b7828f685bb0207c4a4fb8e14adafe7))
+* polish command output and selector UX ([009165f](https://github.com/sergiocarracedo/skill-organizer/commit/009165fc111ad333292d9de6a94ebb351a514aa2))
+* polish command output and selector UX ([c888384](https://github.com/sergiocarracedo/skill-organizer/commit/c8883842e84347bcee5bfb2eedd9fc73affe1405))
+* prepare beta release candidate ([89e0f21](https://github.com/sergiocarracedo/skill-organizer/commit/89e0f218231bb5ff20621cb74af215ee9cc797a7))
+* support custom unmanaged skill destinations ([d126aef](https://github.com/sergiocarracedo/skill-organizer/commit/d126aefec748fc08cfdb0aee27664dbda772c548))
+
+
+### Bug Fixes
+
+* allow npm installer release asset redirects ([6089086](https://github.com/sergiocarracedo/skill-organizer/commit/6089086f53911f95b6d68f1404b1e15782178e67))
+* archive cli release docs from package ([ca0c44d](https://github.com/sergiocarracedo/skill-organizer/commit/ca0c44d840a10300e65654749978971d66e53dd1))
+* make cli e2e portable in CI ([66bb5a5](https://github.com/sergiocarracedo/skill-organizer/commit/66bb5a523fa173ea5bfe142c640bc2533a0626e1))
+* package release archives correctly ([41ed953](https://github.com/sergiocarracedo/skill-organizer/commit/41ed953d343fcb168b340cc2f1e08cd2471b62c5))
+* resolve source skill paths from configured root ([2cfb036](https://github.com/sergiocarracedo/skill-organizer/commit/2cfb036a80c54258588bf62d9e77702eed37ec9c))
+* restore release-please version updates ([2ca4d04](https://github.com/sergiocarracedo/skill-organizer/commit/2ca4d0450dc641ec72608fbadc4660f9a8feb330))
+* trigger patch release ([aa63701](https://github.com/sergiocarracedo/skill-organizer/commit/aa6370166f092509c06c2af584730633426f0401))
+* trigger release workflow ([6a0ea30](https://github.com/sergiocarracedo/skill-organizer/commit/6a0ea30ef279b2e6a9a9c0d68efafb2631fe75fc))
+
 ## [1.0.2-beta.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.1-beta.1...v1.0.2-beta.1) (2026-05-10)
 
 
