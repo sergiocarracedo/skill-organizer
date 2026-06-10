@@ -1,0 +1,25 @@
+.planning/phases/01-skill-security-check/02-plan-REFACTOR.md
+  s_924cf51c790901::t_8366aba9baae5f 1-245
+.planning/phases/01-skill-security-check/03-plan-METADATA.md
+  s_924cf51c790901::t_845e10e6251503 1-169
+.planning/phases/01-skill-security-check/05-plan-HOOKS.md
+  s_924cf51c790901::t_e4e9950fe3ef5b 1-377
+.planning/phases/01-skill-security-check/04-plan-COMMAND.md
+  s_924cf51c790901::t_7299decdefd48c 1-362
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3cae01f2c296260747c413243c8e3550ba08ccd8",
+  "prompts": {},
+  "sessions": {
+    "s_924cf51c790901": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f2bd9d4ffeZaC8UNFXPkVhtM",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
