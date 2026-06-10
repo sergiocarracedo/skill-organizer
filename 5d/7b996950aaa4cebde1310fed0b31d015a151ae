@@ -1,0 +1,23 @@
+packages/cli/internal/skills/frontmatter.go
+  s_e595791b137881::t_c5f79895f8b22d 207-210
+  s_e595791b137881::t_6c1b38f1c1d6b1 25-28
+  s_e595791b137881::t_f547b985efb8ff 159-172
+  s_e595791b137881::t_a668688ec40314 339-349
+  s_e595791b137881::t_870fb22c00ac7e 393-402
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5d7b996950aaa4cebde1310fed0b31d015a151ae",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
