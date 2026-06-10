@@ -1,0 +1,27 @@
+.planning/phases/01-skill-security-check/03-plan-METADATA.md
+  s_e595791b137881::t_9fc9385550d1d4 9
+  s_e595791b137881::t_7d271abc2c5093 28-29
+.planning/phases/01-skill-security-check/04-plan-COMMAND.md
+  s_e595791b137881::t_94a60f6fb0d2af 14
+.planning/phases/01-skill-security-check/05-plan-HOOKS.md
+  s_e595791b137881::t_630adccc0f8a2d 13
+.planning/phases/01-skill-security-check/02-plan-REFACTOR.md
+  s_e595791b137881::t_a2c1c64e3bee7a 10
+  s_e595791b137881::t_0349d1112dbd24 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ed2c74ce92505509c0e917a2a1a93745f3156d68",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
