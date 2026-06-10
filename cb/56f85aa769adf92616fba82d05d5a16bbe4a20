@@ -1,0 +1,21 @@
+packages/cli/cmd/skill_security_test.go
+  s_e595791b137881::t_430827d4cdb741 1-15,17-39,41-61,63-85,87-351
+  s_e595791b137881::t_b05ab581b043b4 62,86
+  s_e595791b137881::t_7b5bd0af5872cb 16,40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cb56f85aa769adf92616fba82d05d5a16bbe4a20",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
