@@ -22,6 +22,10 @@ type ManagedMetadata struct {
 	InstalledAt        string
 	RepoSkillPath      string
 	LastUpdatedAt      string
+	RiskScore          int
+	RiskEvaluatedAt    string
+	RiskEvaluator      string
+	RiskReason         string
 }
 
 type Document struct {
@@ -152,6 +156,20 @@ func (d *Document) ManagedMetadata() ManagedMetadata {
 	if node := mappingValue(organizerNode, "last-updated-at"); node != nil {
 		metadata.LastUpdatedAt = node.Value
 	}
+	if node := mappingValue(organizerNode, "risk-score"); node != nil {
+		if value, err := strconv.Atoi(node.Value); err == nil {
+			metadata.RiskScore = value
+		}
+	}
+	if node := mappingValue(organizerNode, "risk-evaluated-at"); node != nil {
+		metadata.RiskEvaluatedAt = node.Value
+	}
+	if node := mappingValue(organizerNode, "risk-evaluator"); node != nil {
+		metadata.RiskEvaluator = node.Value
+	}
+	if node := mappingValue(organizerNode, "risk-reason"); node != nil {
+		metadata.RiskReason = node.Value
+	}
 
 	return metadata
 }
@@ -186,6 +204,10 @@ func (d *Document) SetManagedFields(flattenedName string, metadata ManagedMetada
 	if strings.TrimSpace(metadata.LastUpdatedAt) != "" {
 		setScalar(organizerNode, "last-updated-at", metadata.LastUpdatedAt)
 	}
+	setScalar(organizerNode, "risk-score", strconv.Itoa(metadata.RiskScore))
+	setScalar(organizerNode, "risk-evaluated-at", metadata.RiskEvaluatedAt)
+	setScalar(organizerNode, "risk-evaluator", metadata.RiskEvaluator)
+	setScalar(organizerNode, "risk-reason", metadata.RiskReason)
 }
 
 func (d Document) WriteTo(path string) error {
@@ -314,6 +336,17 @@ func RewriteManagedFields(skill Skill, rename bool, disabled bool) error {
 	return RewriteManagedFieldsWithMetadata(skill, rename, disabled, ManagedMetadata{})
 }
 
+func updateManagedMetadata(skill Skill, updates ManagedMetadata) error {
+	doc, err := LoadDocument(skill.SkillFile)
+	if err != nil {
+		return err
+	}
+	metadata := doc.ManagedMetadata()
+	mergeManagedMetadata(&metadata, updates)
+	doc.SetManagedFields(skill.FlattenedName, metadata, false)
+	return doc.WriteTo(skill.SkillFile)
+}
+
 func RewriteManagedFieldsWithMetadata(skill Skill, rename bool, disabled bool, updates ManagedMetadata) error {
 	doc, err := LoadDocument(skill.SkillFile)
 	if err != nil {
@@ -356,6 +389,16 @@ func mergeManagedMetadata(target *ManagedMetadata, updates ManagedMetadata) {
 	}
 	if strings.TrimSpace(updates.LastUpdatedAt) != "" {
 		target.LastUpdatedAt = updates.LastUpdatedAt
+	}
+	target.RiskScore = updates.RiskScore
+	if strings.TrimSpace(updates.RiskEvaluatedAt) != "" {
+		target.RiskEvaluatedAt = updates.RiskEvaluatedAt
+	}
+	if strings.TrimSpace(updates.RiskEvaluator) != "" {
+		target.RiskEvaluator = updates.RiskEvaluator
+	}
+	if strings.TrimSpace(updates.RiskReason) != "" {
+		target.RiskReason = updates.RiskReason
 	}
 }
 
