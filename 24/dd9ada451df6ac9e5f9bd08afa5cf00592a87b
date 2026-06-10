@@ -1,0 +1,26 @@
+packages/cli/internal/security/security.go
+  s_e595791b137881::t_e7617ae6dbd066 1-273
+packages/cli/internal/security/process_unix.go
+  s_e595791b137881::t_5cf72429a2e824 1-23
+packages/cli/internal/security/security_test.go
+  s_e595791b137881::t_615318bcb5becf 1-6,9-77,83,95-118
+  s_e595791b137881::t_1644659c7a4830 7-8,78-82,84-94
+packages/cli/internal/security/process_windows.go
+  s_e595791b137881::t_91b903c470c22c 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "24dd9ada451df6ac9e5f9bd08afa5cf00592a87b",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
