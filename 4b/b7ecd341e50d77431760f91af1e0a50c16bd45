@@ -1,0 +1,55 @@
+.planning/codebase/CONCERNS.md
+  s_08b7d1a1caecd1::t_59d9ccbcc1f961 1-171
+.planning/codebase/STRUCTURE.md
+  s_46922ad2278b23::t_6d38f53ba2f621 1-290
+.planning/codebase/TESTING.md
+  s_73415390ee7cb3::t_f9dc8b32021801 1-415
+.planning/codebase/CONVENTIONS.md
+  s_73415390ee7cb3::t_b652f759e116e1 1-357
+.planning/codebase/INTEGRATIONS.md
+  s_1eb2d2f0943e72::t_477c099056f026 1-160
+.planning/codebase/STACK.md
+  s_1eb2d2f0943e72::t_f7b3f14e0a5174 1-110
+.planning/codebase/ARCHITECTURE.md
+  s_46922ad2278b23::t_82f91b54178cf9 1-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4bb7ecd341e50d77431760f91af1e0a50c16bd45",
+  "prompts": {},
+  "sessions": {
+    "s_08b7d1a1caecd1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f8613f4ffecMX4vqNLpWvQPk",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_1eb2d2f0943e72": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f86b8d9ffe0xIy3gWtu1txjU",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_46922ad2278b23": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f8684d8ffehJeNzkJhScSneV",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_73415390ee7cb3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f864404ffeSr412wq6FWXSJ4",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
