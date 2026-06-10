@@ -1,0 +1,19 @@
+.planning/phases/01-skill-security-check-RESEARCH.md
+  s_e082a98e76b6b2::t_da30d9bbb3a669 1-377
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b3168090c7c8f83eb9c96f2b3043e173e0770777",
+  "prompts": {},
+  "sessions": {
+    "s_e082a98e76b6b2": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f2c176effemlEAgKMPRnPoey",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
