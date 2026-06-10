@@ -1,0 +1,19 @@
+.planning/phases/01-skill-security-check/03-plan-SUMMARY.md
+  s_e595791b137881::t_27c1a531403c1a 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "627c11926a26842255b462d9f8f1ebeac662645d",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
