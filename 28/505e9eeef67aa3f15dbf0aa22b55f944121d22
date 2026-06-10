@@ -1,0 +1,26 @@
+packages/cli/cmd/skill_security.go
+  s_e595791b137881::t_7702855f0dfbce 1-204
+packages/cli/cmd/skill.go
+  s_e595791b137881::t_6289dad50a9797 19
+packages/cli/internal/skills/frontmatter.go
+  s_e595791b137881::t_cc4bf1f8237ff8 353
+packages/cli/internal/skills/frontmatter_test.go
+  s_e595791b137881::t_b4edfced31bebe 278-279
+  s_e595791b137881::t_b34675a87eac3a 301
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "28505e9eeef67aa3f15dbf0aa22b55f944121d22",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
