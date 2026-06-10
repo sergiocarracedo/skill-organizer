@@ -26,6 +26,24 @@ Codebase maps live in `.planning/codebase/` (STACK, ARCHITECTURE,
 CONVENTIONS, TESTING, CONCERNS, INTEGRATIONS, STRUCTURE) — read these
 to understand the existing code before adding to it.
 
+## Current Phase
+
+**Phase 1 — Skill security check (REQ-4).** Active.
+
+Plans (in execution order):
+1. `.planning/phases/01-skill-security-check/02-plan-REFACTOR.md` —
+   Extract shared agent-selection helper into `internal/agenttools`;
+   rename `OverlapConfig` → `AgentSelectionConfig`.
+2. `.planning/phases/01-skill-security-check/03-plan-METADATA.md` —
+   Add risk-score fields to `ManagedMetadata` schema.
+3. `.planning/phases/01-skill-security-check/04-plan-COMMAND.md` —
+   Implement `skill check-security` command.
+4. `.planning/phases/01-skill-security-check/05-plan-HOOKS.md` —
+   Add re-enable gate and post-install security hook.
+
+Context: `.planning/phases/01-skill-security-check-CONTEXT.md`
+Research: `.planning/phases/01-skill-security-check-RESEARCH.md`
+
 ## Anti-vision guards
 
 These came from PROJECT.md. **Do not propose, build, or accept PRs
