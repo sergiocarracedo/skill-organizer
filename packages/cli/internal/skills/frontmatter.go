@@ -350,7 +350,7 @@ func RewriteManagedFields(skill Skill, rename bool, disabled bool) error {
 	return RewriteManagedFieldsWithMetadata(skill, rename, disabled, ManagedMetadata{})
 }
 
-func updateManagedMetadata(skill Skill, updates ManagedMetadata) error {
+func UpdateManagedMetadata(skill Skill, updates ManagedMetadata) error {
 	doc, err := LoadDocument(skill.SkillFile)
 	if err != nil {
 		return err

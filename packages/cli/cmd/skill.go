@@ -16,6 +16,7 @@ func newSkillCommand() *cobra.Command {
 	cmd.AddCommand(newCheckUpdatesCommand())
 	cmd.AddCommand(newTryFindMetadataCommand())
 	cmd.AddCommand(newCheckOverlapCommand())
+	cmd.AddCommand(newCheckSecurityCommand())
 
 	return cmd
 }

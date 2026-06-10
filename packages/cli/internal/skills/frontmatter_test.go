@@ -275,8 +275,8 @@ func TestUpdateManagedMetadataRoundTrip(t *testing.T) {
 		RiskReason:      "Suspicious curl pipe bash",
 	}
 
-	if err := updateManagedMetadata(skill, updates); err != nil {
-		t.Fatalf("updateManagedMetadata() error = %v", err)
+	if err := UpdateManagedMetadata(skill, updates); err != nil {
+		t.Fatalf("UpdateManagedMetadata() error = %v", err)
 	}
 
 	doc, err := LoadDocument(path)
@@ -298,7 +298,7 @@ func TestUpdateManagedMetadataRoundTrip(t *testing.T) {
 		t.Fatalf("Reloaded RiskReason = %q, want %q", loaded.RiskReason, "Suspicious curl pipe bash")
 	}
 	if doc.Name() != "example" {
-		t.Fatalf("updateManagedMetadata unexpectedly renamed skill to %q", doc.Name())
+		t.Fatalf("UpdateManagedMetadata unexpectedly renamed skill to %q", doc.Name())
 	}
 }
 
