@@ -1,0 +1,24 @@
+{
+  "mode": "auto",
+  "granularity": "coarse",
+  "learning_mode": "auto",
+  "model_profile": "quality",
+  "context": "dev",
+  "tdd": false,
+  "commit_docs": true,
+  "commit_mode": "auto",
+  "ship_pipeline": {
+    "auto_test": true,
+    "conventional_commits": true,
+    "auto_pr_description": true
+  },
+  "workflow": {
+    "discuss_mode": "standard",
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "review": true,
+    "solutions_search": true,
+    "parallelization": "medium"
+  }
+}
