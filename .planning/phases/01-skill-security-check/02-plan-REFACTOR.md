@@ -7,10 +7,12 @@ files_modified:
   - packages/cli/internal/config/config.go
   - packages/cli/internal/config/registry.go
   - packages/cli/internal/config/overlap_test.go
+  - packages/cli/internal/config/agent_selection_test.go
   - packages/cli/cmd/skill_overlap.go
   - packages/cli/cmd/skill_overlap_test.go
 autonomous: true
 single_layer_justified: false
+requirement: REQ-4
 objective: "Extract agent-selection logic (choose/select/prompt/spinner/launch) from skill_overlap.go into internal/agenttools, and rename OverlapConfig → AgentSelectionConfig with YAML migration fallback — no user-facing behavior change."
 must_haves:
   - "go test ./internal/agenttools/... passes with at least 3 new tests"

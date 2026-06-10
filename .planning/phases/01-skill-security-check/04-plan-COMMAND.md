@@ -11,6 +11,7 @@ files_modified:
   - packages/cli/cmd/skill_security_test.go
 autonomous: true
 single_layer_justified: false
+requirement: REQ-4
 objective: "Implement skill-organizer skill check-security command: selects an agent tool, analyzes all skills for security risks, stores per-skill risk scores in metadata, and prompts to disable high-risk skills (threshold >= 70). Falls back to printing the analysis prompt to stdout when no tools are detected."
 must_haves:
   - "skill-organizer skill check-security --print-prompt outputs a security analysis prompt to stdout and exits 0"

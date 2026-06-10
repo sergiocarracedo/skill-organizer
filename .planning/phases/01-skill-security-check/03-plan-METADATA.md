@@ -3,10 +3,10 @@ wave: 2
 depends_on: []
 files_modified:
   - packages/cli/internal/skills/frontmatter.go
-  - packages/cli/internal/skills/scanner.go
   - packages/cli/internal/skills/frontmatter_test.go
 autonomous: true
 single_layer_justified: "This plan is schema-only: adding risk-score fields to the data model. It is a legitimate single-layer step because the data model must exist before the check-security command (Plan 04) can write to it. No user-facing behavior changes, but verified by round-trip tests."
+requirement: REQ-4
 objective: "Add risk-score fields (risk-score, risk-evaluated-at, risk-evaluator, risk-reason) to ManagedMetadata struct, wire through SetManagedFields and mergeManagedMetadata, and add round-trip tests."
 must_haves:
   - "go test ./internal/skills/... passes"
@@ -24,6 +24,8 @@ Add four new fields to the `ManagedMetadata` struct — `RiskScore` (int 0-100),
 ## Context
 
 These fields are stored in per-skill frontmatter under `metadata.skill-organizer.*` in SKILL.md files. They are read by the check-security command (Plan 04) and the enable gate (Plan 05). The `ManagedMetadata` struct and its helpers are in `internal/skills/frontmatter.go`.
+
+**Deviation from CONTEXT.md:** CONTEXT.md originally listed `scanner.go` (the `Skill` struct) for parallel changes. This plan intentionally does NOT modify the `Skill` struct. Risk-score fields are accessed through `doc.ManagedMetadata().RiskScore` — adding them to the `Skill` struct would create a second source of truth that must stay in sync with frontmatter. Callers (check-security command, enable gate) already work with `ManagedMetadata` directly. This is a cleaner architecture.
 
 The four YAML keys in the `skill-organizer` section map to:
 - `risk-score` — int (0-100), stored as YAML scalar

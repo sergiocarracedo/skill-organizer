@@ -10,6 +10,7 @@ files_modified:
   - packages/cli/cmd/skill_add_test.go
 autonomous: true
 single_layer_justified: false
+requirement: REQ-4
 objective: "Add re-enable gate to the enable command (shows risk reason for high-risk skills, asks confirmation before re-enabling) and a post-install hook to skill add (prompts to run check-security on newly installed skills)."
 must_haves:
   - "Enabling a high-risk skill (risk-score >= 70, risk-evaluator non-empty) shows the risk reason and asks confirmation with default=no; on decline, writes disabled: true explicitly"
