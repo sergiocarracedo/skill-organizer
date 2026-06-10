@@ -171,3 +171,156 @@ func TestWithoutManagedMetadataRemovesOnlyOrganizerSection(t *testing.T) {
 		t.Fatalf("body removed unexpectedly\n%s", output)
 	}
 }
+
+func TestDocumentManagedMetadataIncludesRiskScore(t *testing.T) {
+	content := []byte("---\nname: allium\ndescription: test\nmetadata:\n  skill-organizer:\n    risk-score: 85\n    risk-evaluated-at: \"2026-06-10T12:00:00Z\"\n    risk-evaluator: \"claude-code\"\n    risk-reason: \"Contains shell execution patterns\"\n---\n\n# Body\n")
+
+	doc, err := ParseDocument(content)
+	if err != nil {
+		t.Fatalf("ParseDocument() error = %v", err)
+	}
+
+	parsed := doc.ManagedMetadata()
+	if parsed.RiskScore != 85 {
+		t.Fatalf("ManagedMetadata().RiskScore = %d, want 85", parsed.RiskScore)
+	}
+	if parsed.RiskEvaluatedAt != "2026-06-10T12:00:00Z" {
+		t.Fatalf("ManagedMetadata().RiskEvaluatedAt = %q, want %q", parsed.RiskEvaluatedAt, "2026-06-10T12:00:00Z")
+	}
+	if parsed.RiskEvaluator != "claude-code" {
+		t.Fatalf("ManagedMetadata().RiskEvaluator = %q, want %q", parsed.RiskEvaluator, "claude-code")
+	}
+	if parsed.RiskReason != "Contains shell execution patterns" {
+		t.Fatalf("ManagedMetadata().RiskReason = %q, want %q", parsed.RiskReason, "Contains shell execution patterns")
+	}
+
+	doc.SetManagedFields("thirdparty--allium", parsed, false)
+
+	marshaled, err := doc.Marshal()
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
+
+	output := string(marshaled)
+	for _, want := range []string{
+		"risk-score: 85",
+		"risk-evaluated-at: \"2026-06-10T12:00:00Z\"",
+		"risk-evaluator: \"claude-code\"",
+		"risk-reason: \"Contains shell execution patterns\"",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("Marshal() output missing %q\n%s", want, output)
+		}
+	}
+}
+
+func TestMergeManagedMetadataPreservesRiskFields(t *testing.T) {
+	base := ManagedMetadata{
+		OriginalName:       "allium",
+		SourceRelativePath: "thirdparty/allium",
+		Source:             "terrylica/cc-skills",
+		InstalledVersion:   "abc123",
+	}
+
+	updates := ManagedMetadata{
+		RiskScore:       42,
+		RiskEvaluator:   "opencode",
+		RiskReason:      "Uses eval()",
+		RiskEvaluatedAt: "2026-06-10T12:00:00Z",
+	}
+
+	mergeManagedMetadata(&base, updates)
+
+	if base.RiskScore != 42 {
+		t.Fatalf("mergeManagedMetadata RiskScore = %d, want 42", base.RiskScore)
+	}
+	if base.RiskEvaluator != "opencode" {
+		t.Fatalf("mergeManagedMetadata RiskEvaluator = %q, want %q", base.RiskEvaluator, "opencode")
+	}
+	if base.RiskReason != "Uses eval()" {
+		t.Fatalf("mergeManagedMetadata RiskReason = %q, want %q", base.RiskReason, "Uses eval()")
+	}
+	if base.RiskEvaluatedAt != "2026-06-10T12:00:00Z" {
+		t.Fatalf("mergeManagedMetadata RiskEvaluatedAt = %q, want %q", base.RiskEvaluatedAt, "2026-06-10T12:00:00Z")
+	}
+	if base.OriginalName != "allium" {
+		t.Fatalf("mergeManagedMetadata cleared OriginalName, got %q", base.OriginalName)
+	}
+}
+
+func TestUpdateManagedMetadataRoundTrip(t *testing.T) {
+	root := t.TempDir()
+	dir := filepath.Join(root, "thirdparty", "example")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+
+	path := filepath.Join(dir, SkillFileName)
+	content := "---\nname: example\ndescription: test\n---\n\n# Example\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	skill := Skill{
+		Dir:           dir,
+		SkillFile:     path,
+		RelativePath:  "thirdparty/example",
+		FlattenedName: "thirdparty--example",
+	}
+
+	updates := ManagedMetadata{
+		RiskScore:       72,
+		RiskEvaluator:   "claude",
+		RiskEvaluatedAt: "2026-06-10T12:00:00Z",
+		RiskReason:      "Suspicious curl pipe bash",
+	}
+
+	if err := updateManagedMetadata(skill, updates); err != nil {
+		t.Fatalf("updateManagedMetadata() error = %v", err)
+	}
+
+	doc, err := LoadDocument(path)
+	if err != nil {
+		t.Fatalf("LoadDocument() error = %v", err)
+	}
+
+	loaded := doc.ManagedMetadata()
+	if loaded.RiskScore != 72 {
+		t.Fatalf("Reloaded RiskScore = %d, want 72", loaded.RiskScore)
+	}
+	if loaded.RiskEvaluator != "claude" {
+		t.Fatalf("Reloaded RiskEvaluator = %q, want %q", loaded.RiskEvaluator, "claude")
+	}
+	if loaded.RiskEvaluatedAt != "2026-06-10T12:00:00Z" {
+		t.Fatalf("Reloaded RiskEvaluatedAt = %q, want %q", loaded.RiskEvaluatedAt, "2026-06-10T12:00:00Z")
+	}
+	if loaded.RiskReason != "Suspicious curl pipe bash" {
+		t.Fatalf("Reloaded RiskReason = %q, want %q", loaded.RiskReason, "Suspicious curl pipe bash")
+	}
+	if doc.Name() != "example" {
+		t.Fatalf("updateManagedMetadata unexpectedly renamed skill to %q", doc.Name())
+	}
+}
+
+func TestManagedMetadataDefaultRiskScoreIsZero(t *testing.T) {
+	content := []byte("---\nname: allium\ndescription: test\nmetadata:\n  skill-organizer:\n    source: terrylica/cc-skills\n---\n\n# Body\n")
+
+	doc, err := ParseDocument(content)
+	if err != nil {
+		t.Fatalf("ParseDocument() error = %v", err)
+	}
+
+	parsed := doc.ManagedMetadata()
+	if parsed.RiskScore != 0 {
+		t.Fatalf("ManagedMetadata().RiskScore = %d, want 0", parsed.RiskScore)
+	}
+	if parsed.RiskEvaluator != "" {
+		t.Fatalf("ManagedMetadata().RiskEvaluator = %q, want empty", parsed.RiskEvaluator)
+	}
+	if parsed.RiskReason != "" {
+		t.Fatalf("ManagedMetadata().RiskReason = %q, want empty", parsed.RiskReason)
+	}
+	if parsed.RiskEvaluatedAt != "" {
+		t.Fatalf("ManagedMetadata().RiskEvaluatedAt = %q, want empty", parsed.RiskEvaluatedAt)
+	}
+}

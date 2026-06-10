@@ -204,7 +204,7 @@ func (d *Document) SetManagedFields(flattenedName string, metadata ManagedMetada
 	if strings.TrimSpace(metadata.LastUpdatedAt) != "" {
 		setScalar(organizerNode, "last-updated-at", metadata.LastUpdatedAt)
 	}
-	setScalar(organizerNode, "risk-score", strconv.Itoa(metadata.RiskScore))
+	setInt(organizerNode, "risk-score", metadata.RiskScore)
 	setScalar(organizerNode, "risk-evaluated-at", metadata.RiskEvaluatedAt)
 	setScalar(organizerNode, "risk-evaluator", metadata.RiskEvaluator)
 	setScalar(organizerNode, "risk-reason", metadata.RiskReason)
@@ -313,6 +313,20 @@ func setBool(mapping *yaml.Node, key string, value bool) {
 	mapping.Content = append(mapping.Content,
 		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: key},
 		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!bool", Value: scalar},
+	)
+}
+
+func setInt(mapping *yaml.Node, key string, value int) {
+	if node := mappingValue(mapping, key); node != nil {
+		node.Kind = yaml.ScalarNode
+		node.Tag = "!!int"
+		node.Value = strconv.Itoa(value)
+		return
+	}
+
+	mapping.Content = append(mapping.Content,
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: key},
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!int", Value: strconv.Itoa(value)},
 	)
 }
 
