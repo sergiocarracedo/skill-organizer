@@ -20,16 +20,20 @@ func TestChooseOverlapToolUsesSavedInstalledDefault(t *testing.T) {
 		mockInstalledTool("codex", "codex"),
 	}
 
-	tool, cfg, err := chooseOverlapTool(installed, configpkg.OverlapConfig{DefaultAgentTool: "codex"}, "", false)
+	selector := func(_ string, _ []string, _ string) (string, error) {
+		return "", fmt.Errorf("should not be called")
+	}
+
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "", false, selector)
 	if err != nil {
-		t.Fatalf("chooseOverlapTool() error = %v", err)
+		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
 
 	if tool.Tool.ID != "codex" {
-		t.Fatalf("chooseOverlapTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
+		t.Fatalf("ChooseAgentTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
 	}
 	if cfg.DefaultAgentTool != "codex" {
-		t.Fatalf("chooseOverlapTool().DefaultAgentTool = %q, want %q", cfg.DefaultAgentTool, "codex")
+		t.Fatalf("ChooseAgentTool().DefaultAgentTool = %q, want %q", cfg.DefaultAgentTool, "codex")
 	}
 }
 
@@ -39,55 +43,55 @@ func TestChooseOverlapToolUsesExplicitInstalledTool(t *testing.T) {
 		mockInstalledTool("codex", "codex"),
 	}
 
-	tool, cfg, err := chooseOverlapTool(installed, configpkg.OverlapConfig{DefaultAgentTool: "claude"}, "codex", false)
+	selector := func(_ string, _ []string, _ string) (string, error) {
+		return "", fmt.Errorf("should not be called")
+	}
+
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "codex", false, selector)
 	if err != nil {
-		t.Fatalf("chooseOverlapTool() error = %v", err)
+		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
 
 	if tool.Tool.ID != "codex" {
-		t.Fatalf("chooseOverlapTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
+		t.Fatalf("ChooseAgentTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
 	}
 	if cfg.DefaultAgentTool != "codex" {
-		t.Fatalf("chooseOverlapTool().DefaultAgentTool = %q, want %q", cfg.DefaultAgentTool, "codex")
+		t.Fatalf("ChooseAgentTool().DefaultAgentTool = %q, want %q", cfg.DefaultAgentTool, "codex")
 	}
 }
 
 func TestChooseOverlapToolErrorsWhenExplicitToolIsMissing(t *testing.T) {
 	installed := []agenttools.InstalledTool{mockInstalledTool("claude", "claude")}
 
-	_, _, err := chooseOverlapTool(installed, configpkg.OverlapConfig{}, "codex", false)
+	_, _, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{}, "codex", false, nil)
 	if err == nil {
-		t.Fatalf("chooseOverlapTool() error = nil, want error")
+		t.Fatalf("ChooseAgentTool() error = nil, want error")
 	}
 }
 
 func TestChooseOverlapToolPromptsWhenRequested(t *testing.T) {
-	original := selectToolOption
-	selectToolOption = func(prompt string, options []string, defaultOption string) (string, error) {
-		if len(options) != 2 {
-			return "", fmt.Errorf("got %d options", len(options))
-		}
-		return options[1], nil
-	}
-	t.Cleanup(func() {
-		selectToolOption = original
-	})
-
 	installed := []agenttools.InstalledTool{
 		mockInstalledTool("claude", "claude"),
 		mockInstalledTool("codex", "codex"),
 	}
 
-	tool, cfg, err := chooseOverlapTool(installed, configpkg.OverlapConfig{DefaultAgentTool: "claude"}, "", true)
+	selector := func(_ string, labels []string, _ string) (string, error) {
+		if len(labels) != 2 {
+			return "", fmt.Errorf("got %d labels", len(labels))
+		}
+		return labels[1], nil
+	}
+
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "", true, selector)
 	if err != nil {
-		t.Fatalf("chooseOverlapTool() error = %v", err)
+		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
 
 	if tool.Tool.ID != "codex" {
-		t.Fatalf("chooseOverlapTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
+		t.Fatalf("ChooseAgentTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
 	}
 	if cfg.DefaultAgentTool != "codex" {
-		t.Fatalf("chooseOverlapTool().DefaultAgentTool = %q, want %q", cfg.DefaultAgentTool, "codex")
+		t.Fatalf("ChooseAgentTool().DefaultAgentTool = %q, want %q", cfg.DefaultAgentTool, "codex")
 	}
 }
 
@@ -246,7 +250,7 @@ func TestChooseOverlapToolReportHelpersCompile(t *testing.T) {
 	_ = styleLabel("Why the overlap")
 	_ = overlapScoreStyle(95)
 	_ = overlapTypeStyle("duplicate")
-	_, _ = startDefaultSpinner("Testing spinner")
+	_, _ = agenttools.StartSpinner("Testing spinner")
 	_ = pterm.DefaultSpinner
 }
 
@@ -276,17 +280,17 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	originalDetectInstalled := detectInstalledTools
 	originalLoadResolvedLocation := loadResolvedLocationFunc
 	originalCollectSkills := collectOverlapSkills
-	originalLoadConfig := loadOverlapConfigFunc
-	originalSaveConfig := saveOverlapConfigFunc
+	originalLoadConfig := loadAgentSelectionConfigFunc
+	originalSaveConfig := saveAgentSelectionConfigFunc
 	originalRunOverlap := runOverlapAnalysis
 	originalConfirm := confirmApplyPlan
 	originalConfirmCosts := confirmExternalCosts
 	originalSavePrompt := saveApplyPlanPrompt
-	originalLaunch := launchPlanSession
 	originalInfo := printInfoMessage
 	originalDebug := printDebugMessage
 	originalWarning := printWarningMessage
-	originalSpinner := startOverlapSpinner
+	originalSpinner := agenttools.StartSpinnerFunc
+	originalLaunch := agenttools.LaunchSessionFunc
 
 	overlapChooseTool = false
 	overlapToolID = ""
@@ -302,10 +306,10 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	collectOverlapSkills = func(location configpkg.Location, includeDisabled bool) ([]overlap.SkillInfo, error) {
 		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
 	}
-	loadOverlapConfigFunc = func(path string) (configpkg.OverlapConfig, error) {
-		return configpkg.OverlapConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
 	}
-	saveOverlapConfigFunc = func(path string, cfg configpkg.OverlapConfig) error {
+	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
 	}
 	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
@@ -326,7 +330,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 		savedPath = "/abs/plans/skill-overlap-fix-20262804-120304.md"
 		return savedPath, nil
 	}
-	launchPlanSession = func(tool agenttools.InstalledTool, prompt string) error {
+	agenttools.LaunchSessionFunc = func(tool agenttools.InstalledTool, prompt string) error {
 		return fmt.Errorf("launchPlanSession should not be called")
 	}
 	var infos []string
@@ -339,7 +343,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	}
 	printWarningMessage = func(format string, args ...any) {
 	}
-	startOverlapSpinner = func(text string) (spinnerHandle, error) {
+	agenttools.StartSpinnerFunc = func(text string) (agenttools.SpinnerHandle, error) {
 		return stubSpinner{}, nil
 	}
 	t.Cleanup(func() {
@@ -351,17 +355,17 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 		detectInstalledTools = originalDetectInstalled
 		loadResolvedLocationFunc = originalLoadResolvedLocation
 		collectOverlapSkills = originalCollectSkills
-		loadOverlapConfigFunc = originalLoadConfig
-		saveOverlapConfigFunc = originalSaveConfig
+		loadAgentSelectionConfigFunc = originalLoadConfig
+		saveAgentSelectionConfigFunc = originalSaveConfig
 		runOverlapAnalysis = originalRunOverlap
 		confirmApplyPlan = originalConfirm
 		confirmExternalCosts = originalConfirmCosts
 		saveApplyPlanPrompt = originalSavePrompt
-		launchPlanSession = originalLaunch
+		agenttools.StartSpinnerFunc = originalSpinner
+		agenttools.LaunchSessionFunc = originalLaunch
 		printInfoMessage = originalInfo
 		printDebugMessage = originalDebug
 		printWarningMessage = originalWarning
-		startOverlapSpinner = originalSpinner
 	})
 
 	cmd := newCheckOverlapCommand()

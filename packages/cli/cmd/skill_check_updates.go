@@ -17,6 +17,7 @@ import (
 
 	backuppkg "github.com/sergiocarracedo/skill-organizer/cli/internal/backup"
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
+	"github.com/sergiocarracedo/skill-organizer/cli/internal/agenttools"
 	remotepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/remote"
 	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	versionfmtpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/versionfmt"
@@ -54,7 +55,7 @@ type skillUpdateScanResult struct {
 var (
 	fetchSkillBundleFunc     = remotepkg.FetchSkillBundle
 	updatesPathFunc          = configpkg.UpdatesPath
-	startCheckUpdatesSpinner = startDefaultSpinner
+	startCheckUpdatesSpinner = agenttools.StartSpinner
 	printCheckUpdatesWarning = func(format string, args ...any) {
 		pterm.Warning.Printfln(format, args...)
 	}

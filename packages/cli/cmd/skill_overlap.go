@@ -3,9 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -27,38 +25,21 @@ var (
 	overlapNoAskToApply bool
 )
 
-type spinnerHandle interface {
-	UpdateText(text string)
-	Success(text ...any)
-	Fail(text ...any)
-}
-
 var (
-	loadOverlapConfigFunc    = configpkg.LoadOverlapConfigOrDefault
-	saveOverlapConfigFunc    = configpkg.SaveOverlapConfig
-	loadResolvedLocationFunc = loadResolvedLocation
-	detectInstalledTools     = agenttools.DetectInstalled
-	confirmExternalCosts     = confirm
-	confirmApplyPlan         = confirm
-	selectToolOption         = selectOption
-	collectOverlapSkills     = overlap.CollectSkills
-	printOverlapPromptFunc   = func(prompt string) {
+	loadAgentSelectionConfigFunc = configpkg.LoadAgentSelectionConfigOrDefault
+	saveAgentSelectionConfigFunc = configpkg.SaveAgentSelectionConfig
+	loadResolvedLocationFunc     = loadResolvedLocation
+	detectInstalledTools         = agenttools.DetectInstalled
+	confirmExternalCosts         = confirm
+	confirmApplyPlan             = confirm
+	selectToolOption             = selectOption
+	collectOverlapSkills         = overlap.CollectSkills
+	printOverlapPromptFunc       = func(prompt string) {
 		pterm.Println(prompt)
 	}
 	saveApplyPlanPrompt = writeApplyPlanPrompt
-	startOverlapSpinner = startDefaultSpinner
 	runOverlapAnalysis  = overlap.Run
-	launchPlanSession   = func(tool agenttools.InstalledTool, prompt string) error {
-		if tool.Tool.PlanArgs == nil {
-			return fmt.Errorf("%s cannot be opened in plan mode from this CLI yet", tool.Tool.Name)
-		}
-		command := exec.Command(tool.Binary, tool.Tool.PlanArgs(prompt)...)
-		command.Stdin = os.Stdin
-		command.Stdout = os.Stdout
-		command.Stderr = os.Stderr
-		return command.Run()
-	}
-	printInfoMessage = func(format string, args ...any) {
+	printInfoMessage    = func(format string, args ...any) {
 		pterm.Info.Printfln(format, args...)
 	}
 	printDebugMessage = func(format string, args ...any) {
@@ -66,12 +47,6 @@ var (
 	}
 	printWarningMessage = func(format string, args ...any) {
 		pterm.Warning.Printfln(format, args...)
-	}
-	hideCursor = func() {
-		_, _ = fmt.Fprint(os.Stdout, "\033[?25l")
-	}
-	showCursor = func() {
-		_, _ = fmt.Fprint(os.Stdout, "\033[?25h")
 	}
 )
 
@@ -115,12 +90,12 @@ func newCheckOverlapCommand() *cobra.Command {
 				return err
 			}
 
-			overlapCfg, err := loadOverlapConfigFunc(registryPath)
+			agentCfg, err := loadAgentSelectionConfigFunc(registryPath)
 			if err != nil {
 				return err
 			}
 
-			tool, overlapCfg, err := chooseOverlapTool(installed, overlapCfg, overlapToolID, overlapChooseTool)
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapChooseTool, selectToolOption)
 			if err != nil {
 				return err
 			}
@@ -130,7 +105,7 @@ func newCheckOverlapCommand() *cobra.Command {
 				return err
 			}
 
-			if !overlapCfg.AcknowledgedExternalToolCosts {
+			if !agentCfg.AcknowledgedExternalToolCosts {
 				accepted, err := confirmExternalCosts("This command runs an installed external agent CLI to analyze your skills. Depending on the selected tool and account, usage may incur charges or metered costs. Continue?", false)
 				if err != nil {
 					return err
@@ -138,10 +113,10 @@ func newCheckOverlapCommand() *cobra.Command {
 				if !accepted {
 					return fmt.Errorf("aborted")
 				}
-				overlapCfg.AcknowledgedExternalToolCosts = true
+				agentCfg.AcknowledgedExternalToolCosts = true
 			}
 
-			if err := saveOverlapConfigFunc(registryPath, overlapCfg); err != nil {
+			if err := saveAgentSelectionConfigFunc(registryPath, agentCfg); err != nil {
 				return err
 			}
 
@@ -149,11 +124,11 @@ func newCheckOverlapCommand() *cobra.Command {
 			printInfoMessage("Reconfigure later with: skill-organizer skill check-overlap --choose-tool")
 			printInfoMessage("Showing overlap types: %s and stronger", minOverlapLabel)
 
-			spinner, err := startOverlapSpinner("Analyzing skills")
+			spinner, err := agenttools.StartSpinner("Analyzing skills")
 			if err != nil {
 				return err
 			}
-			defer showCursor()
+			defer agenttools.ShowCursor()
 
 			report, err := runOverlapAnalysis(cmd.Context(), tool, prompt, func(status string) {
 				spinner.UpdateText(limitSpinnerText("Analyzing skills: "+status, 80))
@@ -211,7 +186,7 @@ func newCheckOverlapCommand() *cobra.Command {
 			}
 
 			printInfoMessage("Opening %s in plan mode", tool.Tool.Name)
-			return launchPlanSession(tool, planPrompt)
+			return agenttools.LaunchSession(tool, planPrompt)
 		},
 	}
 
@@ -223,59 +198,6 @@ func newCheckOverlapCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&overlapNoAskToApply, "no-ask-to-apply", false, "Do not ask the selected agent to prepare an apply plan after the report")
 
 	return cmd
-}
-
-func chooseOverlapTool(installed []agenttools.InstalledTool, cfg configpkg.OverlapConfig, explicitID string, choose bool) (agenttools.InstalledTool, configpkg.OverlapConfig, error) {
-	if explicitID != "" {
-		tool, ok := agenttools.FindInstalled(explicitID, installed)
-		if !ok {
-			return agenttools.InstalledTool{}, cfg, fmt.Errorf("requested tool %q is not installed. Installed tools: %s", explicitID, agenttools.FormatInstalledNames(installed))
-		}
-		cfg.DefaultAgentTool = tool.Tool.ID
-		return tool, cfg, nil
-	}
-
-	if !choose && cfg.DefaultAgentTool != "" {
-		if tool, ok := agenttools.FindInstalled(cfg.DefaultAgentTool, installed); ok {
-			return tool, cfg, nil
-		}
-	}
-
-	selection, err := selectInstalledTool(installed)
-	if err != nil {
-		return agenttools.InstalledTool{}, cfg, err
-	}
-
-	cfg.DefaultAgentTool = selection.Tool.ID
-	return selection, cfg, nil
-}
-
-func selectInstalledTool(installed []agenttools.InstalledTool) (agenttools.InstalledTool, error) {
-	ordered := make([]agenttools.InstalledTool, len(installed))
-	copy(ordered, installed)
-	sort.Slice(ordered, func(i, j int) bool {
-		return ordered[i].Tool.Name < ordered[j].Tool.Name
-	})
-
-	labels := make([]string, 0, len(ordered))
-	byLabel := make(map[string]agenttools.InstalledTool, len(ordered))
-	for _, tool := range ordered {
-		label := agenttools.Label(tool)
-		labels = append(labels, label)
-		byLabel[label] = tool
-	}
-
-	selection, err := selectToolOption("Select the agent tool to evaluate overlap", labels, labels[0])
-	if err != nil {
-		return agenttools.InstalledTool{}, err
-	}
-
-	tool, ok := byLabel[selection]
-	if !ok {
-		return agenttools.InstalledTool{}, fmt.Errorf("unknown selected tool %q", selection)
-	}
-
-	return tool, nil
 }
 
 func printOverlapReport(tool agenttools.InstalledTool, skillCount int, includeDisabled bool, report overlap.Report) {
@@ -316,16 +238,6 @@ func printOverlapReport(tool agenttools.InstalledTool, skillCount int, includeDi
 	for _, recommendation := range report.Recommendations {
 		printWrappedBullet(recommendation, 80)
 	}
-}
-
-func startDefaultSpinner(text string) (spinnerHandle, error) {
-	hideCursor()
-	spinner, err := pterm.DefaultSpinner.Start(text)
-	if err != nil {
-		showCursor()
-		return nil, err
-	}
-	return spinner, nil
 }
 
 func limitSpinnerText(value string, width int) string {

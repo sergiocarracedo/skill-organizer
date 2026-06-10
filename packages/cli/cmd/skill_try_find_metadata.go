@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	remotepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/remote"
+	"github.com/sergiocarracedo/skill-organizer/cli/internal/agenttools"
 	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
 )
@@ -30,7 +31,7 @@ var (
 	tryFindMetadataRewriteFieldsFunc  = skills.RewriteManagedFieldsWithMetadata
 	tryFindMetadataLoadResolvedConfig = loadResolvedLocation
 	tryFindMetadataRunSync            = syncpkg.Run
-	startTryFindMetadataSpinner       = startDefaultSpinner
+	startTryFindMetadataSpinner       = agenttools.StartSpinner
 )
 
 func newTryFindMetadataCommand() *cobra.Command {

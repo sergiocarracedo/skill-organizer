@@ -9,6 +9,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// rawOverlapKeys is used to unmarshal the old overlap.* YAML keys for migration.
+type rawOverlapKeys struct {
+	Overlap struct {
+		DefaultAgentTool              string `yaml:"default-agent-tool"`
+		AcknowledgedExternalToolCosts bool   `yaml:"acknowledged-external-tool-costs"`
+	} `yaml:"overlap"`
+}
+
 const appDirName = "skill-organizer"
 
 func AppDir() (string, error) {
@@ -39,6 +47,18 @@ func LoadAppConfig(path string) (AppConfig, error) {
 	if err := yaml.Unmarshal(content, &cfg); err != nil {
 		return cfg, fmt.Errorf("parse app config: %w", err)
 	}
+
+	// Migration: if agent-selection.* is absent, fall back to overlap.*
+	if cfg.AgentSelection.DefaultAgentTool == "" && !cfg.AgentSelection.AcknowledgedExternalToolCosts {
+		var old rawOverlapKeys
+		if err := yaml.Unmarshal(content, &old); err == nil {
+			if old.Overlap.DefaultAgentTool != "" || old.Overlap.AcknowledgedExternalToolCosts {
+				cfg.AgentSelection.DefaultAgentTool = old.Overlap.DefaultAgentTool
+				cfg.AgentSelection.AcknowledgedExternalToolCosts = old.Overlap.AcknowledgedExternalToolCosts
+			}
+		}
+	}
+
 	cfg.Normalize()
 
 	return cfg, nil
@@ -124,30 +144,39 @@ func SaveServiceConfig(path string, service ServiceConfig) error {
 	return SaveAppConfig(path, cfg)
 }
 
-func LoadOverlapConfig(path string) (OverlapConfig, error) {
+func LoadAgentSelectionConfig(path string) (AgentSelectionConfig, error) {
 	cfg, err := LoadAppConfig(path)
 	if err != nil {
-		return OverlapConfig{}, err
+		return AgentSelectionConfig{}, err
 	}
-	return cfg.Overlap, nil
+	return cfg.AgentSelection, nil
 }
 
-func LoadOverlapConfigOrDefault(path string) (OverlapConfig, error) {
+func LoadAgentSelectionConfigOrDefault(path string) (AgentSelectionConfig, error) {
 	cfg, err := LoadAppConfigOrDefault(path)
 	if err != nil {
-		return OverlapConfig{}, err
+		return AgentSelectionConfig{}, err
 	}
-	return cfg.Overlap, nil
+	return cfg.AgentSelection, nil
 }
 
-func SaveOverlapConfig(path string, overlap OverlapConfig) error {
+func SaveAgentSelectionConfig(path string, as AgentSelectionConfig) error {
 	cfg, err := LoadAppConfigOrDefault(path)
 	if err != nil {
 		return err
 	}
-	cfg.Overlap = overlap
+	cfg.AgentSelection = as
 	return SaveAppConfig(path, cfg)
 }
+
+// Deprecated: use LoadAgentSelectionConfig instead.
+var LoadOverlapConfig = LoadAgentSelectionConfig
+
+// Deprecated: use LoadAgentSelectionConfigOrDefault instead.
+var LoadOverlapConfigOrDefault = LoadAgentSelectionConfigOrDefault
+
+// Deprecated: use SaveAgentSelectionConfig instead.
+var SaveOverlapConfig = SaveAgentSelectionConfig
 
 func LoadBackupConfig(path string) (BackupConfig, error) {
 	cfg, err := LoadAppConfig(path)
