@@ -1,0 +1,58 @@
+packages/cli/cmd/skill_check_updates.go
+  s_e595791b137881::t_58e5b2844a1c02 20
+  s_e595791b137881::t_2a663a091af982 58
+packages/cli/internal/config/config.go
+  s_e595791b137881::t_62ab3e1ad62e74 48-51
+  s_e595791b137881::t_2bdfadb9f505d4 81,95
+  s_e595791b137881::t_c6364110992595 36,41
+  s_e595791b137881::t_058fa8fb471710 105
+.planning/phases/01-skill-security-check/02-plan-SUMMARY.md
+  s_e595791b137881::t_e58b47b0b24af0 1-34
+packages/cli/cmd/skill_overlap.go
+  s_e595791b137881::t_2617cc68019494 93,98,108,116,119,127,131
+  s_e595791b137881::t_faee22375d967e 29-37,42
+  s_e595791b137881::t_5a29d69165d7db 189
+packages/cli/cmd/skill_overlap_test.go
+  s_e595791b137881::t_ad73449fbf1355 24-27,29,33,36,47-50,52,56,59,66,68,79-85,87,91,94
+  s_e595791b137881::t_a780a6a0cb1d41 78
+  s_e595791b137881::t_ca935a64a140ec 253
+  s_e595791b137881::t_fffe664a7ac7a2 23,46
+  s_e595791b137881::t_fab461872d63e1 283-284,292-293,309-310,312,333,346,358-359,364-365
+packages/cli/internal/config/registry.go
+  s_e595791b137881::t_3e559003d22311 12-19
+  s_e595791b137881::t_4568c62df40028 50-61
+  s_e595791b137881::t_d62bd923800916 147,150,152,155,158,160,163,168,172-179
+packages/cli/internal/agenttools/agenttools_test.go
+  s_e595791b137881::t_c3068b278266d6 6-7
+  s_e595791b137881::t_821e0aaa87c12a 46-55,57-80,82-119,121-152
+  s_e595791b137881::t_037c8fde3c9c2d 120
+  s_e595791b137881::t_db2030bf56cf6f 56,81
+packages/cli/cmd/skill_try_find_metadata.go
+  s_e595791b137881::t_e34537fdff98dc 34
+  s_e595791b137881::t_2cfbab6e05abbd 14
+packages/cli/internal/agenttools/agenttools.go
+  s_e595791b137881::t_6210a9b11b10f1 5,9-12
+  s_e595791b137881::t_cbd7862437a198 169
+  s_e595791b137881::t_e2c0c4fa5677fa 167-168,170-227,229-310
+  s_e595791b137881::t_4f004ff185979f 228
+packages/cli/internal/config/agent_selection_test.go
+  s_e595791b137881::t_676f34b3f7d4cb 103-108
+  s_e595791b137881::t_4169171be1b19f 1-5,7-102,109
+  s_e595791b137881::t_e0ea423dbb21c9 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fca45eb4ee096abdfdc459856ae11883b9dcc969",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
