@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"time"
@@ -201,4 +202,89 @@ func toSkill(info securitypkg.SkillInfo, location configpkg.Location) skills.Ski
 		RelativePath:  info.RelativePath,
 		FlattenedName: info.FlattenedName,
 	}
+}
+
+// RunCheckSecurityForSkill performs a security analysis on a single skill
+// using the default agent selection flow. Used by the skill-add hook.
+func RunCheckSecurityForSkill(skill skills.Skill, location configpkg.Location) error {
+	info := securitypkg.SkillInfo{
+		FlattenedName: skill.FlattenedName,
+		RelativePath:  skill.RelativePath,
+		Name:          skill.FlattenedName,
+	}
+	if doc, err := skills.LoadDocument(skill.SkillFile); err == nil {
+		if name := doc.Name(); name != "" {
+			info.Name = name
+		}
+		info.Description = doc.Description()
+	}
+
+	prompt := securitypkg.BuildPrompt([]securitypkg.SkillInfo{info})
+
+	installed, err := securityDetectInstalledTools()
+	if err != nil {
+		return fmt.Errorf("detect tools: %w", err)
+	}
+	if len(installed) == 0 {
+		pterm.Warning.Println("No agent tools detected. Run 'skill-organizer skill check-security' manually after installing a tool.")
+		return nil
+	}
+
+	registryPath, err := configpkg.RegistryPath()
+	if err != nil {
+		return err
+	}
+
+	cfg, err := securityLoadConfigFunc(registryPath)
+	if err != nil {
+		return err
+	}
+
+	autoSelectFirst := func(_ string, _ []string, _ string) (string, error) {
+		return agenttools.Label(installed[0]), nil
+	}
+
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, cfg, "", false, autoSelectFirst)
+	if err != nil {
+		return err
+	}
+
+	if !cfg.AcknowledgedExternalToolCosts {
+		accepted, err := securityConfirm("This command runs an installed external agent CLI. Continue?", false)
+		if err != nil {
+			return err
+		}
+		if !accepted {
+			pterm.Warning.Println("Security check skipped by user.")
+			return nil
+		}
+		cfg.AcknowledgedExternalToolCosts = true
+		if err := securitySaveConfigFunc(registryPath, cfg); err != nil {
+			return err
+		}
+	}
+
+	report, err := securityRunAnalysis(context.Background(), tool, prompt, func(_ string) {})
+	if err != nil {
+		return fmt.Errorf("security analysis failed: %w", err)
+	}
+
+	now := time.Now().UTC().Format(time.RFC3339)
+	for _, result := range report.Results {
+		if result.Name != skill.FlattenedName {
+			continue
+		}
+		updates := skills.ManagedMetadata{
+			RiskScore:       result.RiskScore,
+			RiskEvaluatedAt: now,
+			RiskEvaluator:   tool.Tool.ID,
+			RiskReason:      result.RiskReason,
+		}
+		if err := skills.UpdateManagedMetadata(skill, updates); err != nil {
+			return fmt.Errorf("persist risk score: %w", err)
+		}
+		break
+	}
+
+	return nil
 }

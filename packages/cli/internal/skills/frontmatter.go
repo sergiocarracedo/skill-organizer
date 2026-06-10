@@ -361,6 +361,18 @@ func UpdateManagedMetadata(skill Skill, updates ManagedMetadata) error {
 	return doc.WriteTo(skill.SkillFile)
 }
 
+// SetDisabled updates only the disabled flag without touching other fields.
+func SetDisabled(skill Skill, disabled bool) error {
+	doc, err := LoadDocument(skill.SkillFile)
+	if err != nil {
+		return err
+	}
+	metadata := doc.ManagedMetadata()
+	metadata.Disabled = disabled
+	doc.SetManagedFields(skill.FlattenedName, metadata, false)
+	return doc.WriteTo(skill.SkillFile)
+}
+
 func RewriteManagedFieldsWithMetadata(skill Skill, rename bool, disabled bool, updates ManagedMetadata) error {
 	doc, err := LoadDocument(skill.SkillFile)
 	if err != nil {
@@ -404,7 +416,9 @@ func mergeManagedMetadata(target *ManagedMetadata, updates ManagedMetadata) {
 	if strings.TrimSpace(updates.LastUpdatedAt) != "" {
 		target.LastUpdatedAt = updates.LastUpdatedAt
 	}
-	target.RiskScore = updates.RiskScore
+	if updates.RiskScore > 0 || strings.TrimSpace(updates.RiskEvaluator) != "" {
+		target.RiskScore = updates.RiskScore
+	}
 	if strings.TrimSpace(updates.RiskEvaluatedAt) != "" {
 		target.RiskEvaluatedAt = updates.RiskEvaluatedAt
 	}
