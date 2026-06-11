@@ -286,3 +286,179 @@ func copyDir(t *testing.T, src, dst string) {
 		t.Fatalf("WriteFile(%q): %v", filepath.Join(dst, skills.SkillFileName), err)
 	}
 }
+
+func TestCollectSkillsOnConflictingFixture(t *testing.T) {
+	root := loadFixtureRoot(t, "conflicting")
+	items, err := CollectSkills(configpkg.Location{Source: root, Target: filepath.Join(root, "target")}, false)
+	if err != nil {
+		t.Fatalf("CollectSkills() error = %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("CollectSkills() len = %d, want 2: %#v", len(items), items)
+	}
+
+	byPath := make(map[string]SkillInfo, len(items))
+	for _, item := range items {
+		byPath[item.RelativePath] = item
+	}
+
+	// loadFixtureRoot copies the inner entries of testdata/overlap/<scenario>/
+	// directly into t.TempDir(), so the RelativePath returned by ScanSource is
+	// the leaf name (e.g. "alpha"), not the scenario-prefixed path.
+	alpha, ok := byPath["alpha"]
+	if !ok {
+		t.Fatalf("CollectSkills() missing alpha: %#v", items)
+	}
+	if alpha.Name != "release-announcer" {
+		t.Fatalf("alpha Name = %q, want %q", alpha.Name, "release-announcer")
+	}
+	if !strings.Contains(alpha.Description, "release announcement") {
+		t.Fatalf("alpha Description = %q, want containing 'release announcement'", alpha.Description)
+	}
+	if alpha.Disabled {
+		t.Fatalf("alpha Disabled = true, want false")
+	}
+
+	beta, ok := byPath["beta"]
+	if !ok {
+		t.Fatalf("CollectSkills() missing beta: %#v", items)
+	}
+	if beta.Name != "release-notes-writer" {
+		t.Fatalf("beta Name = %q, want %q", beta.Name, "release-notes-writer")
+	}
+	if !strings.Contains(beta.Description, "release announcement") {
+		t.Fatalf("beta Description = %q, want containing 'release announcement'", beta.Description)
+	}
+	if beta.Disabled {
+		t.Fatalf("beta Disabled = true, want false")
+	}
+}
+
+func TestCollectSkillsOnCleanFixture(t *testing.T) {
+	root := loadFixtureRoot(t, "clean")
+	items, err := CollectSkills(configpkg.Location{Source: root, Target: filepath.Join(root, "target")}, false)
+	if err != nil {
+		t.Fatalf("CollectSkills() error = %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("CollectSkills() len = %d, want 2: %#v", len(items), items)
+	}
+
+	byPath := make(map[string]SkillInfo, len(items))
+	for _, item := range items {
+		byPath[item.RelativePath] = item
+	}
+
+	alpha, ok := byPath["alpha"]
+	if !ok {
+		t.Fatalf("CollectSkills() missing alpha: %#v", items)
+	}
+	if alpha.Name != "image-resizer" {
+		t.Fatalf("alpha Name = %q, want %q", alpha.Name, "image-resizer")
+	}
+	if !strings.Contains(alpha.Description, "resize") {
+		t.Fatalf("alpha Description = %q, want containing 'resize'", alpha.Description)
+	}
+
+	beta, ok := byPath["beta"]
+	if !ok {
+		t.Fatalf("CollectSkills() missing beta: %#v", items)
+	}
+	if beta.Name != "sql-query-builder" {
+		t.Fatalf("beta Name = %q, want %q", beta.Name, "sql-query-builder")
+	}
+	if !strings.Contains(beta.Description, "SQL") {
+		t.Fatalf("beta Description = %q, want containing 'SQL'", beta.Description)
+	}
+
+	// Lock in that the two descriptions are disjoint — neither contains the
+	// other skill's distinguishing keyword. This is what makes the 'clean'
+	// scenario suitable for asserting an empty agent report.
+	if strings.Contains(alpha.Description, "SQL") || strings.Contains(alpha.Description, "sql") {
+		t.Fatalf("alpha Description should not mention SQL: %q", alpha.Description)
+	}
+	if strings.Contains(beta.Description, "resize") || strings.Contains(beta.Description, "image") {
+		t.Fatalf("beta Description should not mention image/resize: %q", beta.Description)
+	}
+}
+
+func TestCollectSkillsOnPartialFixture(t *testing.T) {
+	root := loadFixtureRoot(t, "partial")
+	items, err := CollectSkills(configpkg.Location{Source: root, Target: filepath.Join(root, "target")}, false)
+	if err != nil {
+		t.Fatalf("CollectSkills() error = %v", err)
+	}
+	if len(items) != 3 {
+		t.Fatalf("CollectSkills() len = %d, want 3: %#v", len(items), items)
+	}
+
+	byPath := make(map[string]SkillInfo, len(items))
+	for _, item := range items {
+		byPath[item.RelativePath] = item
+	}
+
+	expected := []struct {
+		path string
+		name string
+	}{
+		{"alpha", "changelog-formatter"},
+		{"beta", "changelog-deduplicator"},
+		{"gamma", "release-summary-writer"},
+	}
+	for _, want := range expected {
+		got, ok := byPath[want.path]
+		if !ok {
+			t.Fatalf("CollectSkills() missing %q: %#v", want.path, items)
+		}
+		if got.Name != want.name {
+			t.Fatalf("%s Name = %q, want %q", want.path, got.Name, want.name)
+		}
+	}
+}
+
+func TestRunParsesReportWithMixedSeverities(t *testing.T) {
+	original := commandRunner
+	commandRunner = func(_ context.Context, _ string, _ []string, _ func(string)) (string, error) {
+		// Intentionally unsorted: adjacent (30) before partial (80). Normalize
+		// must sort by Score descending so the cmd-package filter (which sees
+		// the normalized report) can drop the adjacent group when
+		// --min-overlap-type=partial.
+		return `{
+  "summary": "Mixed overlap detected.",
+  "groups": [
+    {
+      "skill_names": ["a", "b"],
+      "skill_paths": ["thirdparty/a", "thirdparty/b"],
+      "score": 30,
+      "why_overlap": "low overlap",
+      "overlap_type": "adjacent",
+      "recommendation": "keep separate"
+    },
+    {
+      "skill_names": ["c", "d"],
+      "skill_paths": ["thirdparty/c", "thirdparty/d"],
+      "score": 80,
+      "why_overlap": "shared trigger",
+      "overlap_type": "partial",
+      "recommendation": "merge"
+    }
+  ],
+  "recommendations": ["Review c and d."]
+}`, nil
+	}
+	t.Cleanup(func() { commandRunner = original })
+
+	result, err := Run(context.Background(), mockInstalledTool("codex", "codex"), "prompt", nil)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if len(result.Groups) != 2 {
+		t.Fatalf("Run().Groups len = %d, want 2: %#v", len(result.Groups), result.Groups)
+	}
+	if result.Groups[0].OverlapType != "partial" || result.Groups[0].Score != 80 {
+		t.Fatalf("Run().Groups[0] = (type=%q, score=%d), want (partial, 80)", result.Groups[0].OverlapType, result.Groups[0].Score)
+	}
+	if result.Groups[1].OverlapType != "adjacent" || result.Groups[1].Score != 30 {
+		t.Fatalf("Run().Groups[1] = (type=%q, score=%d), want (adjacent, 30)", result.Groups[1].OverlapType, result.Groups[1].Score)
+	}
+}
