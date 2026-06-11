@@ -6,11 +6,11 @@
 
 ## Current Phase
 
-**Phase 2 — Overlap refactor (REQ-3)** — plans ready, 2026-06-10.
+**Phase 2 — Overlap refactor (REQ-3)** — plan 02-01 complete, 2026-06-11.
 
-2 plans committed (`6ce4549`):
-- 02-01: `--allow-overlap` flag + non-zero exit code
-- 02-02: curated fixtures + overlap-package tests (single_layer_justified: true)
+Plan progress:
+- 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
+- 02-02: curated fixtures + overlap-package tests (single_layer_justified: true) — next
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
@@ -27,6 +27,14 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Last completed
 
+- **Phase 2 — Overlap refactor (REQ-3) — plan 02-01 ✓** (2026-06-11)
+  - Added `--allow-overlap` cobra flag (default false) and
+    `overlapAllowOverlap` package var in `packages/cli/cmd/skill_overlap.go`
+  - Inserted exit-code check after `printOverlapReport` and before
+    the `--no-ask-to-apply` early-return; returns
+    `fmt.Errorf("overlap detected: %d group(s) (use --allow-overlap to ignore)", ...)`
+  - Added 3 new tests; 65 cmd tests pass; e2e tests pass
+  - Build, vet, help text, all green
 - **Phase 1 — Skill security check (REQ-4) ✓** (2026-06-10)
   - Plan 02: REFACTOR — extract agent-selection helper into
     `internal/agenttools`; rename `OverlapConfig` → `AgentSelectionConfig`
