@@ -6,13 +6,22 @@
 
 ## Current Phase
 
-**Phase 2 — Overlap refactor (REQ-3) ✓ complete** (2026-06-11).
+**Phase 3 — Observability (REQ-8)** — context captured, ready for planning.
 
-Plan progress:
+Plan progress: none yet (Phase 3 has 0/0 plans).
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
 Verification: 14/14 must-haves passed (`9ab7ef1`).
+
+Phase 3 discuss-phase completed 2026-06-11:
+- First-run prompt: fires on first run of any command, default=no, sticky
+- Event schema: JSON, 7 fields (command, exit_status, install_id, host_id, timestamp RFC3339 UTC, version, event_id ULID), snake_case
+- Identity: two distinct IDs (install_id never rotates, host_id rotatable via `telemetry rotate-host-id`); 32 hex chars from 16 random bytes via crypto/rand
+- Endpoint: no-op default + YAML/env/flag (precedence: flag > env > YAML); `Recorder` interface with `NoopRecorder` (drops) and `HTTPRecorder` (POSTs JSON); factory func var for test injection
+- Network gating: zero egress when disabled; **buffer on disk** (`<AppDir>/telemetry-buffer.jsonl`, 1 MB cap FIFO eviction) for retry on offline
+- OBSERVABILITY.md: full 7-section doc at repo root
+- Test strategy: Recorder interface + httptest server (FakeRecorder + counting transport for zero-network; httptest.NewServer for schema byte-for-byte)
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
