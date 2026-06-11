@@ -28,13 +28,18 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓ complete → Phase 2 (Overlap refactor / REQ-3) planning
+**Milestone:** v0.x — Phase 1 ✓ complete → Phase 2 (Overlap refactor / REQ-3) ready to execute
 
-**Phase:** 2 — Overlap refactor (REQ-3) — context captured 2026-06-10, ready for planning
-**Status:** planning pending
+**Phase:** 2 — Overlap refactor (REQ-3) — 2 plans ready, 2026-06-10
+**Status:** ready to execute
 **Last updated:** 2026-06-10
 
-See `.planning/phases/02-overlap-refactor/02-CONTEXT.md` for the captured decisions and `.planning/STATE.md` for the full state.
+Plans:
+1. `.planning/phases/02-overlap-refactor/02-01-plan-flag-and-exit-code.md` — Add `--allow-overlap` flag and non-zero exit code to `skill check-overlap`
+2. `.planning/phases/02-overlap-refactor/02-02-plan-fixtures-and-tests.md` — Add curated SKILL.md fixtures and overlap-package tests
+
+Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
+Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`
 
 ## Anti-vision guards
 
