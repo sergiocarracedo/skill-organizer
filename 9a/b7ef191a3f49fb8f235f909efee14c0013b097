@@ -1,0 +1,19 @@
+.planning/phases/02-overlap-refactor/02-VERIFICATION.md
+  s_ac91c710b4ea8f::t_604b8157abeb1c 1-214
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9ab7ef191a3f49fb8f235f909efee14c0013b097",
+  "prompts": {},
+  "sessions": {
+    "s_ac91c710b4ea8f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_147c37b7fffeVKa8O7tKmVpk3S",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
