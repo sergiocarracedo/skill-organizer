@@ -277,6 +277,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	originalAllSkills := overlapAllSkills
 	originalPrintPrompt := overlapPrintPrompt
 	originalNoAsk := overlapNoAskToApply
+	originalAllowOverlap := overlapAllowOverlap
 	originalDetectInstalled := detectInstalledTools
 	originalLoadResolvedLocation := loadResolvedLocationFunc
 	originalCollectSkills := collectOverlapSkills
@@ -297,6 +298,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	overlapAllSkills = false
 	overlapPrintPrompt = false
 	overlapNoAskToApply = false
+	overlapAllowOverlap = true
 	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
 		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
 	}
@@ -352,6 +354,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 		overlapAllSkills = originalAllSkills
 		overlapPrintPrompt = originalPrintPrompt
 		overlapNoAskToApply = originalNoAsk
+		overlapAllowOverlap = originalAllowOverlap
 		detectInstalledTools = originalDetectInstalled
 		loadResolvedLocationFunc = originalLoadResolvedLocation
 		collectOverlapSkills = originalCollectSkills
@@ -369,6 +372,8 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	})
 
 	cmd := newCheckOverlapCommand()
+	overlapNoAskToApply = false
+	overlapAllowOverlap = true
 	if err := cmd.RunE(cmd, nil); err != nil {
 		t.Fatalf("RunE() error = %v", err)
 	}
@@ -430,6 +435,298 @@ func TestWriteApplyPlanPromptCreatesTimestampedFile(t *testing.T) {
 	}
 	if string(content) != "test prompt" {
 		t.Fatalf("writeApplyPlanPrompt() content = %q, want %q", string(content), "test prompt")
+	}
+}
+
+func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
+	originalChooseTool := overlapChooseTool
+	originalToolID := overlapToolID
+	originalAllSkills := overlapAllSkills
+	originalPrintPrompt := overlapPrintPrompt
+	originalNoAsk := overlapNoAskToApply
+	originalAllowOverlap := overlapAllowOverlap
+	originalDetectInstalled := detectInstalledTools
+	originalLoadResolvedLocation := loadResolvedLocationFunc
+	originalCollectSkills := collectOverlapSkills
+	originalLoadConfig := loadAgentSelectionConfigFunc
+	originalSaveConfig := saveAgentSelectionConfigFunc
+	originalRunOverlap := runOverlapAnalysis
+	originalConfirm := confirmApplyPlan
+	originalConfirmCosts := confirmExternalCosts
+	originalSavePrompt := saveApplyPlanPrompt
+	originalInfo := printInfoMessage
+	originalDebug := printDebugMessage
+	originalWarning := printWarningMessage
+	originalSpinner := agenttools.StartSpinnerFunc
+	originalLaunch := agenttools.LaunchSessionFunc
+
+	overlapChooseTool = false
+	overlapToolID = ""
+	overlapAllSkills = false
+	overlapPrintPrompt = false
+	overlapNoAskToApply = true
+	overlapAllowOverlap = false
+	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
+		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+	}
+	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
+		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
+	}
+	collectOverlapSkills = func(location configpkg.Location, includeDisabled bool) ([]overlap.SkillInfo, error) {
+		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
+	}
+	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+	}
+	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
+		return nil
+	}
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+		return overlap.Report{Groups: []overlap.Group{{SkillNames: []string{"alpha", "beta"}, SkillPaths: []string{"personal/alpha", "personal/beta"}, Score: 72, OverlapType: "partial", WhyOverlap: "They overlap.", Recommendation: "Separate them."}}}, nil
+	}
+	confirmApplyPlan = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	confirmExternalCosts = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	saveApplyPlanPrompt = func(prompt string) (string, error) {
+		return "/abs/plans/skill-overlap-fix-20262804-120304.md", nil
+	}
+	agenttools.LaunchSessionFunc = func(tool agenttools.InstalledTool, prompt string) error {
+		return fmt.Errorf("launchPlanSession should not be called")
+	}
+	printInfoMessage = func(format string, args ...any) {}
+	printDebugMessage = func(format string, args ...any) {}
+	printWarningMessage = func(format string, args ...any) {}
+	agenttools.StartSpinnerFunc = func(text string) (agenttools.SpinnerHandle, error) {
+		return stubSpinner{}, nil
+	}
+	t.Cleanup(func() {
+		overlapChooseTool = originalChooseTool
+		overlapToolID = originalToolID
+		overlapAllSkills = originalAllSkills
+		overlapPrintPrompt = originalPrintPrompt
+		overlapNoAskToApply = originalNoAsk
+		overlapAllowOverlap = originalAllowOverlap
+		detectInstalledTools = originalDetectInstalled
+		loadResolvedLocationFunc = originalLoadResolvedLocation
+		collectOverlapSkills = originalCollectSkills
+		loadAgentSelectionConfigFunc = originalLoadConfig
+		saveAgentSelectionConfigFunc = originalSaveConfig
+		runOverlapAnalysis = originalRunOverlap
+		confirmApplyPlan = originalConfirm
+		confirmExternalCosts = originalConfirmCosts
+		saveApplyPlanPrompt = originalSavePrompt
+		agenttools.StartSpinnerFunc = originalSpinner
+		agenttools.LaunchSessionFunc = originalLaunch
+		printInfoMessage = originalInfo
+		printDebugMessage = originalDebug
+		printWarningMessage = originalWarning
+	})
+
+	cmd := newCheckOverlapCommand()
+	overlapNoAskToApply = true
+	overlapAllowOverlap = false
+	err := cmd.RunE(cmd, nil)
+	if err == nil {
+		t.Fatalf("RunE() error = nil, want non-nil error")
+	}
+	if !strings.Contains(err.Error(), "overlap detected") {
+		t.Fatalf("RunE() error = %q, want containing 'overlap detected'", err.Error())
+	}
+	if !strings.Contains(err.Error(), "1 group") {
+		t.Fatalf("RunE() error = %q, want containing '1 group'", err.Error())
+	}
+}
+
+func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
+	originalChooseTool := overlapChooseTool
+	originalToolID := overlapToolID
+	originalAllSkills := overlapAllSkills
+	originalPrintPrompt := overlapPrintPrompt
+	originalNoAsk := overlapNoAskToApply
+	originalAllowOverlap := overlapAllowOverlap
+	originalDetectInstalled := detectInstalledTools
+	originalLoadResolvedLocation := loadResolvedLocationFunc
+	originalCollectSkills := collectOverlapSkills
+	originalLoadConfig := loadAgentSelectionConfigFunc
+	originalSaveConfig := saveAgentSelectionConfigFunc
+	originalRunOverlap := runOverlapAnalysis
+	originalConfirm := confirmApplyPlan
+	originalConfirmCosts := confirmExternalCosts
+	originalSavePrompt := saveApplyPlanPrompt
+	originalInfo := printInfoMessage
+	originalDebug := printDebugMessage
+	originalWarning := printWarningMessage
+	originalSpinner := agenttools.StartSpinnerFunc
+	originalLaunch := agenttools.LaunchSessionFunc
+
+	overlapChooseTool = false
+	overlapToolID = ""
+	overlapAllSkills = false
+	overlapPrintPrompt = false
+	overlapNoAskToApply = true
+	overlapAllowOverlap = true
+	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
+		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+	}
+	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
+		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
+	}
+	collectOverlapSkills = func(location configpkg.Location, includeDisabled bool) ([]overlap.SkillInfo, error) {
+		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
+	}
+	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+	}
+	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
+		return nil
+	}
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+		return overlap.Report{Groups: []overlap.Group{{SkillNames: []string{"alpha", "beta"}, SkillPaths: []string{"personal/alpha", "personal/beta"}, Score: 72, OverlapType: "partial", WhyOverlap: "They overlap.", Recommendation: "Separate them."}}}, nil
+	}
+	confirmApplyPlan = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	confirmExternalCosts = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	saveApplyPlanPrompt = func(prompt string) (string, error) {
+		return "/abs/plans/skill-overlap-fix-20262804-120304.md", nil
+	}
+	agenttools.LaunchSessionFunc = func(tool agenttools.InstalledTool, prompt string) error {
+		return fmt.Errorf("launchPlanSession should not be called")
+	}
+	printInfoMessage = func(format string, args ...any) {}
+	printDebugMessage = func(format string, args ...any) {}
+	printWarningMessage = func(format string, args ...any) {}
+	agenttools.StartSpinnerFunc = func(text string) (agenttools.SpinnerHandle, error) {
+		return stubSpinner{}, nil
+	}
+	t.Cleanup(func() {
+		overlapChooseTool = originalChooseTool
+		overlapToolID = originalToolID
+		overlapAllSkills = originalAllSkills
+		overlapPrintPrompt = originalPrintPrompt
+		overlapNoAskToApply = originalNoAsk
+		overlapAllowOverlap = originalAllowOverlap
+		detectInstalledTools = originalDetectInstalled
+		loadResolvedLocationFunc = originalLoadResolvedLocation
+		collectOverlapSkills = originalCollectSkills
+		loadAgentSelectionConfigFunc = originalLoadConfig
+		saveAgentSelectionConfigFunc = originalSaveConfig
+		runOverlapAnalysis = originalRunOverlap
+		confirmApplyPlan = originalConfirm
+		confirmExternalCosts = originalConfirmCosts
+		saveApplyPlanPrompt = originalSavePrompt
+		agenttools.StartSpinnerFunc = originalSpinner
+		agenttools.LaunchSessionFunc = originalLaunch
+		printInfoMessage = originalInfo
+		printDebugMessage = originalDebug
+		printWarningMessage = originalWarning
+	})
+
+	cmd := newCheckOverlapCommand()
+	overlapNoAskToApply = true
+	overlapAllowOverlap = true
+	if err := cmd.RunE(cmd, nil); err != nil {
+		t.Fatalf("RunE() error = %v, want nil", err)
+	}
+}
+
+func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
+	originalChooseTool := overlapChooseTool
+	originalToolID := overlapToolID
+	originalAllSkills := overlapAllSkills
+	originalPrintPrompt := overlapPrintPrompt
+	originalNoAsk := overlapNoAskToApply
+	originalAllowOverlap := overlapAllowOverlap
+	originalDetectInstalled := detectInstalledTools
+	originalLoadResolvedLocation := loadResolvedLocationFunc
+	originalCollectSkills := collectOverlapSkills
+	originalLoadConfig := loadAgentSelectionConfigFunc
+	originalSaveConfig := saveAgentSelectionConfigFunc
+	originalRunOverlap := runOverlapAnalysis
+	originalConfirm := confirmApplyPlan
+	originalConfirmCosts := confirmExternalCosts
+	originalSavePrompt := saveApplyPlanPrompt
+	originalInfo := printInfoMessage
+	originalDebug := printDebugMessage
+	originalWarning := printWarningMessage
+	originalSpinner := agenttools.StartSpinnerFunc
+	originalLaunch := agenttools.LaunchSessionFunc
+
+	overlapChooseTool = false
+	overlapToolID = ""
+	overlapAllSkills = false
+	overlapPrintPrompt = false
+	overlapNoAskToApply = true
+	overlapAllowOverlap = false
+	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
+		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+	}
+	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
+		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
+	}
+	collectOverlapSkills = func(location configpkg.Location, includeDisabled bool) ([]overlap.SkillInfo, error) {
+		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
+	}
+	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+	}
+	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
+		return nil
+	}
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+		return overlap.Report{}, nil
+	}
+	confirmApplyPlan = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	confirmExternalCosts = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	saveApplyPlanPrompt = func(prompt string) (string, error) {
+		return "/abs/plans/skill-overlap-fix-20262804-120304.md", nil
+	}
+	agenttools.LaunchSessionFunc = func(tool agenttools.InstalledTool, prompt string) error {
+		return fmt.Errorf("launchPlanSession should not be called")
+	}
+	printInfoMessage = func(format string, args ...any) {}
+	printDebugMessage = func(format string, args ...any) {}
+	printWarningMessage = func(format string, args ...any) {}
+	agenttools.StartSpinnerFunc = func(text string) (agenttools.SpinnerHandle, error) {
+		return stubSpinner{}, nil
+	}
+	t.Cleanup(func() {
+		overlapChooseTool = originalChooseTool
+		overlapToolID = originalToolID
+		overlapAllSkills = originalAllSkills
+		overlapPrintPrompt = originalPrintPrompt
+		overlapNoAskToApply = originalNoAsk
+		overlapAllowOverlap = originalAllowOverlap
+		detectInstalledTools = originalDetectInstalled
+		loadResolvedLocationFunc = originalLoadResolvedLocation
+		collectOverlapSkills = originalCollectSkills
+		loadAgentSelectionConfigFunc = originalLoadConfig
+		saveAgentSelectionConfigFunc = originalSaveConfig
+		runOverlapAnalysis = originalRunOverlap
+		confirmApplyPlan = originalConfirm
+		confirmExternalCosts = originalConfirmCosts
+		saveApplyPlanPrompt = originalSavePrompt
+		agenttools.StartSpinnerFunc = originalSpinner
+		agenttools.LaunchSessionFunc = originalLaunch
+		printInfoMessage = originalInfo
+		printDebugMessage = originalDebug
+		printWarningMessage = originalWarning
+	})
+
+	cmd := newCheckOverlapCommand()
+	overlapNoAskToApply = true
+	overlapAllowOverlap = false
+	if err := cmd.RunE(cmd, nil); err != nil {
+		t.Fatalf("RunE() error = %v, want nil", err)
 	}
 }
 
