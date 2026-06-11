@@ -1,0 +1,19 @@
+packages/cli/internal/overlap/overlap_test.go
+  s_3227e2aea27bf4::t_f912f388115796 255-288
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bd00eeb94ba16c71f3fb05a7f2efe89d146f971b",
+  "prompts": {},
+  "sessions": {
+    "s_3227e2aea27bf4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_147c90a4effeZ8nt1PGT81IwgY",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
