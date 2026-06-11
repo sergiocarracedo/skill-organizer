@@ -35,6 +35,9 @@ var (
 	latestSkillBundleModTime        = remotepkg.LatestFileModTime
 	rewriteManagedSkillMetadata     = skills.RewriteManagedFieldsWithMetadata
 	runSkillAddSync                 = syncpkg.Run
+	skillAddConfirmRunSecurity      = confirm
+	skillAddRunSecurityForSkill     = RunCheckSecurityForSkill
+	skillAddUpdateMetadata          = skills.UpdateManagedMetadata
 )
 
 func newSkillAddCommand() *cobra.Command {
@@ -113,6 +116,7 @@ func newSkillAddCommand() *cobra.Command {
 			if len(selected) == 0 {
 				return fmt.Errorf("no skills were installed")
 			}
+			actuallyInstalled := make([]remotepkg.InstalledSkill, 0, len(selected))
 
 			bundles := make(map[string]remotepkg.SkillBundle, len(selected))
 			for _, installed := range selected {
@@ -187,6 +191,7 @@ func newSkillAddCommand() *cobra.Command {
 					return err
 				}
 				existingNames[installed.Name] = targetSkill
+				actuallyInstalled = append(actuallyInstalled, installed)
 				pterm.Success.Printfln("Imported skill: %s -> %s", installed.Name, targetSkill.RelativePath)
 			}
 
@@ -195,6 +200,28 @@ func newSkillAddCommand() *cobra.Command {
 				return err
 			}
 			printSyncResult(configFile, result)
+
+			for _, installed := range actuallyInstalled {
+				targetSkill := existingNames[installed.Name]
+				runSecurity, confirmErr := skillAddConfirmRunSecurity(
+					fmt.Sprintf("Run check-security for %q?", installed.Name), true)
+				if confirmErr != nil {
+					return confirmErr
+				}
+				if runSecurity {
+					if err := skillAddRunSecurityForSkill(targetSkill, location); err != nil {
+						pterm.Warning.Printfln("Security check failed for %s: %v", installed.Name, err)
+					}
+					continue
+				}
+				if err := skillAddUpdateMetadata(targetSkill, skills.ManagedMetadata{
+					RiskEvaluator:   "",
+					RiskEvaluatedAt: time.Now().UTC().Format(time.RFC3339),
+				}); err != nil {
+					pterm.Warning.Printfln("Failed to mark unevaluated for %s: %v", installed.Name, err)
+				}
+			}
+
 			return nil
 		},
 	}

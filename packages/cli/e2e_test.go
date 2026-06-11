@@ -116,7 +116,10 @@ func TestSkillAddAndCheckUpdatesBinary(t *testing.T) {
 		},
 	})
 
-	addOutput := env.runInteractive(t, env.workspace, nil, []interactiveStep{{waitForAny: []string{"Set the target folders for the imported skills.", "demo-skill -> skills-organized/"}, send: "\r"}}, "skill", "add", "owner/repo", "--skill", "demo-skill")
+	addOutput := env.runInteractive(t, env.workspace, nil, []interactiveStep{
+		{waitForAny: []string{"Set the target folders for the imported skills.", "demo-skill -> skills-organized/"}, send: "\r"},
+		{waitForAny: []string{"check-security", "No agent tools detected"}, send: "\r"},
+	}, "skill", "add", "owner/repo", "--skill", "demo-skill")
 	assertContains(t, addOutput, "Imported skill: demo-skill -> demo-skill")
 	installed := env.readFile(filepath.Join(env.source, "demo-skill", "SKILL.md"))
 	assertContains(t, installed, "installed-version: 1.0.0")

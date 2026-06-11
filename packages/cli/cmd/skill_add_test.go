@@ -10,6 +10,7 @@ import (
 	backuppkg "github.com/sergiocarracedo/skill-organizer/cli/internal/backup"
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	remotepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/remote"
+	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
 )
 
@@ -410,6 +411,9 @@ func stubSkillAddDependencies(t *testing.T, deps skillAddDeps) func() {
 	originalTargets := chooseSkillAddTargets
 	originalConfirm := confirmSkillAddReinstall
 	originalSync := runSkillAddSync
+	originalRunSecurityConfirm := skillAddConfirmRunSecurity
+	originalRunSecurity := skillAddRunSecurityForSkill
+	originalUpdateMeta := skillAddUpdateMetadata
 
 	skillAddLoadResolvedLocation = func() (string, configpkg.Location, error) {
 		return filepath.Join(t.TempDir(), ".skill-organizer.yml"), deps.location, nil
@@ -430,6 +434,11 @@ func stubSkillAddDependencies(t *testing.T, deps skillAddDeps) func() {
 		confirmSkillAddReinstall = deps.confirm
 	}
 	runSkillAddSync = syncpkg.Run
+	skillAddConfirmRunSecurity = func(prompt string, defaultValue bool) (bool, error) {
+		return false, nil
+	}
+	skillAddRunSecurityForSkill = func(_ skills.Skill, _ configpkg.Location) error { return nil }
+	skillAddUpdateMetadata = func(_ skills.Skill, _ skills.ManagedMetadata) error { return nil }
 
 	return func() {
 		skillAddLoadResolvedLocation = originalLoad
@@ -439,6 +448,9 @@ func stubSkillAddDependencies(t *testing.T, deps skillAddDeps) func() {
 		chooseSkillAddTargets = originalTargets
 		confirmSkillAddReinstall = originalConfirm
 		runSkillAddSync = originalSync
+		skillAddConfirmRunSecurity = originalRunSecurityConfirm
+		skillAddRunSecurityForSkill = originalRunSecurity
+		skillAddUpdateMetadata = originalUpdateMeta
 	}
 }
 
@@ -466,4 +478,176 @@ func backupRootForTests(t *testing.T) string {
 		t.Fatalf("config.AppDir() error = %v", err)
 	}
 	return filepath.Join(appDir, ".old")
+}
+
+func TestSkillAddHooksCheckSecurityPromptDecline(t *testing.T) {
+	root := t.TempDir()
+	configRoot := filepath.Join(root, "config")
+	t.Setenv("XDG_CONFIG_HOME", configRoot)
+
+	source := filepath.Join(root, "skills-organized")
+	target := filepath.Join(root, "skills")
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+
+	sandbox := &fakeSkillAddSandbox{
+		before: nil,
+		after:  []remotepkg.InstalledSkill{{Name: "demo-skill"}},
+		bundles: map[string]remotepkg.SkillBundle{
+			"demo-skill": {
+				Root: filepath.Join(root, "bundle-demo-skill"),
+				Skill: remotepkg.SkillSummary{
+					Name:          "demo-skill",
+					Source:        "owner/repo",
+					SourceType:    "github",
+					RepoSkillPath: "skills/demo-skill",
+					Hash:          "new-hash",
+				},
+				Files: []remotepkg.File{{Path: "SKILL.md", Contents: "---\nname: demo-skill\ndescription: imported\n---\n\n# New\n"}},
+			},
+		},
+	}
+
+	restore := stubSkillAddDependencies(t, skillAddDeps{
+		location: configpkg.Location{Source: source, Target: target},
+		sandbox:  sandbox,
+		targets: func(installed []remotepkg.InstalledSkill, suggestions []string) (map[string]string, error) {
+			return map[string]string{"demo-skill": "thirdparty/demo"}, nil
+		},
+		confirm: func(prompt string, defaultValue bool) (bool, error) {
+			return false, nil
+		},
+	})
+	defer restore()
+
+	originalConfirm := skillAddConfirmRunSecurity
+	originalRun := skillAddRunSecurityForSkill
+	originalUpdate := skillAddUpdateMetadata
+
+	capturedPrompt := ""
+	skillAddConfirmRunSecurity = func(prompt string, defaultValue bool) (bool, error) {
+		capturedPrompt = prompt
+		return false, nil
+	}
+	securityRunCalled := false
+	skillAddRunSecurityForSkill = func(_ skills.Skill, _ configpkg.Location) error {
+		securityRunCalled = true
+		return nil
+	}
+	updateCalled := false
+	var capturedUpdate skills.ManagedMetadata
+	skillAddUpdateMetadata = func(_ skills.Skill, updates skills.ManagedMetadata) error {
+		updateCalled = true
+		capturedUpdate = updates
+		return nil
+	}
+	t.Cleanup(func() {
+		skillAddConfirmRunSecurity = originalConfirm
+		skillAddRunSecurityForSkill = originalRun
+		skillAddUpdateMetadata = originalUpdate
+	})
+
+	cmd := newSkillAddCommand()
+	if err := cmd.RunE(cmd, []string{"owner/repo"}); err != nil {
+		t.Fatalf("RunE() error = %v", err)
+	}
+
+	if !strings.Contains(capturedPrompt, "Run check-security for \"demo-skill\"?") {
+		t.Fatalf("captured prompt = %q, want to mention check-security for demo-skill", capturedPrompt)
+	}
+	if securityRunCalled {
+		t.Fatalf("RunCheckSecurityForSkill was called despite user declining")
+	}
+	if !updateCalled {
+		t.Fatalf("UpdateManagedMetadata was not called to mark skill unevaluated")
+	}
+	if strings.TrimSpace(capturedUpdate.RiskEvaluator) != "" {
+		t.Fatalf("UpdateManagedMetadata RiskEvaluator = %q, want empty (unevaluated)", capturedUpdate.RiskEvaluator)
+	}
+	if strings.TrimSpace(capturedUpdate.RiskEvaluatedAt) == "" {
+		t.Fatalf("UpdateManagedMetadata RiskEvaluatedAt is empty")
+	}
+}
+
+func TestSkillAddRunsSecurityOnAccept(t *testing.T) {
+	root := t.TempDir()
+	configRoot := filepath.Join(root, "config")
+	t.Setenv("XDG_CONFIG_HOME", configRoot)
+
+	source := filepath.Join(root, "skills-organized")
+	target := filepath.Join(root, "skills")
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+
+	sandbox := &fakeSkillAddSandbox{
+		before: nil,
+		after:  []remotepkg.InstalledSkill{{Name: "demo-skill"}},
+		bundles: map[string]remotepkg.SkillBundle{
+			"demo-skill": {
+				Root: filepath.Join(root, "bundle-demo-skill"),
+				Skill: remotepkg.SkillSummary{
+					Name:          "demo-skill",
+					Source:        "owner/repo",
+					SourceType:    "github",
+					RepoSkillPath: "skills/demo-skill",
+					Hash:          "new-hash",
+				},
+				Files: []remotepkg.File{{Path: "SKILL.md", Contents: "---\nname: demo-skill\ndescription: imported\n---\n\n# New\n"}},
+			},
+		},
+	}
+
+	restore := stubSkillAddDependencies(t, skillAddDeps{
+		location: configpkg.Location{Source: source, Target: target},
+		sandbox:  sandbox,
+		targets: func(installed []remotepkg.InstalledSkill, suggestions []string) (map[string]string, error) {
+			return map[string]string{"demo-skill": "thirdparty/demo"}, nil
+		},
+		confirm: func(prompt string, defaultValue bool) (bool, error) {
+			return false, nil
+		},
+	})
+	defer restore()
+
+	originalConfirm := skillAddConfirmRunSecurity
+	originalRun := skillAddRunSecurityForSkill
+	originalUpdate := skillAddUpdateMetadata
+
+	skillAddConfirmRunSecurity = func(prompt string, defaultValue bool) (bool, error) {
+		return true, nil
+	}
+	called := false
+	var capturedSkill skills.Skill
+	skillAddRunSecurityForSkill = func(skill skills.Skill, _ configpkg.Location) error {
+		called = true
+		capturedSkill = skill
+		return nil
+	}
+	updateCalled := false
+	skillAddUpdateMetadata = func(_ skills.Skill, _ skills.ManagedMetadata) error {
+		updateCalled = true
+		return nil
+	}
+	t.Cleanup(func() {
+		skillAddConfirmRunSecurity = originalConfirm
+		skillAddRunSecurityForSkill = originalRun
+		skillAddUpdateMetadata = originalUpdate
+	})
+
+	cmd := newSkillAddCommand()
+	if err := cmd.RunE(cmd, []string{"owner/repo"}); err != nil {
+		t.Fatalf("RunE() error = %v", err)
+	}
+
+	if !called {
+		t.Fatalf("RunCheckSecurityForSkill was not called on accept")
+	}
+	if capturedSkill.FlattenedName != "thirdparty--demo" {
+		t.Fatalf("RunCheckSecurityForSkill called with FlattenedName = %q, want %q", capturedSkill.FlattenedName, "thirdparty--demo")
+	}
+	if updateCalled {
+		t.Fatalf("UpdateManagedMetadata should not be called when user accepts run-security")
+	}
 }

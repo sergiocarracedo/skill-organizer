@@ -206,6 +206,7 @@ func toSkill(info securitypkg.SkillInfo, location configpkg.Location) skills.Ski
 
 // RunCheckSecurityForSkill performs a security analysis on a single skill
 // using the default agent selection flow. Used by the skill-add hook.
+// Hook mode: no cost-acknowledgment prompt; auto-pick first installed tool.
 func RunCheckSecurityForSkill(skill skills.Skill, location configpkg.Location) error {
 	info := securitypkg.SkillInfo{
 		FlattenedName: skill.FlattenedName,
@@ -230,39 +231,7 @@ func RunCheckSecurityForSkill(skill skills.Skill, location configpkg.Location) e
 		return nil
 	}
 
-	registryPath, err := configpkg.RegistryPath()
-	if err != nil {
-		return err
-	}
-
-	cfg, err := securityLoadConfigFunc(registryPath)
-	if err != nil {
-		return err
-	}
-
-	autoSelectFirst := func(_ string, _ []string, _ string) (string, error) {
-		return agenttools.Label(installed[0]), nil
-	}
-
-	tool, cfg, err := agenttools.ChooseAgentTool(installed, cfg, "", false, autoSelectFirst)
-	if err != nil {
-		return err
-	}
-
-	if !cfg.AcknowledgedExternalToolCosts {
-		accepted, err := securityConfirm("This command runs an installed external agent CLI. Continue?", false)
-		if err != nil {
-			return err
-		}
-		if !accepted {
-			pterm.Warning.Println("Security check skipped by user.")
-			return nil
-		}
-		cfg.AcknowledgedExternalToolCosts = true
-		if err := securitySaveConfigFunc(registryPath, cfg); err != nil {
-			return err
-		}
-	}
+	tool := installed[0]
 
 	report, err := securityRunAnalysis(context.Background(), tool, prompt, func(_ string) {})
 	if err != nil {
