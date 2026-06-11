@@ -1,0 +1,19 @@
+.planning/phases/03-observability/03-RESEARCH.md
+  s_3d8e7c173c2aa7::t_3be78f16aa2c69 1-648
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1467fa4db4586d16bc79f24e934fd66181b79f95",
+  "prompts": {},
+  "sessions": {
+    "s_3d8e7c173c2aa7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1479509ccffeumLkmtrKInNAAo",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
