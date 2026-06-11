@@ -6,10 +6,20 @@
 
 ## Current Phase
 
-**Phase 2 — Overlap refactor (REQ-3)** — pending.
+**Phase 2 — Overlap refactor (REQ-3)** — context captured, ready for planning.
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
+
+Phase 2 discuss-phase completed 2026-06-10:
+- Detection source: keep agent-driven (no new local rule)
+- Trigger semantics: name + path + description in prompt
+- Output schema: keep existing `Report.Groups` (no schema change)
+- Exit code: non-zero on any group, `--allow-overlap` forces 0
+- Filters: keep `--min-overlap-type=partial` default
+- Test fixtures: `packages/cli/internal/overlap/testdata/overlap/`
+- Test scope: parse + filter + exit + flag + a single agent smoke test
+- "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
 

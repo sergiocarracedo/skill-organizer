@@ -28,13 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓ complete → Phase 2 (Overlap refactor / REQ-3) pending
+**Milestone:** v0.x — Phase 1 ✓ complete → Phase 2 (Overlap refactor / REQ-3) planning
 
-**Phase:** 1 — Skill security check ✓ complete → next: Phase 2 — Overlap refactor (REQ-3)
-**Status:** verifying (no `STATE.md` -> created 2026-06-10; ROADMAP.md updated)
+**Phase:** 2 — Overlap refactor (REQ-3) — context captured 2026-06-10, ready for planning
+**Status:** planning pending
 **Last updated:** 2026-06-10
 
-See `.planning/STATE.md` for the full state and `.planning/ROADMAP.md` for the next phase.
+See `.planning/phases/02-overlap-refactor/02-CONTEXT.md` for the captured decisions and `.planning/STATE.md` for the full state.
 
 ## Anti-vision guards
 
