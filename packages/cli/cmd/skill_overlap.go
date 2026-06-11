@@ -23,6 +23,7 @@ var (
 	overlapPrintPrompt  bool
 	overlapMinType      string
 	overlapNoAskToApply bool
+	overlapAllowOverlap bool
 )
 
 var (
@@ -142,6 +143,14 @@ func newCheckOverlapCommand() *cobra.Command {
 
 			printOverlapReport(tool, len(items), overlapAllSkills, report)
 
+			// P2 (REQ-3): non-zero exit on overlap; --allow-overlap suppresses it.
+			if len(report.Groups) > 0 && !overlapAllowOverlap {
+				return fmt.Errorf(
+					"overlap detected: %d group(s) (use --allow-overlap to ignore)",
+					len(report.Groups),
+				)
+			}
+
 			if overlapNoAskToApply {
 				return nil
 			}
@@ -196,6 +205,7 @@ func newCheckOverlapCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&overlapPrintPrompt, "print-prompt", false, "Print the generated overlap prompt without invoking an external tool")
 	cmd.Flags().StringVar(&overlapMinType, "min-overlap-type", "partial", "Minimum overlap type to show: adjacent|partial|duplicate or 1|2|3")
 	cmd.Flags().BoolVar(&overlapNoAskToApply, "no-ask-to-apply", false, "Do not ask the selected agent to prepare an apply plan after the report")
+	cmd.Flags().BoolVar(&overlapAllowOverlap, "allow-overlap", false, "Exit 0 even when overlap groups are found (the report is still printed)")
 
 	return cmd
 }
