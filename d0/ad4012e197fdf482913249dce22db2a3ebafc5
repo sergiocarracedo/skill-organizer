@@ -1,0 +1,31 @@
+packages/cli/internal/overlap/testdata/overlap/conflicting/beta/SKILL.md
+  s_3227e2aea27bf4::t_08d1879f7191c0 1-10
+packages/cli/internal/overlap/testdata/overlap/partial/beta/SKILL.md
+  s_3227e2aea27bf4::t_b683a39ffd8303 1-10
+packages/cli/internal/overlap/testdata/overlap/partial/gamma/SKILL.md
+  s_3227e2aea27bf4::t_41f9fd88cdcc38 1-10
+packages/cli/internal/overlap/testdata/overlap/conflicting/alpha/SKILL.md
+  s_3227e2aea27bf4::t_775857a8b3f7f9 1-10
+packages/cli/internal/overlap/testdata/overlap/clean/alpha/SKILL.md
+  s_3227e2aea27bf4::t_ec66317f9c5af2 1-10
+packages/cli/internal/overlap/testdata/overlap/clean/beta/SKILL.md
+  s_3227e2aea27bf4::t_9543afa69de301 1-10
+packages/cli/internal/overlap/testdata/overlap/partial/alpha/SKILL.md
+  s_3227e2aea27bf4::t_f88267cdcec3ec 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d0ad4012e197fdf482913249dce22db2a3ebafc5",
+  "prompts": {},
+  "sessions": {
+    "s_3227e2aea27bf4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_147c90a4effeZ8nt1PGT81IwgY",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
