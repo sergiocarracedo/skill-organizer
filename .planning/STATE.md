@@ -6,11 +6,11 @@
 
 ## Current Phase
 
-**Phase 2 — Overlap refactor (REQ-3)** — plan 02-01 complete, 2026-06-11.
+**Phase 2 — Overlap refactor (REQ-3)** — plan 02-02 complete, 2026-06-11.
 
 Plan progress:
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
-- 02-02: curated fixtures + overlap-package tests (single_layer_justified: true) — next
+- 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
@@ -27,6 +27,24 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Last completed
 
+- **Phase 2 — Overlap refactor (REQ-3) — plan 02-02 ✓** (2026-06-11)
+  - Added 7 curated `SKILL.md` fixtures under
+    `packages/cli/internal/overlap/testdata/overlap/{conflicting,clean,partial}/`
+    (2 + 2 + 3)
+  - Added `loadFixtureRoot` + `copyDir` helpers in
+    `packages/cli/internal/overlap/overlap_test.go`
+  - Added 4 new tests in the `overlap` package:
+    `TestCollectSkillsOnConflictingFixture`,
+    `TestCollectSkillsOnCleanFixture`,
+    `TestCollectSkillsOnPartialFixture`,
+    `TestRunParsesReportWithMixedSeverities`
+  - All `go test ./...` and `go build ./...` pass; lefthook
+    pre-commit hook passes
+  - Deviation noted in SUMMARY.md: the new tests use leaf-name
+    `RelativePath` keys (`"alpha"`, `"beta"`, `"gamma"`) instead
+    of the scenario-prefixed paths the plan action text
+    referenced, because `loadFixtureRoot` only copies the inner
+    entries of `testdata/overlap/<scenario>/` into `t.TempDir()`.
 - **Phase 2 — Overlap refactor (REQ-3) — plan 02-01 ✓** (2026-06-11)
   - Added `--allow-overlap` cobra flag (default false) and
     `overlapAllowOverlap` package var in `packages/cli/cmd/skill_overlap.go`
