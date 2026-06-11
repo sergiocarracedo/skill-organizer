@@ -6,7 +6,11 @@
 
 ## Current Phase
 
-**Phase 2 — Overlap refactor (REQ-3)** — context captured, ready for planning.
+**Phase 2 — Overlap refactor (REQ-3)** — plans ready, 2026-06-10.
+
+2 plans committed (`6ce4549`):
+- 02-01: `--allow-overlap` flag + non-zero exit code
+- 02-02: curated fixtures + overlap-package tests (single_layer_justified: true)
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
