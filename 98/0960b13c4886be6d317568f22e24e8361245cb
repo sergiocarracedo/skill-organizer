@@ -1,0 +1,32 @@
+packages/cli/cmd/skill_add.go
+  s_e595791b137881::t_bddfdcacd63b9e 203,206-224
+  s_e595791b137881::t_1c741af56ae00b 38-40
+  s_e595791b137881::t_07a138fcd6e09b 119
+  s_e595791b137881::t_18b9e85d59689d 194,204-205
+packages/cli/cmd/skill_add_test.go
+  s_e595791b137881::t_0c00c08ea00a5f 647-648
+  s_e595791b137881::t_b5323f65b38bd6 414-416,437-441,451-453
+  s_e595791b137881::t_abe105ee50ecbc 13
+  s_e595791b137881::t_11df8ebd4d6eca 482-646,649-653
+packages/cli/cmd/skill_security.go
+  s_e595791b137881::t_2dc4be053fddf2 209,234
+packages/cli/e2e_test.go
+  s_e595791b137881::t_9c77ca7c078166 119-120,122
+  s_e595791b137881::t_229958b7fd95b5 121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "980960b13c4886be6d317568f22e24e8361245cb",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
