@@ -252,3 +252,37 @@ func mockInstalledTool(id string, binary string) agenttools.InstalledTool {
 	tool, _ := agenttools.FindSupported(id)
 	return agenttools.InstalledTool{Tool: tool, Binary: binary}
 }
+
+// loadFixtureRoot copies the curated testdata/overlap/<scenario> tree into a
+// fresh t.TempDir() and returns its absolute path. The test fixtures live as
+// committed SKILL.md files under testdata/overlap/<scenario>/<skill>/SKILL.md;
+// the copy is required because skills.ScanSource is a real directory walker
+// (not a virtual one) and operates on the live filesystem.
+func loadFixtureRoot(t *testing.T, scenario string) string {
+	t.Helper()
+	root := t.TempDir()
+	src := filepath.Join("testdata", "overlap", scenario)
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		t.Fatalf("read fixture dir %q: %v", src, err)
+	}
+	for _, entry := range entries {
+		copyDir(t, filepath.Join(src, entry.Name()), filepath.Join(root, entry.Name()))
+	}
+	return root
+}
+
+func copyDir(t *testing.T, src, dst string) {
+	t.Helper()
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q): %v", dst, err)
+	}
+	skillFile := filepath.Join(src, skills.SkillFileName)
+	data, err := os.ReadFile(skillFile)
+	if err != nil {
+		t.Fatalf("ReadFile(%q): %v", skillFile, err)
+	}
+	if err := os.WriteFile(filepath.Join(dst, skills.SkillFileName), data, 0o644); err != nil {
+		t.Fatalf("WriteFile(%q): %v", filepath.Join(dst, skills.SkillFileName), err)
+	}
+}
