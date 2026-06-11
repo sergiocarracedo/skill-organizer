@@ -1,0 +1,32 @@
+.planning/phases/02-overlap-refactor/02-02-plan-fixtures-and-tests.md
+  s_96ca34490d2a31::t_003be2f4f98f2a 1-14,17-24,26,28-43,45-48
+  s_96ca34490d2a31::t_621c2c2eb47759 25,27,44
+  s_96ca34490d2a31::t_9308574f05df78 49-355
+  s_e595791b137881::t_d428ccd3d31f98 15-16
+.planning/phases/02-overlap-refactor/02-01-plan-flag-and-exit-code.md
+  s_96ca34490d2a31::t_04f8693bc0fa63 1-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6ce4549df5d4ea1a6125972f59660be855166d29",
+  "prompts": {},
+  "sessions": {
+    "s_96ca34490d2a31": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14937ef99ffexUGuoULoxGv1v4",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
