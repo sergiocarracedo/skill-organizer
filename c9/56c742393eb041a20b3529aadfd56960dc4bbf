@@ -1,0 +1,24 @@
+packages/cli/cmd/skill_overlap_test.go
+  s_0999f069ed24ef::t_4ad1980d26b263 280,301,357
+  s_0999f069ed24ef::t_39bff7c5bf2e8f 529-530
+  s_0999f069ed24ef::t_ac122818dc8d4c 631-632
+  s_0999f069ed24ef::t_6c3ae5555788d4 726-727
+  s_0999f069ed24ef::t_f3e09684bafa78 441-528,531-630,633-725,728-732
+  s_0999f069ed24ef::t_bfdfad7e78f58d 375-376
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c956c742393eb041a20b3529aadfd56960dc4bbf",
+  "prompts": {},
+  "sessions": {
+    "s_0999f069ed24ef": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_148d52927ffekC5MZXnRybOxQB",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
