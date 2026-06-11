@@ -1,0 +1,23 @@
+.planning/STATE.md
+  s_3227e2aea27bf4::t_5dd520358640d3 9,13,30-47
+.planning/phases/02-overlap-refactor/02-02-plan-SUMMARY.md
+  s_3227e2aea27bf4::t_e5f4f69370d659 1-156
+AGENTS.md
+  s_3227e2aea27bf4::t_2122738563506b 33-34,39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0f8a2bdac412c2e8b22299b1e9815cd78d2c2e99",
+  "prompts": {},
+  "sessions": {
+    "s_3227e2aea27bf4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_147c90a4effeZ8nt1PGT81IwgY",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
