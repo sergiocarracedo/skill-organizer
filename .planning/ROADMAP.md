@@ -51,7 +51,7 @@ abstraction.
 
 ---
 
-## Phase 2 — Overlap refactor (REQ-3)
+## Phase 2 — Overlap refactor (REQ-3) ✓ Complete
 
 **Goal:** `skill-organizer check-overlap` (or whatever it is called
 now) uses the same shared agent-selection helper that P1 extracted,
