@@ -28,21 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Phase 1 — Skill security check (REQ-4).** Active.
+**Milestone:** v0.x — Phase 1 ✓ complete → Phase 2 (Overlap refactor / REQ-3) pending
 
-Plans (in execution order):
-1. `.planning/phases/01-skill-security-check/02-plan-REFACTOR.md` —
-   Extract shared agent-selection helper into `internal/agenttools`;
-   rename `OverlapConfig` → `AgentSelectionConfig`.
-2. `.planning/phases/01-skill-security-check/03-plan-METADATA.md` —
-   Add risk-score fields to `ManagedMetadata` schema.
-3. `.planning/phases/01-skill-security-check/04-plan-COMMAND.md` —
-   Implement `skill check-security` command.
-4. `.planning/phases/01-skill-security-check/05-plan-HOOKS.md` —
-   Add re-enable gate and post-install security hook.
+**Phase:** 1 — Skill security check ✓ complete → next: Phase 2 — Overlap refactor (REQ-3)
+**Status:** verifying (no `STATE.md` -> created 2026-06-10; ROADMAP.md updated)
+**Last updated:** 2026-06-10
 
-Context: `.planning/phases/01-skill-security-check-CONTEXT.md`
-Research: `.planning/phases/01-skill-security-check-RESEARCH.md`
+See `.planning/STATE.md` for the full state and `.planning/ROADMAP.md` for the next phase.
 
 ## Anti-vision guards
 

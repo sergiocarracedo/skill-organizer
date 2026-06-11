@@ -6,7 +6,7 @@
 
 ---
 
-## Phase 1 — Skill security check (REQ-4)
+## Phase 1 — Skill security check (REQ-4) ✓ Complete
 
 **Goal:** A user can run `skill-organizer check-security` and get a
 per-skill risk score; high-risk skills prompt to be disabled; the
