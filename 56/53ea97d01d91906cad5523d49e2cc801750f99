@@ -1,0 +1,22 @@
+packages/cli/internal/telemetry/prompt.go
+  s_e595791b137881::t_7760c73badcf3d 51
+packages/cli/internal/telemetry/prompt_test.go
+  s_e595791b137881::t_bff94f8aaab530 8
+  s_e595791b137881::t_11cf4c9c1fd3d2 103-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5653ea97d01d91906cad5523d49e2cc801750f99",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
