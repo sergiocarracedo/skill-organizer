@@ -1,0 +1,21 @@
+packages/cli/internal/telemetry/observability_test.go
+  s_9376ebd023353c::t_a5c622c0a5207e 162-163,165-166
+  s_9376ebd023353c::t_2f8cf33c408949 17-18
+  s_9376ebd023353c::t_0bd1532174fc88 180-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "4a0af694536c519ed9b29dc24a2d1707b7fb2270",
+  "prompts": {},
+  "sessions": {
+    "s_9376ebd023353c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143ac0286ffeeqXPFZMCdV47F4",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
