@@ -2,7 +2,14 @@ package telemetry
 
 import (
 	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"regexp"
+	"strings"
 	"testing"
+	"time"
 )
 
 // fakeRecorder is a test double for the Recorder interface used by
@@ -76,5 +83,172 @@ func TestRecorderFactorySwapRoundtrip(t *testing.T) {
 	}
 	if fr.events[0].Command != ev.Command {
 		t.Fatalf("fake captured Command = %q, want %q", fr.events[0].Command, ev.Command)
+	}
+}
+
+// TestHTTPRecorderSchemaByteForByte captures the raw POST body the
+// recorder sends to an httptest server and asserts the schema. This
+// is the strongest possible schema assertion short of running the
+// recorder against the production server (which doesn't exist yet).
+// The 3 deterministic fields (command, exit_status, version) are
+// compared byte-for-byte; the 4 volatile fields (install_id,
+// host_id, event_id, timestamp) are checked against the regexes
+// documented in OBSERVABILITY.md.
+func TestHTTPRecorderSchemaByteForByte(t *testing.T) {
+	var (
+		gotMethod      string
+		gotContentType string
+		gotBody        []byte
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotMethod = r.Method
+		gotContentType = r.Header.Get("Content-Type")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("server: read body: %v", err)
+			http.Error(w, "read body", http.StatusInternalServerError)
+			return
+		}
+		gotBody = body
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	rec := HTTPRecorder{Endpoint: srv.URL, Client: &http.Client{Timeout: 5 * time.Second}}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("HTTPRecorder.Record() = %v, want nil", err)
+	}
+
+	if gotMethod != http.MethodPost {
+		t.Fatalf("request method = %q, want POST", gotMethod)
+	}
+	if !strings.HasPrefix(gotContentType, "application/json") {
+		t.Fatalf("Content-Type = %q, want application/json", gotContentType)
+	}
+	if !json.Valid(gotBody) {
+		t.Fatalf("server body is not valid JSON: %s", gotBody)
+	}
+
+	var asMap map[string]any
+	if err := json.Unmarshal(gotBody, &asMap); err != nil {
+		t.Fatalf("json.Unmarshal() = %v\nbody = %s", err, gotBody)
+	}
+
+	const wantKeyCount = 7
+	if len(asMap) != wantKeyCount {
+		t.Fatalf("json keys count = %d, want %d (got %v)", len(asMap), wantKeyCount, asMap)
+	}
+
+	// Deterministic fields: byte-for-byte equality.
+	if asMap["command"] != "check-security" {
+		t.Fatalf("command = %v, want %q", asMap["command"], "check-security")
+	}
+	// Go's json.Unmarshal decodes JSON numbers into float64.
+	if asMap["exit_status"] != float64(0) {
+		t.Fatalf("exit_status = %v, want 0", asMap["exit_status"])
+	}
+	if asMap["version"] != "0.4.0" {
+		t.Fatalf("version = %v, want %q", asMap["version"], "0.4.0")
+	}
+
+	// Volatile fields: regex match (the value is fresh, the shape
+	// is fixed).
+	hexRe := regexp.MustCompile(`^[0-9a-f]{32}$`)
+	ulidRe := regexp.MustCompile(`^[0-9A-HJKMNP-TV-Z]{26}$`)
+	tsRe := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`)
+
+	for _, key := range []string{"install_id", "host_id"} {
+		v, ok := asMap[key].(string)
+		if !ok {
+			t.Fatalf("key %q is not a string (got %T)", key, asMap[key])
+		}
+		if !hexRe.MatchString(v) {
+			t.Fatalf("key %q = %q, want 32 hex chars", key, v)
+		}
+	}
+	if v, ok := asMap["event_id"].(string); !ok || !ulidRe.MatchString(v) {
+		t.Fatalf("event_id = %v, want 26-char ULID", asMap["event_id"])
+	}
+	if v, ok := asMap["timestamp"].(string); !ok || !tsRe.MatchString(v) {
+		t.Fatalf("timestamp = %v, want RFC3339 UTC", asMap["timestamp"])
+	}
+}
+
+// TestHTTPRecorderSchemaFieldOrder inspects the raw body as a string
+// and asserts the keys appear in the exact order documented in
+// OBSERVABILITY.md: command, exit_status, install_id, host_id,
+// timestamp, version, event_id. encoding/json marshals struct fields
+// in declaration order; this test pins that order to the doc.
+func TestHTTPRecorderSchemaFieldOrder(t *testing.T) {
+	var gotBody []byte
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("server: read body: %v", err)
+			http.Error(w, "read body", http.StatusInternalServerError)
+			return
+		}
+		gotBody = body
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	rec := HTTPRecorder{Endpoint: srv.URL, Client: &http.Client{Timeout: 5 * time.Second}}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("HTTPRecorder.Record() = %v, want nil", err)
+	}
+
+	expected := []string{
+		`"command":`,
+		`"exit_status":`,
+		`"install_id":`,
+		`"host_id":`,
+		`"timestamp":`,
+		`"version":`,
+		`"event_id":`,
+	}
+	cursor := 0
+	body := string(gotBody)
+	for _, marker := range expected {
+		idx := strings.Index(body[cursor:], marker)
+		if idx < 0 {
+			t.Fatalf("json body missing marker %q after offset %d (body = %s)", marker, cursor, body)
+		}
+		cursor += idx + len(marker)
+	}
+}
+
+// TestHTTPRecorderFieldCount is the "no extra fields" guard. The
+// schema is exactly 7 top-level keys; adding an 8th is a breaking
+// change and must be caught at CI time.
+func TestHTTPRecorderFieldCount(t *testing.T) {
+	var gotBody []byte
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("server: read body: %v", err)
+			http.Error(w, "read body", http.StatusInternalServerError)
+			return
+		}
+		gotBody = body
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	rec := HTTPRecorder{Endpoint: srv.URL, Client: &http.Client{Timeout: 5 * time.Second}}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("HTTPRecorder.Record() = %v, want nil", err)
+	}
+
+	var asMap map[string]any
+	if err := json.Unmarshal(gotBody, &asMap); err != nil {
+		t.Fatalf("json.Unmarshal() = %v\nbody = %s", err, gotBody)
+	}
+	if len(asMap) != 7 {
+		keys := make([]string, 0, len(asMap))
+		for k := range asMap {
+			keys = append(keys, k)
+		}
+		t.Fatalf("json keys count = %d, want 7 (got %v)", len(asMap), keys)
 	}
 }
