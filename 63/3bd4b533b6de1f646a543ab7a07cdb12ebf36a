@@ -1,0 +1,24 @@
+.planning/STATE.md
+  s_e317dd879fd6d7::t_be486c0aeaa0e6 9-14,17-19,30
+  s_e317dd879fd6d7::t_2a023652e17a11 98-184
+.planning/phases/05-local-only-anonymous-telemetry/05-01-plan-SUMMARY.md
+  s_e317dd879fd6d7::t_17510e1a051271 1-218
+AGENTS.md
+  s_e317dd879fd6d7::t_dadf357a7bb249 31,33-34,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "633bd4b533b6de1f646a543ab7a07cdb12ebf36a",
+  "prompts": {},
+  "sessions": {
+    "s_e317dd879fd6d7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143ca5b48ffewr6Uqdq01Ti6p7",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
