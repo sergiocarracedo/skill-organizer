@@ -37,3 +37,5 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+# CocoIndex Code (ccc)
+/.cocoindex_code/
