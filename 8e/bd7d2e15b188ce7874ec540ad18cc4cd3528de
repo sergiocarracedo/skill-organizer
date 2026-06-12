@@ -1,0 +1,26 @@
+OBSERVABILITY.md
+  s_9376ebd023353c::t_16e8aa418d3bed 6-7
+  s_9376ebd023353c::t_f3ed362199f64a 32-33,45
+  s_9376ebd023353c::t_c2da886935598c 176-179
+  s_9376ebd023353c::t_8fcfc9dd4d0290 10,17-18,24
+  s_9376ebd023353c::t_e51827c98cab2a 59-63,71-73,77-82,85,88-106,109-111
+  s_9376ebd023353c::t_7d891eb37c0806 134,139-140
+  s_9376ebd023353c::t_9a19b8dada6325 135-138
+  s_9376ebd023353c::t_91670a0db369f2 172-175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8ebd7d2e15b188ce7874ec540ad18cc4cd3528de",
+  "prompts": {},
+  "sessions": {
+    "s_9376ebd023353c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143ac0286ffeeqXPFZMCdV47F4",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
