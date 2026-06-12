@@ -6,18 +6,29 @@
 
 ## Current Phase
 
-**Phase 4 — Telemetry backend selection (REQ-9) — plan 04-01 ✓**
-(2026-06-12).
+**Phase 4 — Telemetry backend selection (REQ-9) — plan 04-02 ✓**
+(2026-06-12). Phase 4 is complete.
 
-The Phase 4 receive-side recorder is wired: `NewRelicRecorder`
-struct + `Record` method + 3-way factory + env-var wiring in
-`cmd/root.go` + extended `telemetry status` output + 9 new
-httptest.NewServer smoke tests. Plan 04-02 (the OBSERVABILITY.md
-"Backend: New Relic" docs section) is the next step.
+The Phase 4 receive-side recorder is wired (plan 04-01):
+`NewRelicRecorder` struct + `Record` method + 3-way factory +
+env-var wiring in `cmd/root.go` + extended `telemetry status`
+output + 9 new httptest.NewServer smoke tests. The
+user-facing docs are shipped (plan 04-02): a `### Backend:
+New Relic` H3 sub-section in OBSERVABILITY.md under `##
+Endpoint configuration` (env-var setup, default URL, envelope,
+`clientTime` rename with rationale, hard-drop on 413/429, 503
+retry, EU data center variant) + a cross-reference in
+"How to enable / disable" + a 100-line human-audit record at
+`.planning/PHASE-4-DECISION.md` (chosen product, why, free-tier
+limits, ingestion math, roll-over behavior, rename rationale,
+future changes). REQ-9 acceptance observably met: a user can
+read OBSERVABILITY.md and set up the New Relic backend in 4
+steps; the recorder's smoke test passes through a fake
+httptest server with no real backend contact.
 
 Plan progress:
 - 04-01: NewRelicRecorder + factory + status + smoke test (Wave 1) ✓ implemented
-- 04-02: OBSERVABILITY.md "Backend: New Relic" section (Wave 2, docs-only) — next
+- 04-02: OBSERVABILITY.md "Backend: New Relic" section + PHASE-4-DECISION.md (Wave 2, docs-only) ✓ implemented
 
 Phase 3 — Observability (REQ-8) ✓ complete (2026-06-12). All 3
 phases of the v0.x roadmap completed before Phase 4 was added.
@@ -32,8 +43,12 @@ opt-in via the first-run prompt.
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
-Next learnship step: `execute-phase 4` (plan 04-02) or
-`audit-milestone` if the docs are folded into the next phase.
+Next learnship step: `audit-milestone` to review the v0.x
+milestone (Phases 1-4), or `new-phase` to start a new milestone
+phase. The OBSERVABILITY.md and PHASE-4-DECISION.md are the
+audit trail for REQ-9; PHASE-4-DECISION.md is the single source
+of truth for "we chose New Relic" and is read by any future
+planner considering a backend change.
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
@@ -49,6 +64,65 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 4 — Telemetry backend selection (REQ-9) — plan 04-02 ✓** (2026-06-12)
+  - 3 atomic commits; SUMMARY at
+    `.planning/phases/04-observability-product-selection/04-02-plan-SUMMARY.md`
+  - `OBSERVABILITY.md` now has a `### Backend: New Relic` H3
+    sub-section under the existing `## Endpoint configuration`
+    H2 (232 lines total, up from 157). Documents: (1) the
+    4-line env-var setup, (2) the default URL with
+    `$ACCOUNT_ID` placeholder, (3) the 8-key envelope
+    (`eventType: "skill_organizer_command"` + 6 schema fields
+    + `clientTime` rename with reserved-attribute rationale),
+    (4) the 413/429 hard-drop behavior, (5) the 503 retry
+    contract, (6) the EU data center variant URL
+    (`insights-collector.eu01.nr-data.net`)
+  - `## How to enable / disable` section updated with a
+    5-line cross-reference paragraph that points to the new
+    sub-section and explains the HTTPRecorder passthrough
+    for custom proxies
+  - `.planning/PHASE-4-DECISION.md` created (100 lines, 6
+    required H2 sections): Decision, Why New Relic, Ingestion
+    math (200 B × 10 × 1,000 = 60 MB/month; 0.06% of the 100
+    GB free tier cap), Roll-over behavior (hard drop on
+    413/429), `timestamp` → `clientTime` rename rationale
+    (New Relic reserves `timestamp` for Unix-epoch integers;
+    RFC3339 string is silently dropped at ingest), Future
+    changes (multi-tenant routing, paid tier, other backends,
+    EU data center, custom proxy — all out of scope for v0.x)
+  - Phase 4 e2e acceptance re-verified:
+    `TestNewRelicRecorderContractEnforced` (from plan 04-01)
+    passes with `-count=1` — the recorder works through a
+    fake httptest server with no real backend contact (no
+    DNS, no real account)
+  - Manual demo path verified:
+    `SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID=12345
+    SKILL_ORGANIZER_NEWRELIC_INSERT_KEY=test-key
+    /tmp/skill-organizer telemetry status` outputs
+    `Recorder: NewRelicRecorder`, `Account ID: 1234...`,
+    `Insert key: present` — env vars read end-to-end, factory
+    selects NewRelicRecorder
+  - Deviations:
+    - **OBSERVABILITY.md is 232 lines, 12 over the recommended
+      220-line bound.** The plan's action text said "50-60
+      line addition" and "157 to ~210 lines", but the literal
+      content is 68 lines for the sub-section + 7 for the
+      "How to enable" reference = 75 added. The content is
+      faithful to the plan; the deviation is the planner's
+      under-estimate. The 7-section structure from Phase 3
+      is preserved (the new content is a sub-section, not a
+      top-level section). `TestOBSERVABILITYHasAllSevenSections`
+      continues to pass.
+    - **PHASE-4-DECISION.md was tightened from 102 to 100
+      lines** by combining the front-matter metadata
+      (semantics identical: still references all 3 source
+      discussions in `.planning/phases/04-observability-product-selection/`).
+    - **No plan-checker bugs were fixed** in this plan.
+      The plan was a clean closing-slice; no code changes
+      meant no agent-drift bugs to detect.
+  - Build, vet, full test suite (200+ existing + plan 04-01
+    tests + the e2e re-verification) all green
 
 - **Phase 4 — Telemetry backend selection (REQ-9) — plan 04-01 ✓** (2026-06-12)
   - 6 atomic commits; SUMMARY at
@@ -335,6 +409,9 @@ Phase 2 discuss-phase completed 2026-06-10:
 - **`skills.SetDisabled` is a new helper** to update only the disabled flag without touching risk fields. Required for the re-enable gate.
 - **`RunCheckSecurityForSkill` skips cost-ack prompt in hook mode** (per plan: "no prompt in hook mode"). The full `check-security` command still has the cost-ack prompt.
 - **Risk evaluator field = tool.Tool.ID** (e.g. `claude-code`, `codex`); empty string = unevaluated.
+- **OBSERVABILITY.md is 232 lines, 12 over the recommended 220-line bound** (Phase 4 plan 04-02, plan-checker deviation). The plan's action text said "50-60 line addition" and "157 to ~210 lines", but the literal plan content is 68 lines for the sub-section + 7 for the "How to enable / disable" reference = 75 added. The content is faithful to the plan; the deviation is the planner's under-estimate. The 7-section structure from Phase 3 is preserved (the new content is a sub-section, not a top-level section). `TestOBSERVABILITYHasAllSevenSections` continues to pass. A future PR that grows the doc further should split the New Relic content into a separate `OBSERVABILITY-NEWRELIC.md` and link from OBSERVABILITY.md.
+- **PHASE-4-DECISION.md was tightened from 102 to 100 lines** (Phase 4 plan 04-02, plan-checker deviation). The plan's literal content was 102 lines, 2 over the 30-100 must-have. To stay within the hard bound, the front-matter blockquote was tightened: the 4-line "Decided / Phase / Source discussions" metadata became 2 lines ("Decided / Phase" on one line, "Source discussions" on the next) and the trailing "all in `.planning/phases/04-observability-product-selection/`" became a parenthetical. Semantics identical.
+- **No plan-checker bugs were fixed in plan 04-02** (Phase 4 plan 04-02). The plan was a clean closing-slice (OBSERVABILITY.md sub-section + PHASE-4-DECISION.md audit record + re-verify of plan 04-01's e2e test); no code changes, no agent-drift bugs to detect. The only deviations were the planner's under-estimates on line-count bounds (OBSERVABILITY.md 220→232, PHASE-4-DECISION.md 100→100-stayed, SUMMARY 30-100→143).
 
 ## Open questions
 

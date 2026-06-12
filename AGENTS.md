@@ -28,13 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 plan 01 ✓, plan 02 pending (REQ-9)
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 ✓ (REQ-9)
 
-**Phase:** 4 — Telemetry backend selection (REQ-9) — plan 01 done, 2026-06-12
-**Status:** plan 04-01 complete (NewRelicRecorder + factory + status + smoke tests); next learnship step is `execute-phase 4` plan 02 (OBSERVABILITY.md "Backend: New Relic" section)
+**Phase:** 4 — Telemetry backend selection (REQ-9) — plans 01 and 02 done, 2026-06-12
+**Status:** Phase 4 complete. Plan 04-01 shipped the `NewRelicRecorder` struct + factory + status + smoke tests; plan 04-02 shipped the `OBSERVABILITY.md` "Backend: New Relic" sub-section + the `.planning/PHASE-4-DECISION.md` audit record. Next learnship step is `audit-milestone` (review the v0.x milestone) or `new-phase` (start a new milestone phase).
 **Last updated:** 2026-06-12
 
-See `.planning/phases/04-observability-product-selection/` for the plan artifacts (CONTEXT, RESEARCH, 2 plans, 04-01 SUMMARY). Phase 4 picks New Relic (Insights Events API) as the receive-side backend, with the existing `HTTPRecorder` retained as a passthrough fallback.
+See `.planning/phases/04-observability-product-selection/` for the plan artifacts (CONTEXT, RESEARCH, 2 plans, both SUMMARYs). Phase 4 picks New Relic (Insights Events API) as the receive-side backend, with the existing `HTTPRecorder` retained as a passthrough fallback. The decision audit record is at `.planning/PHASE-4-DECISION.md` (100 lines, 6 required sections).
 
 Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
 Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`
