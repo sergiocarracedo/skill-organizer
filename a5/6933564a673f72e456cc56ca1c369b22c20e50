@@ -1,0 +1,21 @@
+.planning/PHASE-4-DECISION.md
+  s_ba364a4aa44423::t_aaa7bacafb38b5 5,7
+  s_ba364a4aa44423::t_368410ecd4a82b 1-4,6,10-100
+  s_ba364a4aa44423::t_e0daa8606b5f69 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a56933564a673f72e456cc56ca1c369b22c20e50",
+  "prompts": {},
+  "sessions": {
+    "s_ba364a4aa44423": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1447b16b0ffezVgpN831Hzl7iU",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
