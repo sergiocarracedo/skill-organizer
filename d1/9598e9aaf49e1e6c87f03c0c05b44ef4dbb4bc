@@ -1,0 +1,21 @@
+packages/cli/internal/telemetry/recorder.go
+  s_eb672b2f30af0d::t_185ea4559aac66 11-12
+  s_eb672b2f30af0d::t_290d4dc938ff8b 156-161,168-173
+  s_eb672b2f30af0d::t_09fc07eb4eefec 175-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d19598e9aaf49e1e6c87f03c0c05b44ef4dbb4bc",
+  "prompts": {},
+  "sessions": {
+    "s_eb672b2f30af0d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1448ee53fffemlXi0sWRtfvuPQ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
