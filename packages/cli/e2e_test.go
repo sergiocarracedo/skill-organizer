@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 
+	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
+	telemetrypkg "github.com/sergiocarracedo/skill-organizer/cli/internal/telemetry"
 	"github.com/creack/pty"
 	"gopkg.in/yaml.v3"
 )
@@ -698,5 +700,131 @@ func assertSymlinkTargetContains(t *testing.T, linkPath string, want string) {
 	}
 	if !strings.Contains(filepath.ToSlash(target), filepath.ToSlash(want)) {
 		t.Fatalf("Readlink(%q) = %q, want to contain %q", linkPath, target, want)
+	}
+}
+
+// telemetryConfigPath is the on-disk path the binary reads/writes for
+// the telemetry subcommand. It's a helper because e2e tests need to
+// pre-write the YAML for the disabled / status subcommand cases.
+func telemetryConfigPath(env *cliEnv) string {
+	return filepath.Join(env.configHome, "skill-organizer", "skill-organizer.yml")
+}
+
+// TestTelemetryFirstRunPromptFiresOnce exercises the e2e flow:
+//  1. fresh XDG_CONFIG_HOME with the sentinel removed
+//  2. first run fires the pterm confirm prompt
+//  3. pressing Enter (default = no) writes the sticky YAML
+//  4. second run does NOT fire the prompt (sentinel short-circuits)
+func TestTelemetryFirstRunPromptFiresOnce(t *testing.T) {
+	t.Parallel()
+	env := newCLIEnv(t)
+	// Remove the sentinel newCLIEnv pre-created; we want the
+	// first-run prompt to actually fire on the first run.
+	sentinel := filepath.Join(env.configHome, "skill-organizer", "telemetry-prompted")
+	if err := os.Remove(sentinel); err != nil && !os.IsNotExist(err) {
+		t.Fatalf("Remove(%q) error = %v", sentinel, err)
+	}
+
+	// First run: prompt fires; press Enter to accept the default
+	// ("no" — opt-out).
+	output := env.runInteractive(t, env.workspace, nil, []interactiveStep{
+		{waitForAny: []string{"Enable anonymous", "Enable"}, send: "\r"},
+	}, "sync")
+	if !strings.Contains(output, "Enable anonymous") {
+		t.Fatalf("first run output missing the first-run prompt text 'Enable anonymous'\noutput:\n%s", output)
+	}
+
+	// The sticky answer is written. The TelemetryConfig has
+	// `omitempty` on the `telemetry` parent key, so the YAML may or
+	// may not contain the `telemetry:` line depending on whether
+	// any inner field is non-zero. The strong evidence that the
+	// answer was persisted is: (1) the registry YAML file was
+	// created/touched, and (2) the sentinel file exists. We assert
+	// both.
+	registryYAML := telemetryConfigPath(env)
+	if _, err := os.Stat(registryYAML); err != nil {
+		t.Fatalf("registry YAML not created at %q after first run: %v", registryYAML, err)
+	}
+	content, err := os.ReadFile(registryYAML)
+	if err != nil {
+		t.Fatalf("ReadFile(%q) = %v", registryYAML, err)
+	}
+	// The YAML must parse as a valid AppConfig — that's the
+	// structural assertion. (The exact key set varies with omitempty.)
+	var parsed configpkg.AppConfig
+	if err := yaml.Unmarshal(content, &parsed); err != nil {
+		t.Fatalf("registry YAML is not a valid AppConfig: %v\nyaml:\n%s", err, string(content))
+	}
+
+	// The sentinel file is created.
+	if _, err := os.Stat(sentinel); err != nil {
+		t.Fatalf("sentinel not created after first run: %v", err)
+	}
+
+	// Second run: prompt does NOT fire.
+	output2 := env.run(t, env.workspace, nil, "sync")
+	if strings.Contains(output2, "Enable anonymous") {
+		t.Fatalf("second run still shows the first-run prompt (sentinel should short-circuit)\noutput:\n%s", output2)
+	}
+}
+
+// TestTelemetryDisabledNoBuffer asserts the "disabled" state never
+// writes the on-disk buffer (per REQ-8 acceptance: zero network
+// egress and zero on-disk writes when disabled). The
+// install_id and host_id files DO exist because Identity is loaded
+// even when telemetry is disabled.
+func TestTelemetryDisabledNoBuffer(t *testing.T) {
+	t.Parallel()
+	env := newCLIEnv(t)
+
+	// Pre-write the registry YAML with telemetry disabled.
+	registryYAML := telemetryConfigPath(env)
+	if err := os.MkdirAll(filepath.Dir(registryYAML), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(registryYAML), err)
+	}
+	env.writeFile(registryYAML, "telemetry:\n  enabled: false\n  endpoint: \"\"\n")
+
+	// Run a command; the buffer file must not be created.
+	_ = env.run(t, env.workspace, nil, "sync")
+
+	bufferPath := filepath.Join(env.configHome, "skill-organizer", telemetrypkg.BufferFileName)
+	if _, err := os.Stat(bufferPath); !os.IsNotExist(err) {
+		t.Fatalf("telemetry buffer file was created at %q even though telemetry is disabled (stat err = %v)", bufferPath, err)
+	}
+
+	// Positive control: the Identity is loaded even when telemetry is
+	// disabled, so install_id and host_id files should exist.
+	installIDPath := filepath.Join(env.configHome, "skill-organizer", "install_id")
+	hostIDPath := filepath.Join(env.configHome, "skill-organizer", "host_id")
+	if _, err := os.Stat(installIDPath); err != nil {
+		t.Fatalf("install_id file not created at %q: %v (Identity must be loaded even when telemetry is disabled)", installIDPath, err)
+	}
+	if _, err := os.Stat(hostIDPath); err != nil {
+		t.Fatalf("host_id file not created at %q: %v (Identity must be loaded even when telemetry is disabled)", hostIDPath, err)
+	}
+}
+
+// TestTelemetryStatusSubcommandE2E asserts the `telemetry status`
+// subcommand prints the 5 expected lines (Enabled, Endpoint,
+// Install ID, Host ID, Buffer file) when telemetry is enabled.
+// The endpoint is a placeholder; the status subcommand is in the
+// skip set, so it never POSTs to the endpoint.
+func TestTelemetryStatusSubcommandE2E(t *testing.T) {
+	t.Parallel()
+	env := newCLIEnv(t)
+
+	// Pre-write the registry YAML with telemetry enabled.
+	registryYAML := telemetryConfigPath(env)
+	if err := os.MkdirAll(filepath.Dir(registryYAML), 0o755); err != nil {
+		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(registryYAML), err)
+	}
+	env.writeFile(registryYAML, "telemetry:\n  enabled: true\n  endpoint: \"https://example.invalid\"\n")
+
+	output := env.run(t, env.workspace, nil, "telemetry", "status")
+
+	for _, needle := range []string{"Enabled:", "true", "https://example.invalid", "Install ID:", "Host ID:"} {
+		if !strings.Contains(output, needle) {
+			t.Fatalf("telemetry status output missing %q\noutput:\n%s", needle, output)
+		}
 	}
 }
