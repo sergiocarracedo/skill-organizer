@@ -28,13 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓ complete → Phase 2 ✓ complete → Phase 3 (Observability, REQ-8) planning pending
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 plans ready (3 plans, 3 waves)
 
-**Phase:** 3 — Observability (REQ-8) — context captured 2026-06-11, ready for planning
-**Status:** planning pending
+**Phase:** 3 — Observability (REQ-8) — plans ready to execute
+**Status:** planning complete; ready for /execute-phase 3
 **Last updated:** 2026-06-11
 
-See `.planning/phases/03-observability/03-CONTEXT.md` for the captured decisions and `.planning/STATE.md` for the full state.
+See `.planning/phases/03-observability/` for the plan artifacts.
 
 Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
 Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`
