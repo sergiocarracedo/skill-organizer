@@ -1,0 +1,20 @@
+packages/cli/internal/telemetry/telemetry_test.go
+  s_cd0e8157b37b02::t_36f06fde817138 7,21-23,39-43,85,93-100,102-103,106,141,179,190,201,204
+  s_cd0e8157b37b02::t_11295ef943eb43 1-6,8-20,24-38,44-84,86-92,101,104-105,107-140,142-178,180-189,191-200,202-203,205-207
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e8cf9bd434c06a70b96d1da18354f60a34c5ff8b",
+  "prompts": {},
+  "sessions": {
+    "s_cd0e8157b37b02": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_145347d7cffe7wAHidEAMO2VIH",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
