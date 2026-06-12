@@ -6,9 +6,12 @@
 
 ## Current Phase
 
-**Phase 3 — Observability (REQ-8)** — context captured, ready for planning.
+**Phase 3 — Observability (REQ-8)** — plan 03-01 implemented 2026-06-12, 03-02 and 03-03 ready to execute next.
 
-Plan progress: none yet (Phase 3 has 0/0 plans).
+Plan progress:
+- 03-01: package + identity + interface (Wave 1, no deps) ✓ implemented
+- 03-02: buffer + HTTPRecorder + first-run prompt + cobra (Wave 2, depends on 01) — ready to execute
+- 03-03: OBSERVABILITY.md + byte-for-byte schema test + e2e (Wave 3, depends on 01+02) — ready to execute
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
@@ -38,6 +41,34 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Last completed
 
+- **Phase 3 — Observability (REQ-8) — plan 03-01 ✓** (2026-06-12)
+  - New `packages/cli/internal/telemetry/` package with
+    `Event` struct (7 fields, snake_case JSON, regex-validated),
+    `Recorder` interface, `NoopRecorder` (zero-egress default),
+    `RecorderFactoryFunc` package var for test injection, and
+    `NewHTTPClientFunc` placeholder for plan 02's HTTPRecorder
+  - `Identity` type with `LoadOrCreate` and `RotateHostID` (32 hex
+    chars from 16 random bytes via `crypto/rand`; unexported
+    `generateID(io.Reader)` test seam uses `bytes.NewReader`)
+  - 22 unit tests across 3 test files: 12 in `event_test.go`
+    (Validate 5 sub-cases + 2 host/version paths, JSON shape,
+    100-ULID format check, timestamp regex), 3 in
+    `recorder_test.go` (Noop drops 1000 events, factory returns
+    noop on default, factory swap with captured `[]Event`), 7 in
+    `identity_test.go` (hex format, create-if-missing, reuse,
+    rotation preserves install_id, corruption recovery,
+    app-dir creation, regenerate-on-call)
+  - 7 atomic commits; SUMMARY at
+    `.planning/phases/03-observability/03-01-plan-SUMMARY.md`
+  - Deviations: (1) `go get` and `go mod tidy` were split
+    between task 1 and task 2 because `tidy` with no caller
+    removes the dep; (2) added 2 extra Validate tests to cover
+    the `host_id` and `version` error paths not in the
+    table-driven test; (3) `fakeRecorder` was promoted to
+    package scope because Go does not allow method declarations
+    inside function bodies
+  - Build, vet, full test suite (184 passing in 19 packages),
+    and lefthook pre-commit (`pnpm run test:cli:e2e`) all green
 - **Phase 2 — Overlap refactor (REQ-3) — plan 02-02 ✓** (2026-06-11)
   - Added 7 curated `SKILL.md` fixtures under
     `packages/cli/internal/overlap/testdata/overlap/{conflicting,clean,partial}/`
@@ -76,6 +107,8 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Recent decisions
 
+- **Telemetry dep workflow: `go get` first, `go mod tidy` after the first caller exists.** Running `go mod tidy` with no caller silently removes an unused dep from `go.mod`. The plan's task 1 step said "go get && go mod tidy" but the verify step (`go list -m`) required the dep to remain. Splitting the two commands across the dep-add and the first-caller tasks preserves the dep in `go.mod` and lets `tidy` promote it from indirect to direct at the right moment.
+- **`fakeRecorder` is a package-level test double** in the telemetry test file, not a function-local type. Go does not allow method declarations inside function bodies, so the type and its `Record` method must live at package scope. The factory-swap test instantiates a fresh `*fakeRecorder` per swap.
 - **ToolSelector** signature is `func(prompt string, labels []string, defaultOption string) (string, error)` (3 args, not 2 as plan 02 specified). Required so `selectOption` from `prompt.go` can be passed directly without an adapter.
 - **`mergeManagedMetadata` heuristic for `RiskScore`**: only overwrites when `updates.RiskScore > 0` OR `updates.RiskEvaluator != ""`. Discovered regression: empty-update calls were clobbering existing risk scores. Plan 03's "always overwrite" was wrong; the heuristic is the practical fix.
 - **`skills.SetDisabled` is a new helper** to update only the disabled flag without touching risk fields. Required for the re-enable gate.
