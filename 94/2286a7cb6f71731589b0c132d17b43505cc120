@@ -1,0 +1,23 @@
+.planning/phases/04-observability-product-selection/04-02-plan-observability-decision-and-docs.md
+  s_0896370f1dc247::t_fe0ef0acdd65bc 1-538
+.planning/phases/04-observability-product-selection/04-01-plan-newrelic-recorder-and-factory.md
+  s_0896370f1dc247::t_6839382afd09ff 23,148,158,178-183,188,200,225-228,247,294-297,303-305,308,383,392-394,399-400,406-1130
+  s_0896370f1dc247::t_da2fe71eb99d25 1-22,24-79,81-96,102-112
+  s_0896370f1dc247::t_aabcaa4910dd55 80,97-101,113-147,149-157,159-177,184-187,189-199,201-224,229-246,248-293,298-302,306-307,309-382,384-391,395-398,401-405
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "942286a7cb6f71731589b0c132d17b43505cc120",
+  "prompts": {},
+  "sessions": {
+    "s_0896370f1dc247": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_144afab3cffeVdU1UDnpzR5dQk",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
