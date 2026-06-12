@@ -153,6 +153,7 @@ func init() {
 	rootCmd.AddCommand(newWatchCommand())
 	rootCmd.AddCommand(newServiceCommand())
 	rootCmd.AddCommand(newSelfUpdateCommand())
+	rootCmd.AddCommand(newTelemetryCommand())
 
 	for _, child := range skillCmd.Commands() {
 		switch child.Name() {
