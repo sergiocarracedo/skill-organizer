@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/pterm/pterm"
 )
 
 // Recorder is the sink for telemetry events. Implementations must be
@@ -151,32 +153,141 @@ var RecorderVersion = ""
 // set telemetry.endpoint to override.
 const newRelicEndpointTemplate = "https://insights-collector.newrelic.com/v1/accounts/$ACCOUNT_ID/events"
 
-// NewNewRelicRecorder is the recorder surface for the New Relic
-// Insights Events API (Phase 4). It wraps the project's flat 7-field
-// Event in a backend-specific envelope: a JSON array of length 1
-// with an `eventType: "skill_organizer_command"` prefix, the
-// `timestamp` field renamed to `clientTime` in the envelope (New
-// Relic reserves `timestamp` for Unix-epoch integers — see RESEARCH
-// NP1), 413/429 responses hard-drop the event (return nil, no
-// buffer fallback — RESEARCH NP4), and 503 responses get one
-// context-aware 250ms retry (RESEARCH NP3). The X-Insert-Key
-// header is the New Relic auth method (CONTEXT lock).
-//
-// The full struct + Record method is added in task 04-01-02. This
-// stub returns a NoopRecorder so the factory's NewRelic branch
-// compiles cleanly while the recorder is in flight.
+// NewNewRelicRecorder returns a Recorder that POSTs a
+// New-Relic-shaped array envelope to the New Relic Insights
+// Events API. The endpointTemplate is the URL template with the
+// account_id placeholder; the constructor substitutes the
+// AccountID at recorder-construction time. The InsertKey is
+// sent in the X-Insert-Key header per the CONTEXT decision.
 func NewNewRelicRecorder(accountID, insertKey, endpointTemplate string) Recorder {
-	// Placeholder body: returns a NoopRecorder until the
-	// NewRelicRecorder struct and its Record method are added in
-	// task 04-01-02. The endpoint-template substitution is computed
-	// here so the helper is in place when the struct is wired.
 	endpoint := newRelicEndpointTemplate
 	if endpointTemplate != "" {
 		endpoint = endpointTemplate
 	}
 	endpoint = strings.ReplaceAll(endpoint, "$ACCOUNT_ID", accountID)
-	_ = endpoint
-	_ = insertKey
-	_ = accountID
-	return NoopRecorder{}
+	return &NewRelicRecorder{
+		Endpoint:   endpoint,
+		InsertKey:  insertKey,
+		HTTPClient: NewHTTPClientFunc(),
+		Version:    RecorderVersion,
+	}
+}
+
+// NewRelicRecorder POSTs events to the New Relic Insights Events
+// API. The envelope is a JSON array of length 1 (one event per
+// POST — the buffer drain calls Record once per event, not in
+// batches). The envelope adds:
+//
+//   - "eventType": "skill_organizer_command" (New Relic requires
+//     this field; it groups events in the NRDB UI).
+//   - "clientTime": the RFC3339 string from event.Timestamp.
+//     New Relic RESERVES the "timestamp" attribute name for
+//     Unix-epoch integers (RESEARCH NP1); an RFC3339 string sent
+//     in the "timestamp" field is silently dropped at ingest. The
+//     rename is an envelope-only transform — the flat 7-field
+//     schema in event.go and the byte-for-byte HTTPRecorder test
+//     are unchanged.
+//
+// Status code handling:
+//   - 2xx: return nil. Service moves on.
+//   - 413, 429: log a one-line warning via pterm and return nil.
+//     The event is DROPPED (no buffer write). Per CONTEXT, the
+//     local buffer is for network-down, not server-quota.
+//     Returning a non-nil error here would trigger Service's
+//     "recorder failed -> buffer write" path, creating an
+//     infinite drain loop (RESEARCH NP4).
+//   - 503: 1 retry with 250ms context-aware backoff. Final 503
+//     returns the error (so the event is buffered for the next
+//     drain).
+//   - Other 4xx, 5xx, network errors: return the error. The
+//     buffer is the right fallback for transient failures.
+//
+// The X-Insert-Key header is the New Relic Insights Event API
+// auth method (per CONTEXT lock). The User-Agent is
+// "skill-organizer/<version>" for ops visibility on the New
+// Relic side.
+type NewRelicRecorder struct {
+	Endpoint   string // resolved URL (account_id substituted)
+	InsertKey  string // X-Insert-Key header value
+	HTTPClient *http.Client
+	Version    string // for User-Agent; may be empty
+}
+
+// Record marshals the event as a New-Relic-shaped JSON array, POSTs
+// it to the configured endpoint with the X-Insert-Key auth header,
+// and handles 413/429 (hard drop) and 503 (1 retry) per the
+// struct's doc.
+func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
+	elem := map[string]any{
+		"eventType":   "skill_organizer_command",
+		"command":     event.Command,
+		"exit_status": event.ExitStatus,
+		"install_id":  event.InstallID,
+		"host_id":     event.HostID,
+		"clientTime":  event.Timestamp, // renamed: see struct doc
+		"version":     event.Version,
+		"event_id":    event.EventID,
+	}
+	body, err := json.Marshal([]map[string]any{elem})
+	if err != nil {
+		return fmt.Errorf("marshal newrelic envelope: %w", err)
+	}
+
+	send := func() (int, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, r.Endpoint, bytes.NewReader(body))
+		if err != nil {
+			return 0, fmt.Errorf("build newrelic request: %w", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Insert-Key", r.InsertKey)
+		if r.Version != "" {
+			req.Header.Set("User-Agent", "skill-organizer/"+r.Version)
+		}
+		resp, err := r.HTTPClient.Do(req)
+		if err != nil {
+			return 0, fmt.Errorf("post event to newrelic: %w", err)
+		}
+		defer resp.Body.Close()
+		return resp.StatusCode, nil
+	}
+
+	status, err := send()
+	if err != nil {
+		return err
+	}
+	// 413/429: hard drop, return nil, log a warning.
+	if status == http.StatusRequestEntityTooLarge || status == http.StatusTooManyRequests {
+		WarningFunc("telemetry: dropping event due to %d from New Relic (quota or rate-limit; will not retry)", status)
+		return nil
+	}
+	// 503: 1 retry with 250ms context-aware backoff.
+	if status == http.StatusServiceUnavailable {
+		select {
+		case <-time.After(250 * time.Millisecond):
+			// fall through to the retry
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		status, err = send()
+		if err != nil {
+			return err
+		}
+		if status == http.StatusRequestEntityTooLarge || status == http.StatusTooManyRequests {
+			WarningFunc("telemetry: dropping event due to %d from New Relic (quota or rate-limit after retry)", status)
+			return nil
+		}
+	}
+	if status < 200 || status >= 300 {
+		return fmt.Errorf("post event to newrelic: unexpected status %d", status)
+	}
+	return nil
+}
+
+// WarningFunc is a swappable function variable for emitting
+// warnings. The default writes to stderr via pterm.Warning
+// (light-magenta, per the project's color rules — yellow is
+// reserved for keyboard hints). Tests reassign in t.Cleanup
+// to capture or silence the output.
+var WarningFunc = func(format string, args ...any) {
+	pterm.Warning.Printfln(format, args...)
 }
