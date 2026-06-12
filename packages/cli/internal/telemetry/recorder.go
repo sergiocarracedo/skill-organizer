@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -96,26 +97,86 @@ func NewHTTPRecorder(endpoint string) Recorder {
 	return HTTPRecorder{Endpoint: endpoint, Client: NewHTTPClientFunc()}
 }
 
-// RecorderConfig is the input to the default factory. Plan 02 sets
-// this from Service; the cmd package's PersistentPostRun is the only
-// caller.
+// RecorderConfig is the input to the default factory. The cmd
+// package's PersistentPreRun sets this from the resolved
+// TelemetryConfig (Phase 3) plus the two New Relic env vars
+// (Phase 4). AccountID and InsertKey are env-only (no YAML) per
+// the CONTEXT: secrets don't belong in the user's YAML file.
 type RecorderConfig struct {
-	Enabled  bool
-	Endpoint string
+	Enabled   bool
+	Endpoint  string
+	AccountID string // SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID
+	InsertKey string // SKILL_ORGANIZER_NEWRELIC_INSERT_KEY
 }
 
-// SetDefaultFactory swaps RecorderFactoryFunc to a closure that returns
-// an HTTPRecorder when both Enabled and Endpoint are set, else a
-// NoopRecorder. Idempotent: calling it with the same cfg is a no-op.
+// SetDefaultFactory swaps RecorderFactoryFunc to a 3-way closure:
+//
+//  1. NewRelicRecorder when telemetry is enabled AND both AccountID
+//     and InsertKey are non-empty (the user has configured the New
+//     Relic backend).
+//  2. HTTPRecorder (the Phase 3 passthrough) when telemetry is
+//     enabled AND a non-empty endpoint is set.
+//  3. NoopRecorder otherwise (zero network egress).
 //
 // The "0 network egress when disabled" guarantee is preserved: the
-// closure returns a NoopRecorder{} value, which has no methods that
-// touch the network.
+// closure returns a NoopRecorder{} value when !cfg.Enabled, which
+// has no methods that touch the network.
 func SetDefaultFactory(cfg RecorderConfig) {
 	RecorderFactoryFunc = func() Recorder {
-		if !cfg.Enabled || cfg.Endpoint == "" {
+		if !cfg.Enabled {
 			return NoopRecorder{}
 		}
-		return NewHTTPRecorder(cfg.Endpoint)
+		if cfg.AccountID != "" && cfg.InsertKey != "" {
+			return NewNewRelicRecorder(cfg.AccountID, cfg.InsertKey, cfg.Endpoint)
+		}
+		if cfg.Endpoint != "" {
+			return NewHTTPRecorder(cfg.Endpoint)
+		}
+		return NoopRecorder{}
 	}
+}
+
+// RecorderVersion is set by the cmd package (cmd/root.go) at
+// PersistentPreRun time. The default empty string means the
+// User-Agent header is omitted; production sets it to the CLI
+// semver. Exported so cmd/root.go can write to it.
+var RecorderVersion = ""
+
+// newRelicEndpointTemplate is the default endpoint for the New
+// Relic Insights Events API. The $ACCOUNT_ID placeholder is
+// substituted with cfg.AccountID in the constructor. Per
+// CONTEXT, the EU data center variant
+// (insights-collector.eu01.nr-data.net) is documented in
+// OBSERVABILITY.md but not defaulted here — users in the EU
+// set telemetry.endpoint to override.
+const newRelicEndpointTemplate = "https://insights-collector.newrelic.com/v1/accounts/$ACCOUNT_ID/events"
+
+// NewNewRelicRecorder is the recorder surface for the New Relic
+// Insights Events API (Phase 4). It wraps the project's flat 7-field
+// Event in a backend-specific envelope: a JSON array of length 1
+// with an `eventType: "skill_organizer_command"` prefix, the
+// `timestamp` field renamed to `clientTime` in the envelope (New
+// Relic reserves `timestamp` for Unix-epoch integers — see RESEARCH
+// NP1), 413/429 responses hard-drop the event (return nil, no
+// buffer fallback — RESEARCH NP4), and 503 responses get one
+// context-aware 250ms retry (RESEARCH NP3). The X-Insert-Key
+// header is the New Relic auth method (CONTEXT lock).
+//
+// The full struct + Record method is added in task 04-01-02. This
+// stub returns a NoopRecorder so the factory's NewRelic branch
+// compiles cleanly while the recorder is in flight.
+func NewNewRelicRecorder(accountID, insertKey, endpointTemplate string) Recorder {
+	// Placeholder body: returns a NoopRecorder until the
+	// NewRelicRecorder struct and its Record method are added in
+	// task 04-01-02. The endpoint-template substitution is computed
+	// here so the helper is in place when the struct is wired.
+	endpoint := newRelicEndpointTemplate
+	if endpointTemplate != "" {
+		endpoint = endpointTemplate
+	}
+	endpoint = strings.ReplaceAll(endpoint, "$ACCOUNT_ID", accountID)
+	_ = endpoint
+	_ = insertKey
+	_ = accountID
+	return NoopRecorder{}
 }
