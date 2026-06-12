@@ -1,0 +1,20 @@
+.planning/phases/04-observability-product-selection/04-02-plan-SUMMARY.md
+  s_ba364a4aa44423::t_80c44c507889ce 1-7,26-28,35,38-39,41-51,57,60-62,88-90,114-115,118-122,127,132-136
+  s_ba364a4aa44423::t_8ae4cdc6fc39e3 8-25,29-34,36-37,40,52-56,58-59,63-87,91-113,116-117,123-126,128-131,137-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "954bd0e91cd4b26c551f92fe8dab7cc1c7dc6b7b",
+  "prompts": {},
+  "sessions": {
+    "s_ba364a4aa44423": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1447b16b0ffezVgpN831Hzl7iU",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
