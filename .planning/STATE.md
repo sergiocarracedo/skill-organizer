@@ -6,16 +6,16 @@
 
 ## Current Phase
 
-**Phase 3 — Observability (REQ-8)** — plans 03-01 + 03-02 implemented 2026-06-12, 03-03 ready to execute next.
+**Phase 3 — Observability (REQ-8)** — all 3 plans complete 2026-06-12; REQ-8 acceptance is observably met.
 
 Plan progress:
 - 03-01: package + identity + interface (Wave 1, no deps) ✓ implemented
 - 03-02: buffer + HTTPRecorder + first-run prompt + cobra (Wave 2, depends on 01) ✓ implemented
-- 03-03: OBSERVABILITY.md + byte-for-byte schema test + e2e (Wave 3, depends on 01+02) — ready to execute
+- 03-03: OBSERVABILITY.md + byte-for-byte schema test + e2e (Wave 3, depends on 01+02) ✓ implemented
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
-Verification: 223/223 tests pass (185 baseline + 38 new in plan 03-02); go vet clean; go build clean; lefthook pre-commit e2e green.
+Verification: 200 PASS, 1 SKIP, 0 FAIL across 19 packages; 13 new tests in plan 03-03; go vet clean; go build clean; lefthook pre-commit e2e green; end-to-end demo path (build -> telemetry status -> enable -> inspect YAML) completes.
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
@@ -31,6 +31,45 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 3 — Observability (REQ-8) — plan 03-03 ✓** (2026-06-12)
+  - 5 atomic commits; SUMMARY at
+    `.planning/phases/03-observability/03-03-plan-SUMMARY.md`
+  - OBSERVABILITY.md at the repo root (157 lines, 7 sections:
+    What is collected, Schema, How to enable / disable, Endpoint
+    configuration, Data retention, Privacy guarantees, FAQ)
+    with an example JSON payload block that the schema test
+    parses
+  - 3 new HTTPRecorder schema tests (byte-for-byte,
+    field order, field count) using httptest.NewServer to
+    capture the raw POST body
+  - 4 new factory + zero-egress tests using a
+    `countingTransport` atomic-counter wrapper: 100
+    `NoopRecorder.Record` calls must produce 0 HTTP calls
+  - 3 new OBSERVABILITY doc tests in a new
+    `observability_test.go` file: example payload matches
+    the recorder's output (modulo 4 volatile fields), 7
+    section headers present, example is valid JSON
+  - 3 new e2e tests in `e2e_test.go`:
+    first-run prompt fires once (with sentinel cleanup),
+    disabled state never writes the buffer,
+    `telemetry status` prints the 5 expected lines
+  - Deviations: (1) `Telemetry` is `omitempty` in the YAML
+    so a "no" answer omits the `telemetry:` key — the
+    first-run e2e test was rewritten to assert the YAML
+    parses as a valid AppConfig and the sentinel is created;
+    (2) `newCLIEnv` pre-creates the sentinel, so the
+    first-run e2e test removes the sentinel in the test
+    body instead of modifying the shared helper; (3) the
+    OBSERVABILITY path-resolver walks up from CWD to
+    handle both `go test ./...` and
+    `go test ./internal/telemetry/...`
+  - Build, vet, full test suite (200 PASS, 1 SKIP, 0 FAIL
+    in 19 packages), and lefthook pre-commit
+    (`pnpm run test:cli:e2e`) all green
+  - End-to-end manual demo path completes (build binary,
+    set fresh XDG_CONFIG_HOME, `telemetry status` -> enable
+    -> inspect YAML -> status shows `Enabled: true`)
 
 - **Phase 3 — Observability (REQ-8) — plan 03-02 ✓** (2026-06-12)
   - 12 atomic commits; SUMMARY at
