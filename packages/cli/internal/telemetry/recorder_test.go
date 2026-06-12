@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -250,5 +251,119 @@ func TestHTTPRecorderFieldCount(t *testing.T) {
 			keys = append(keys, k)
 		}
 		t.Fatalf("json keys count = %d, want 7 (got %v)", len(asMap), keys)
+	}
+}
+
+// countingTransport is a test double http.RoundTripper that counts
+// every request that passes through it. The zero-egress tests below
+// swap the HTTPRecorder's HTTP client to one using this transport
+// and assert the counter is 0 after exercising the recorder.
+type countingTransport struct {
+	calls atomic.Int64
+}
+
+// RoundTrip records one call and returns a synthetic 200 OK response.
+// The recorder only checks the status code and closes the body; the
+// body content is irrelevant for the zero-egress assertion.
+func (c *countingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	c.calls.Add(1)
+	_ = req // unused beyond the count
+	return &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(strings.NewReader("")),
+		Header:     make(http.Header),
+	}, nil
+}
+
+// TestNoopRecorderNoNetworkCalls asserts the strongest possible
+// "zero network egress when disabled" property: 100 Record calls on
+// a NoopRecorder must not touch the network at all. The
+// countingTransport is the only path that would increment the
+// counter; if the NoopRecorder were ever wired to use the HTTP
+// client, the counter would jump above 0 and the test would fail.
+func TestNoopRecorderNoNetworkCalls(t *testing.T) {
+	counter := &countingTransport{}
+	// Wire the counting transport through the package's HTTP client
+	// seam, so the test would catch any code path that constructs an
+	// HTTPRecorder (even by accident) and uses NewHTTPClientFunc.
+	originalClientFunc := NewHTTPClientFunc
+	t.Cleanup(func() { NewHTTPClientFunc = originalClientFunc })
+	NewHTTPClientFunc = func() *http.Client {
+		return &http.Client{Transport: counter}
+	}
+
+	rec := NoopRecorder{}
+	for i := 0; i < 100; i++ {
+		if err := rec.Record(t.Context(), validEvent()); err != nil {
+			t.Fatalf("NoopRecorder.Record() iter %d = %v, want nil", i, err)
+		}
+	}
+	if got := counter.calls.Load(); got != 0 {
+		t.Fatalf("countingTransport.calls = %d after 100 NoopRecorder.Record calls, want 0 (NoopRecorder must never touch the network)", got)
+	}
+}
+
+// TestRecorderFactoryReturnsNoopWhenEndpointEmpty asserts that even
+// with Enabled=true, the factory short-circuits to a NoopRecorder
+// when no endpoint is configured. The CONTEXT decision: "If none is
+// set, the factory returns NoopRecorder regardless of the enabled
+// flag."
+func TestRecorderFactoryReturnsNoopWhenEndpointEmpty(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	SetDefaultFactory(RecorderConfig{Enabled: true, Endpoint: ""})
+
+	rec := NewRecorder()
+	if _, ok := rec.(NoopRecorder); !ok {
+		t.Fatalf("NewRecorder() = %T, want NoopRecorder (enabled=true with empty endpoint must short-circuit)", rec)
+	}
+}
+
+// TestRecorderFactoryReturnsHTTPRecorderWhenConfigured asserts the
+// happy path: enabled=true and a non-empty endpoint produces an
+// HTTPRecorder that actually POSTs to the configured endpoint.
+func TestRecorderFactoryReturnsHTTPRecorderWhenConfigured(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		hits++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	SetDefaultFactory(RecorderConfig{Enabled: true, Endpoint: srv.URL})
+
+	rec := NewRecorder()
+	hr, ok := rec.(HTTPRecorder)
+	if !ok {
+		t.Fatalf("NewRecorder() = %T, want HTTPRecorder (enabled=true with non-empty endpoint)", rec)
+	}
+	if hr.Endpoint != srv.URL {
+		t.Fatalf("HTTPRecorder.Endpoint = %q, want %q", hr.Endpoint, srv.URL)
+	}
+
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("rec.Record() = %v, want nil", err)
+	}
+	if hits != 1 {
+		t.Fatalf("server hits = %d, want 1 (the recorder should have POSTed once)", hits)
+	}
+}
+
+// TestRecorderFactoryReturnsNoopWhenDisabled asserts the disabled
+// state overrides the endpoint: even with a configured endpoint,
+// the factory returns a NoopRecorder so no network calls are made.
+func TestRecorderFactoryReturnsNoopWhenDisabled(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	SetDefaultFactory(RecorderConfig{Enabled: false, Endpoint: "https://example.com/in"})
+
+	rec := NewRecorder()
+	if _, ok := rec.(NoopRecorder); !ok {
+		t.Fatalf("NewRecorder() = %T, want NoopRecorder (enabled=false must short-circuit regardless of endpoint)", rec)
 	}
 }
