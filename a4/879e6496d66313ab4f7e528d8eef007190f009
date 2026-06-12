@@ -1,0 +1,19 @@
+packages/cli/internal/telemetry/identity.go
+  s_76c928682d8da7::t_d6756fd98a2f4b 1-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a4879e6496d66313ab4f7e528d8eef007190f009",
+  "prompts": {},
+  "sessions": {
+    "s_76c928682d8da7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14542d62cffeg97QcEScCrLMeg",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
