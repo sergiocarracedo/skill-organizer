@@ -1,0 +1,23 @@
+.planning/phases/05-local-only-anonymous-telemetry/05-CONTEXT.md
+  s_e595791b137881::t_53a76855090394 1-387
+.planning/phases/05-local-only-anonymous-telemetry/05-DISCUSSION-LOG.md
+  s_e595791b137881::t_fbf5e26775d56c 1-263
+.planning/STATE.md
+  s_e595791b137881::t_3761f24007291d 9-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "22510f6d4f372a4cda3a79c6b7986109fc9d60c4",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
