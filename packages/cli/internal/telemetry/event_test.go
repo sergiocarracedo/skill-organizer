@@ -14,8 +14,6 @@ func validEvent() Event {
 	return Event{
 		Command:    "check-security",
 		ExitStatus: 0,
-		InstallID:  "0123456789abcdef0123456789abcdef",
-		HostID:     "0123456789abcdef0123456789abcdef",
 		Timestamp:  "2026-06-11T00:00:00Z",
 		Version:    "0.4.0",
 		EventID:    "01HXYZABCDEFGHJKMNPQRSTVWX",
@@ -46,11 +44,6 @@ func TestEventValidateFields(t *testing.T) {
 			wantSub: "exit_status must be 0 or 1",
 		},
 		{
-			name:    "malformed install_id",
-			mutate:  func(e *Event) { e.InstallID = "not-hex" },
-			wantSub: "install_id must be 32 hex chars",
-		},
-		{
 			name:    "malformed timestamp",
 			mutate:  func(e *Event) { e.Timestamp = "yesterday" },
 			wantSub: "timestamp must be RFC3339 UTC",
@@ -74,18 +67,6 @@ func TestEventValidateFields(t *testing.T) {
 				t.Fatalf("Validate() = %q, want it to contain %q", err.Error(), tc.wantSub)
 			}
 		})
-	}
-}
-
-func TestEventValidateRejectsBadHostID(t *testing.T) {
-	e := validEvent()
-	e.HostID = "garbage"
-	err := e.Validate()
-	if err == nil {
-		t.Fatal("Validate() = nil, want error")
-	}
-	if !strings.Contains(err.Error(), "host_id must be 32 hex chars") {
-		t.Fatalf("Validate() = %q, want it to mention host_id", err.Error())
 	}
 }
 
@@ -115,8 +96,7 @@ func TestEventJSONShape(t *testing.T) {
 	}
 
 	wantKeys := []string{
-		"command", "exit_status", "install_id", "host_id",
-		"timestamp", "version", "event_id",
+		"command", "exit_status", "timestamp", "version", "event_id",
 	}
 	if len(asMap) != len(wantKeys) {
 		t.Fatalf("json keys count = %d, want %d (got %v)", len(asMap), len(wantKeys), asMap)
@@ -128,7 +108,7 @@ func TestEventJSONShape(t *testing.T) {
 	}
 
 	// Type checks: most are strings, exit_status is a number.
-	stringKeys := []string{"command", "install_id", "host_id", "timestamp", "version", "event_id"}
+	stringKeys := []string{"command", "timestamp", "version", "event_id"}
 	for _, k := range stringKeys {
 		v, ok := asMap[k].(string)
 		if !ok {
@@ -145,7 +125,7 @@ func TestEventJSONShape(t *testing.T) {
 	// Assert field declaration order: encoding/json marshals struct
 	// fields in declaration order, so the byte offsets of the keys
 	// must be monotonically increasing in the expected order.
-	expected := []string{`"command":`, `"exit_status":`, `"install_id":`, `"host_id":`, `"timestamp":`, `"version":`, `"event_id":`}
+	expected := []string{`"command":`, `"exit_status":`, `"timestamp":`, `"version":`, `"event_id":`}
 	cursor := 0
 	for _, marker := range expected {
 		idx := strings.Index(string(body)[cursor:], marker)
@@ -153,6 +133,24 @@ func TestEventJSONShape(t *testing.T) {
 			t.Fatalf("json body missing marker %q after offset %d (body = %s)", marker, cursor, body)
 		}
 		cursor += idx + len(marker)
+	}
+}
+
+// TestEventHasNoIdentityFields is the source-lock guard for the
+// REQ-10 "no pseudonymous identifier is ever emitted" property. The
+// JSON shape must not contain the substring `install_id` or
+// `host_id` in any field. A regression that re-introduces the
+// Identity fields fails this test.
+func TestEventHasNoIdentityFields(t *testing.T) {
+	e := validEvent()
+	body, err := json.Marshal(e)
+	if err != nil {
+		t.Fatalf("json.Marshal() = %v", err)
+	}
+	for _, banned := range []string{`"install_id"`, `"host_id"`} {
+		if strings.Contains(string(body), banned) {
+			t.Fatalf("json body must not contain %q (Identity fields are dropped in Phase 5 REQ-10)\nbody: %s", banned, body)
+		}
 	}
 }
 

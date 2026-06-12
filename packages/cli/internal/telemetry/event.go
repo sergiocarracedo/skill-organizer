@@ -11,25 +11,18 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-// Event is the JSON-serializable record of a single command invocation.
-// It carries no arguments, no paths, and no PII. The seven fields are
-// the entire payload; the server schema matches these names exactly.
-//
-// The JSON field order is fixed by struct declaration order, which
-// encoding/json honours. Reordering the fields will break the
-// byte-for-byte schema test.
+// Phase 5 (REQ-10): the schema is 5 fields. No pseudonymous
+// identifiers are emitted. The 2 dropped fields were `install_id`
+// and `host_id`.
 type Event struct {
 	Command    string `json:"command"`
 	ExitStatus int    `json:"exit_status"`
-	InstallID  string `json:"install_id"`
-	HostID     string `json:"host_id"`
 	Timestamp  string `json:"timestamp"`
 	Version    string `json:"version"`
 	EventID    string `json:"event_id"`
 }
 
 var (
-	idHexRe     = regexp.MustCompile(`^[0-9a-f]{32}$`)
 	ulidRe      = regexp.MustCompile(`^[0-9A-HJKMNP-TV-Z]{26}$`)
 	timestampRe = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`)
 )
@@ -44,12 +37,6 @@ func (e *Event) Validate() error {
 	}
 	if e.ExitStatus != 0 && e.ExitStatus != 1 {
 		return fmt.Errorf("event: exit_status must be 0 or 1, got %d", e.ExitStatus)
-	}
-	if !idHexRe.MatchString(e.InstallID) {
-		return fmt.Errorf("event: install_id must be 32 hex chars, got %q", e.InstallID)
-	}
-	if !idHexRe.MatchString(e.HostID) {
-		return fmt.Errorf("event: host_id must be 32 hex chars, got %q", e.HostID)
 	}
 	if !timestampRe.MatchString(e.Timestamp) {
 		return fmt.Errorf("event: timestamp must be RFC3339 UTC, got %q", e.Timestamp)
