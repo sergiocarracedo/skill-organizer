@@ -89,7 +89,7 @@ func init() {
 			maintenancepkg.MaybeNotifySkillUpdates(cmd.Context(), cmd.OutOrStdout())
 		}
 
-		// ---- Telemetry (REQ-8) ----
+		// ---- Telemetry (REQ-8 / REQ-9) ----
 		// Resolve the AppDir and the final endpoint value (flag > env > YAML).
 		appDir, appDirErr := configpkg.AppDir()
 		if appDirErr == nil {
@@ -100,6 +100,20 @@ func init() {
 				os.Getenv("SKILL_ORGANIZER_TELEMETRY_ENDPOINT"), // env override (flag > env > YAML precedence)
 				cfg.Endpoint,
 			)
+			// Phase 4: read the two New Relic env vars and the version.
+			// The RecorderVersion var is read by NewNewRelicRecorder
+			// (User-Agent header). The factory closure is set BEFORE
+			// telemetrypkg.New(...) so the Service captures the right
+			// recorder (Phase 3 BUG #2 fix from STATE.md).
+			telemetrypkg.RecorderVersion = version
+			newRelicAccountID := os.Getenv("SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID")
+			newRelicInsertKey := os.Getenv("SKILL_ORGANIZER_NEWRELIC_INSERT_KEY")
+			telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{
+				Enabled:   cfg.Enabled,
+				Endpoint:  resolvedEndpoint,
+				AccountID: newRelicAccountID,
+				InsertKey: newRelicInsertKey,
+			})
 			// The Service is constructed and stored on the command's
 			// Context so the PersistentPostRun can pick it up. We use
 			// a custom context-key type to avoid collisions.
