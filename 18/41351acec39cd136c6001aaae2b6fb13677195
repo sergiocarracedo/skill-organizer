@@ -1,0 +1,20 @@
+packages/cli/internal/telemetry/event_test.go
+  s_76c928682d8da7::t_8a4fa2d326c8c5 26-27
+  s_76c928682d8da7::t_932ff2ace5c931 1-25,28-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "1841351acec39cd136c6001aaae2b6fb13677195",
+  "prompts": {},
+  "sessions": {
+    "s_76c928682d8da7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14542d62cffeg97QcEScCrLMeg",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
