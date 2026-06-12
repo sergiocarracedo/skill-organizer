@@ -1,0 +1,27 @@
+packages/cli/internal/config/registry_test.go
+  s_cd0e8157b37b02::t_52793f8dc5fe5f 61-93
+packages/cli/internal/config/config.go
+  s_cd0e8157b37b02::t_8988f63d30c801 48-56,62
+  s_cd0e8157b37b02::t_8897715ea0f11b 131-134
+  s_cd0e8157b37b02::t_bcb20a3c838905 7
+  s_cd0e8157b37b02::t_5458fbe1ff2b9a 94
+  s_cd0e8157b37b02::t_2ecb2d519e6613 109
+packages/cli/internal/config/registry.go
+  s_cd0e8157b37b02::t_c08d95b86d7102 206-230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "be960b17f17d714db5c67b623fbd3b2ec0d459bc",
+  "prompts": {},
+  "sessions": {
+    "s_cd0e8157b37b02": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_145347d7cffe7wAHidEAMO2VIH",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
