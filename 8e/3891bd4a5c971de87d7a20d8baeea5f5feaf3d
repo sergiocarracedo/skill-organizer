@@ -1,0 +1,23 @@
+.planning/STATE.md
+  s_76c928682d8da7::t_cc56c0fdda3c62 110-111
+  s_76c928682d8da7::t_5e8bd2688eca58 9,11-14
+  s_76c928682d8da7::t_2aa66e1c6a5b34 44-71
+.planning/phases/03-observability/03-01-plan-SUMMARY.md
+  s_76c928682d8da7::t_78123b271767b4 1-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8e3891bd4a5c971de87d7a20d8baeea5f5feaf3d",
+  "prompts": {},
+  "sessions": {
+    "s_76c928682d8da7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14542d62cffeg97QcEScCrLMeg",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
