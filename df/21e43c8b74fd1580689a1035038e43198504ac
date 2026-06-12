@@ -1,0 +1,20 @@
+OBSERVABILITY.md
+  s_ba364a4aa44423::t_18905430ffa2da 106-174
+  s_ba364a4aa44423::t_95f687bfe3b943 68-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "df21e43c8b74fd1580689a1035038e43198504ac",
+  "prompts": {},
+  "sessions": {
+    "s_ba364a4aa44423": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1447b16b0ffezVgpN831Hzl7iU",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
