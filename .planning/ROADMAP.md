@@ -309,3 +309,29 @@ stay at `noop` by default.
 | 05-01 (recorder core) | ✓ | 5-field Event, 2-way factory (Noop+NewRelic), HTTPRecorder removed, identity.go deleted, build-time NewRelic vars |
 | 05-02 (CLI surface)  | ✓ | `telemetry wipe` command, `telemetry status` 2 lines, prompt copy tweak |
 | 05-03 (docs)         | ✓ | `PRIVACY.md` (4 sections), `OBSERVABILITY.md` updated to 5 fields / 6 H2 sections |
+
+---
+
+## Phase 6 — AI model visibility and security tooling
+
+**Goal:** AI-tool-aware commands show which model they use and let the user select a different model interactively; `check-security` gets dangerous fixture skills for testing; security ratings appear in the status tree.
+
+**Status:** [ ] Not started
+**Depends on:** Phase 1 (check-security), Phase 2 (overlap — tree/report output)
+
+### Scope
+
+- **AI tool model visibility:** Commands that invoke the AI tool (e.g. `check-security`, `check-overlap`) print the model name being used (e.g. `claude-sonnet-4-20250514`). When multiple models are available, the user can select interactively via the tool selector.
+- **check-security fixture skills:** Add curated dangerous skill fixtures under `testdata/` that the security evaluator flags as high-risk (obfuscated code, env exfiltration, payload downloads). Unlocks deterministic regression testing for the security check.
+- **Security rating in status tree:** The `skill-organizer status` tree output (or `list --tree`) shows each skill's security risk score / rating alongside its name. High-risk skills are visually flagged.
+
+### Acceptance
+
+- `check-security --model` lists available models and lets the user pick one.
+- Dangerous fixture skills produce risk score ≥ 70 in `check-security`.
+- `status --tree` shows a security badge (e.g. `🟢 0-30`, `🟡 31-69`, `🔴 70-100`) per skill.
+- All existing tests still pass.
+
+### Plans
+
+*Not yet planned — run `plan-phase 6`*

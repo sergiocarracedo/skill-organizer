@@ -6,13 +6,11 @@
 
 ## Current Phase
 
-**All v0.x phases complete.** Phase 1 (check-security), Phase 2
-(overlap-refactor), Phase 3 (observability), Phase 4 (telemetry
-backend selection), and Phase 5 (local-only anonymous telemetry)
-are all ✓ done. All requirements REQ-3, REQ-4, REQ-8, REQ-9, and
-REQ-10 are observably met.
+**All v0.x phases complete** (Phases 1-5, REQ-3/4/8/9/10).
+**Phase 6 — AI model visibility and security tooling** added to
+roadmap but not yet planned.
 
-Next learnship step: `audit-milestone` — review the v0.x cycle.
+Next learnship step: `discuss-phase 6` or `plan-phase 6`.
 
 Phase 5 summary:
 - Recorder API: 2 implementations (Noop + NewRelic), HTTPRecorder dropped.
@@ -577,7 +575,7 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Roadmap Evolution
 
-- **2026-06-12** — Phase 4 added: Telemetry backend selection (REQ-9).
+- **2026-06-12** — Phase 6 added: AI model visibility and security tooling.
   Scope: research and pick a free-of-charge telemetry backend
   (or self-hosted sink) for the v0.x CLI to point its
   `HTTPRecorder` at. Phase 3 ships the emit side; Phase 4 closes
