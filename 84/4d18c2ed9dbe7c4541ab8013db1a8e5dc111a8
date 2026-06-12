@@ -1,0 +1,19 @@
+packages/cli/internal/telemetry/source_lock_test.go
+  s_e317dd879fd6d7::t_ba71d9260dd3f2 1-197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "844d18c2ed9dbe7c4541ab8013db1a8e5dc111a8",
+  "prompts": {},
+  "sessions": {
+    "s_e317dd879fd6d7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143ca5b48ffewr6Uqdq01Ti6p7",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
