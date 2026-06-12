@@ -1,0 +1,25 @@
+packages/cli/internal/telemetry/recorder.go
+  s_e317dd879fd6d7::t_1b8b32b0afa742 38,43,49-52
+  s_e317dd879fd6d7::t_5437824c9efaaa 150-152
+  s_e317dd879fd6d7::t_9c1b23716b523f 182-184
+packages/cli/internal/telemetry/recorder_test.go
+  s_e317dd879fd6d7::t_2eaeabd594fdbf 32,83-94,114-119,121,134-138,140-143,145-147,151-152,155-156,158-159,167-168,170-172,174-183,187-191,205-209,211-228,232-235,249-253,255,258-259,262-268,271,277-279,306-307,326-327,329-336,338-342,346,351-354,360,363-364,437,439,464-470,587-599,602-603,605-607,612,614-615,617-618,623-625,627-633,636-640,643,646-652
+packages/cli/internal/telemetry/buffer_test.go
+  s_e317dd879fd6d7::t_991b98fb715951 46-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dde7301f91887a19fce778b850bd8fd118829dbc",
+  "prompts": {},
+  "sessions": {
+    "s_e317dd879fd6d7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143ca5b48ffewr6Uqdq01Ti6p7",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
