@@ -1,0 +1,45 @@
+packages/cli/cmd/telemetry_test.go
+  s_e317dd879fd6d7::t_ea3992ef852c03 108-113,117,120-121,125,128-129,133-135,138,157,160,162,169-182,185-187,191,194-195,199,202-203,207-208,211,231-233,243-246,249,252-253,257,260-261,265-267,270,289-290,294-296,307-310,313,315,319,321-338
+packages/cli/cmd/root.go
+  s_e317dd879fd6d7::t_f6616f418dc011 24
+  s_e317dd879fd6d7::t_c8e1adffbab29a 90-96,101,106,110,113
+packages/cli/internal/telemetry/telemetry_test.go
+  s_e317dd879fd6d7::t_00546c513905d7 48,100,103,133,163-167,181-209,212,214-215,217-218,221-222,224-230
+  s_e317dd879fd6d7::t_8efe0e817faf7d 5,10,211,213,216,223
+packages/cli/internal/config/config.go
+  s_e317dd879fd6d7::t_06d50dcf354534 47-52,54
+  s_e317dd879fd6d7::t_42a1b24173c454 132-135
+packages/cli/internal/telemetry/telemetry.go
+  s_e317dd879fd6d7::t_a3882f9005eff3 21-28,51-54,72-75
+packages/cli/e2e_test.go
+  s_e317dd879fd6d7::t_e116c979702933 773-776,786,796-802
+  s_e317dd879fd6d7::t_b4344079bfbc2f 807-810,820,824,829-833
+packages/cli/cmd/telemetry.go
+  s_e317dd879fd6d7::t_532841cf5761d3 16-17,22-23,27-29,34,39,61,69-72,103-107,111,121-126,128-129,135-139,141-142,148-150,157-160
+packages/cli/cmd/root_test.go
+  s_e317dd879fd6d7::t_6f9dd6109ff015 132
+  s_e317dd879fd6d7::t_c8a491427f3336 59-60,63-64,67,71-74,81
+packages/cli/internal/telemetry/recorder_test.go
+  s_e317dd879fd6d7::t_921e12f7781805 198-202,234-235,239-242,274,279
+  s_e317dd879fd6d7::t_33470c78279b60 145-150,155-157
+packages/cli/internal/telemetry/observability_test.go
+  s_e317dd879fd6d7::t_73614cabb8a789 70-81,90-98,136-145
+packages/cli/internal/config/registry_test.go
+  s_e317dd879fd6d7::t_d1a5a6b2873451 66,76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "15397b6626b3f4d114cf1fec94c2d346717d11ad",
+  "prompts": {},
+  "sessions": {
+    "s_e317dd879fd6d7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143ca5b48ffewr6Uqdq01Ti6p7",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
