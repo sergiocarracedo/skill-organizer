@@ -1,0 +1,19 @@
+.planning/phases/04-observability-product-selection/04-01-plan-SUMMARY.md
+  s_eb672b2f30af0d::t_ba4a679777551a 1-189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0b62fca1b40bb8ece7bb3ab1dd8de904646e86e9",
+  "prompts": {},
+  "sessions": {
+    "s_eb672b2f30af0d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1448ee53fffemlXi0sWRtfvuPQ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
