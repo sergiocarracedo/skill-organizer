@@ -203,6 +203,31 @@ func SaveBackupConfig(path string, backup BackupConfig) error {
 	return SaveAppConfig(path, cfg)
 }
 
+func LoadTelemetryConfig(path string) (TelemetryConfig, error) {
+	cfg, err := LoadAppConfig(path)
+	if err != nil {
+		return TelemetryConfig{}, err
+	}
+	return cfg.Telemetry, nil
+}
+
+func LoadTelemetryConfigOrDefault(path string) (TelemetryConfig, error) {
+	cfg, err := LoadAppConfigOrDefault(path)
+	if err != nil {
+		return TelemetryConfig{}, err
+	}
+	return cfg.Telemetry, nil
+}
+
+func SaveTelemetryConfig(path string, t TelemetryConfig) error {
+	cfg, err := LoadAppConfigOrDefault(path)
+	if err != nil {
+		return err
+	}
+	cfg.Telemetry = t
+	return SaveAppConfig(path, cfg)
+}
+
 func (r *WatchRegistry) Add(path string) {
 	r.Watched = append(r.Watched, path)
 	r.Normalize()

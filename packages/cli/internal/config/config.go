@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 type Location struct {
@@ -44,11 +45,21 @@ type BackupConfig struct {
 	RetentionDays int `yaml:"retention-days,omitempty"`
 }
 
+// TelemetryConfig holds the opt-in telemetry settings. The Enabled flag
+// controls whether the first-run prompt is sticky-yes; the Endpoint
+// field is the URL the HTTPRecorder POSTs events to. An empty Endpoint
+// forces the recorder to NoopRecorder regardless of Enabled (per CONTEXT).
+type TelemetryConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Endpoint string `yaml:"endpoint,omitempty"`
+}
+
 type AppConfig struct {
 	Watched        []string             `yaml:"watched"`
 	Service        ServiceConfig        `yaml:"service"`
 	AgentSelection AgentSelectionConfig `yaml:"agent-selection,omitempty"`
 	Backup         BackupConfig         `yaml:"backup,omitempty"`
+	Telemetry      TelemetryConfig      `yaml:"telemetry,omitempty"`
 }
 
 func (r *WatchRegistry) Normalize() {
@@ -80,6 +91,7 @@ func (c *AppConfig) Normalize() {
 	c.Service.Normalize()
 	c.AgentSelection.Normalize()
 	c.Backup.Normalize()
+	c.Telemetry.Normalize()
 }
 
 func (c AppConfig) WatchRegistry() WatchRegistry {
@@ -94,6 +106,7 @@ func (c *AppConfig) SetWatchRegistry(registry WatchRegistry) {
 	c.Service.Normalize()
 	c.AgentSelection.Normalize()
 	c.Backup.Normalize()
+	c.Telemetry.Normalize()
 }
 
 func (c *ServiceConfig) Normalize() {
@@ -113,6 +126,10 @@ func (c *BackupConfig) Normalize() {
 	if c.RetentionDays <= 0 {
 		c.RetentionDays = DefaultBackupRetentionDays
 	}
+}
+
+func (c *TelemetryConfig) Normalize() {
+	c.Endpoint = strings.TrimSpace(c.Endpoint)
 }
 
 const DefaultLogLevel = "info"

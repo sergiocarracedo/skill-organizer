@@ -58,3 +58,36 @@ func TestLoadAppConfigSupportsLegacyWatchedOnlyFile(t *testing.T) {
 		t.Fatalf("LoadAppConfig().Service.LogLevel = %q, want %q", cfg.Service.LogLevel, DefaultLogLevel)
 	}
 }
+
+func TestTelemetryConfigRoundtrip(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "skill-organizer.yml")
+
+	// On a fresh AppDir, LoadTelemetryConfigOrDefault returns a zero-value
+	// TelemetryConfig (the default — telemetry disabled, no endpoint).
+	fresh, err := LoadTelemetryConfigOrDefault(path)
+	if err != nil {
+		t.Fatalf("LoadTelemetryConfigOrDefault() on fresh path = %v", err)
+	}
+	if fresh.Enabled {
+		t.Fatalf("LoadTelemetryConfigOrDefault().Enabled = true, want false")
+	}
+	if fresh.Endpoint != "" {
+		t.Fatalf("LoadTelemetryConfigOrDefault().Endpoint = %q, want empty", fresh.Endpoint)
+	}
+
+	// Save a real config and read it back.
+	want := TelemetryConfig{Enabled: true, Endpoint: "https://example.com/in"}
+	if err := SaveTelemetryConfig(path, want); err != nil {
+		t.Fatalf("SaveTelemetryConfig() = %v", err)
+	}
+	got, err := LoadTelemetryConfigOrDefault(path)
+	if err != nil {
+		t.Fatalf("LoadTelemetryConfigOrDefault() after save = %v", err)
+	}
+	if got.Enabled != want.Enabled {
+		t.Fatalf("Loaded Enabled = %v, want %v", got.Enabled, want.Enabled)
+	}
+	if got.Endpoint != want.Endpoint {
+		t.Fatalf("Loaded Endpoint = %q, want %q", got.Endpoint, want.Endpoint)
+	}
+}
