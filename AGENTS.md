@@ -16,11 +16,13 @@ Before making non-trivial changes, read the planning docs in order:
 2. `.planning/REQUIREMENTS.md` — 3 testable requirements
    (REQ-3, REQ-4, REQ-8) for the next version, plus a "Dropped from
    this version" section for traceability.
-3. `.planning/ROADMAP.md` — 3 phases:
+3. `.planning/ROADMAP.md` — 5 phases (all complete for v0.x):
    - **P1**: Skill security check (REQ-4) — includes extracting the
      agent-selection helper from the existing `skill-overlap` code.
    - **P2**: Overlap refactor (REQ-3) — reuses the P1 helper.
-   - **P3**: Observability (REQ-8) — opt-in, anonymous, last.
+   - **P3**: Observability (REQ-8) — opt-in, anonymous telemetry layer.
+   - **P4**: Telemetry backend selection (REQ-9) — New Relic backend.
+   - **P5**: Local-only anonymous telemetry (REQ-10) — final privacy redesign.
 
 Codebase maps live in `.planning/codebase/` (STACK, ARCHITECTURE,
 CONVENTIONS, TESTING, CONCERNS, INTEGRATIONS, STRUCTURE) — read these
@@ -28,15 +30,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 ✓ (REQ-9), Phase 5 plan 05-01 ✓ (REQ-10)
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 ✓ (REQ-9), Phase 5 ✓ (REQ-10)
 
-**Phase:** 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 implemented, 2026-06-12
-**Status:** plan 05-01 ✓ (5-field Event schema, 2-way Recorder factory, identity module removed). Plans 05-02 (CLI surface) and 05-03 (OBSERVABILITY.md update + PRIVACY.md creation) are next. See `05-01-plan-SUMMARY.md` in `.planning/phases/05-local-only-anonymous-telemetry/`.
+**Phase:** 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 ✓, 05-02 ✓, 05-03 ✓
+**Status:** all Phase 5 plans executed. 47/47 must-haves verified. All v0.x phases complete.
 **Last updated:** 2026-06-12
 
-See `.planning/phases/05-local-only-anonymous-telemetry/` for `05-CONTEXT.md` (decisions), `05-DISCUSSION-LOG.md` (audit), `05-RESEARCH.md` (7 pillars + 10 pitfalls), the 3 PLAN.md files, and `05-01-plan-SUMMARY.md` (the recorder core refactor that landed).
-
-See `.planning/phases/04-observability-product-selection/` for the plan artifacts (CONTEXT, RESEARCH, 2 plans, both SUMMARYs). Phase 4 picks New Relic (Insights Events API) as the receive-side backend, with the existing `HTTPRecorder` retained as a passthrough fallback. The decision audit record is at `.planning/PHASE-4-DECISION.md` (100 lines, 6 required sections).
+See `.planning/phases/05-local-only-anonymous-telemetry/` for `05-CONTEXT.md` (decisions), `05-DISCUSSION-LOG.md` (audit), `05-RESEARCH.md` (7 pillars + 10 pitfalls), the 3 PLAN.md files, the 3 SUMMARY files, and `05-VERIFICATION.md` (47/47 passed).
 
 Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
 Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`

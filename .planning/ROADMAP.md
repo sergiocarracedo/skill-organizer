@@ -302,4 +302,10 @@ stay at `noop` by default.
 
 ### Plans
 
-*Not yet planned — run `plan-phase 5`*
+**Status:** ✓ Complete (2026-06-12). All 3 plans executed, 47/47 must-haves passed.
+
+| Plan | Status | What it built |
+|------|--------|---------------|
+| 05-01 (recorder core) | ✓ | 5-field Event, 2-way factory (Noop+NewRelic), HTTPRecorder removed, identity.go deleted, build-time NewRelic vars |
+| 05-02 (CLI surface)  | ✓ | `telemetry wipe` command, `telemetry status` 2 lines, prompt copy tweak |
+| 05-03 (docs)         | ✓ | `PRIVACY.md` (4 sections), `OBSERVABILITY.md` updated to 5 fields / 6 H2 sections |

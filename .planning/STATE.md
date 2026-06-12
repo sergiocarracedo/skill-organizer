@@ -6,33 +6,28 @@
 
 ## Current Phase
 
-**Phase 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 ✓, 05-03 ✓** (2026-06-12).
-Plan 05-01 (recorder core refactor) is complete. The 5-field
-Event schema, 2-way Recorder factory, build-time NewRelic vars,
-and identity module removal are landed. Plan 05-03 (docs:
-OBSERVABILITY.md update + PRIVACY.md creation) is complete.
-Plan 05-02 (CLI surface cleanup) is next.
+**All v0.x phases complete.** Phase 1 (check-security), Phase 2
+(overlap-refactor), Phase 3 (observability), Phase 4 (telemetry
+backend selection), and Phase 5 (local-only anonymous telemetry)
+are all ✓ done. All requirements REQ-3, REQ-4, REQ-8, REQ-9, and
+REQ-10 are observably met.
 
-Plan progress:
-- 05-03: PRIVACY.md (4 required sections) + OBSERVABILITY.md updated to 5-field schema, 6 H2, Build-time backend, PRIVACY.md link ✓ implemented
-  (4 atomic commits; SUMMARY at
-  `.planning/phases/05-local-only-anonymous-telemetry/05-03-plan-SUMMARY.md`)
-- 05-01: 5-field Event schema, 2-way Recorder factory, identity module removed ✓ implemented
-  (4 atomic refactor commits + 1 atomic test commit; SUMMARY at
-  `.planning/phases/05-local-only-anonymous-telemetry/05-01-plan-SUMMARY.md`)
-- 05-context: design captured via discuss-phase workflow (5 areas, all decided)
-  - Recorder API collapses from 3 implementations to 2 (Noop + NewRelic; HTTPRecorder dropped)
-  - NewRelic endpoint + token are build-time vars (-ldflags); user never configures
-  - User-facing config: one key, `telemetry.enabled`
-  - Schema shrinks from 7 fields to 5 (drop install_id, host_id)
-  - `telemetry wipe` is the GDPR right-to-erasure command
-  - Separate top-level PRIVACY.md with 4 sections
-  - `telemetry status` is two lines: Enabled + Recorder
-  - First-run prompt unchanged structurally; one-line copy tweak to mention `telemetry disable`
+Next learnship step: `audit-milestone` — review the v0.x cycle.
 
-Next learnship step: `execute-phase 5` (continue with plan 05-02).
+Phase 5 summary:
+- Recorder API: 2 implementations (Noop + NewRelic), HTTPRecorder dropped.
+- NewRelic endpoint + token are build-time vars (-ldflags); user never configures.
+- User-facing config: one key, `telemetry.enabled`.
+- Schema: 5 fields (dropped install_id, host_id).
+- Identity module: deleted (no install_id/host_id files, no LoadOrCreate).
+- `telemetry wipe`: GDPR right-to-erasure command (deletes on-disk buffer).
+- `telemetry status`: 2 lines (Enabled + Recorder).
+- First-run prompt: one-line copy tweak (mentions `telemetry disable`).
+- Top-level PRIVACY.md: 4 sections (field-by-field, legal basis, data-controller, schema-change protocol).
+- OBSERVABILITY.md: 5-field schema, 6 H2 sections, PRIVACY.md link.
+- Verification: 47/47 must-haves passed (verifier commit pending).
 
-Phase 4 status preserved below for reference.
+Phase 4 summary preserved below for reference.
 
 Plan progress:
 - 04-01: NewRelicRecorder + factory + env-var wiring + status extension (Wave 1, no deps) ✓ implemented
