@@ -65,6 +65,12 @@ Three layers, in order of precedence (highest wins):
 3. **YAML** — `telemetry: { enabled: true, endpoint: "https://example.com/in" }`
    in `~/.config/skill-organizer/skill-organizer.yml`.
 
+The default backend is the New Relic Insights Events API — see
+the [Backend: New Relic](#backend-new-relic) sub-section below
+for setup. For a custom proxy, point `telemetry.endpoint` at
+the proxy URL and the CLI will POST the flat 7-field object
+(the HTTPRecorder passthrough mode).
+
 The first run of the binary asks for consent interactively (TTY only).
 The default is **no**. The answer is sticky: the prompt does not fire on
 subsequent runs. To re-prompt, delete `<appDir>/telemetry-prompted`.
@@ -96,6 +102,75 @@ application/json` header and a 2xx response on success. The CLI follows
 3xx redirects via the standard `http.Client`; non-2xx (4xx, 5xx) is
 treated as a failure and the event is appended to the on-disk buffer
 for a later drain.
+
+### Backend: New Relic
+
+The default backend is the New Relic Insights Events API, served
+on the free tier (100 GB / month of ingest, 1 full user, 8-day
+retention). The CLI wraps the 7-field schema in a backend-specific
+envelope (a JSON array of length 1 with an `eventType` prefix)
+and sends it to the collector with an `X-Insert-Key` auth header.
+The schema is unchanged — the envelope is a transform applied at
+the recorder layer, not a wire-format bump.
+
+Setup (4 steps):
+
+1. Sign up for New Relic (free tier) at https://newrelic.com/signup.
+2. Create an Insights insert key in the New Relic UI
+   (Account settings → API keys → Insights insert key).
+3. Export the two env vars:
+   ```
+   export SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID=...   # your account number
+   export SKILL_ORGANIZER_NEWRELIC_INSERT_KEY=...    # the insert key
+   ```
+4. Enable telemetry: `skill-organizer telemetry enable`.
+
+The CLI resolves the endpoint URL by substituting
+`SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID` into the default template:
+
+```
+https://insights-collector.newrelic.com/v1/accounts/$SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID/events
+```
+
+Envelope (8 keys per event):
+
+- `eventType` — always `"skill_organizer_command"`. New Relic uses
+  this to group events in the NRDB UI.
+- `command`, `exit_status`, `install_id`, `host_id`, `version`,
+  `event_id` — the 6 schema fields, sent with their snake_case
+  names verbatim (NRQL is case-sensitive).
+- `clientTime` — the RFC3339 UTC string from the `timestamp` field.
+  **Renamed** from `timestamp` to dodge the New Relic reserved-
+  attribute rule: the server reserves `timestamp` for Unix-epoch
+  integers and silently drops an RFC3339 string sent in that
+  field. The rename is an envelope-only transform; the flat
+  7-field schema above is unchanged. The HTTPRecorder
+  (passthrough) still emits the field as `timestamp`.
+
+Hard-drop on 413 / 429 (quota or rate limit): the recorder logs a
+one-line warning and **drops the event**. The local on-disk buffer
+is for network-down, not server-quota. If the recorder buffered
+the event on 413/429, the next drain would re-POST it, the server
+would return 413/429 again, and the buffer would thrash until
+FIFO eviction kicks in.
+
+503 retry: one retry with a 250ms context-aware backoff. A
+cancelled context (Ctrl-C during the backoff) is honored
+immediately. The 2nd 503 (after the retry) returns the error and
+the event is buffered for the next drain.
+
+**EU data center users**: replace the default URL with
+`https://insights-collector.eu01.nr-data.net/v1/accounts/$SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID/events`
+by setting `telemetry.endpoint` in the YAML (or
+`SKILL_ORGANIZER_TELEMETRY_ENDPOINT` in the env). The recorder
+uses whichever URL it is given; the New Relic region is the
+user's choice.
+
+**Roll-over behavior**: when the free tier is exceeded, the
+recorder hard-drops events. There is no paid-upgrade flow in
+v0.x. The on-disk buffer covers offline / restart cases, not
+server-quota cases. See `.planning/PHASE-4-DECISION.md` for the
+ingestion math and the rationale.
 
 ## Data retention
 
