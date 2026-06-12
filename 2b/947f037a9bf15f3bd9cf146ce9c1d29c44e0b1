@@ -1,0 +1,19 @@
+packages/cli/internal/telemetry/buffer.go
+  s_cd0e8157b37b02::t_1f42f7388577d3 1-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2b947f037a9bf15f3bd9cf146ce9c1d29c44e0b1",
+  "prompts": {},
+  "sessions": {
+    "s_cd0e8157b37b02": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_145347d7cffe7wAHidEAMO2VIH",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
