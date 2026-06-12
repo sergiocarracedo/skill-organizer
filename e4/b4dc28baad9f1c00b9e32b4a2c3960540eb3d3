@@ -1,0 +1,20 @@
+packages/cli/cmd/root_test.go
+  s_cd0e8157b37b02::t_2fac41d3df683c 63-70
+  s_cd0e8157b37b02::t_089ae52ec84743 1-62,71-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e4b4dc28baad9f1c00b9e32b4a2c3960540eb3d3",
+  "prompts": {},
+  "sessions": {
+    "s_cd0e8157b37b02": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_145347d7cffe7wAHidEAMO2VIH",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
