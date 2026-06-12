@@ -1,0 +1,21 @@
+.planning/ROADMAP.md
+  s_e595791b137881::t_7817c909892001 217-218
+.planning/STATE.md
+  s_e595791b137881::t_0ecb7efa699745 9-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6f349527abe06cc477a655d54632caa798b6031f",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
