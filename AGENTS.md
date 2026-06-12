@@ -28,11 +28,11 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 plans ready (3 plans, 3 waves)
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 plan 01 ✓ (plans 02 + 03 ready to execute)
 
-**Phase:** 3 — Observability (REQ-8) — plans ready to execute
-**Status:** planning complete; ready for /execute-phase 3
-**Last updated:** 2026-06-11
+**Phase:** 3 — Observability (REQ-8) — plan 03-01 implemented
+**Status:** plan 03-01 complete; ready to execute /execute-phase for 03-02
+**Last updated:** 2026-06-12
 
 See `.planning/phases/03-observability/` for the plan artifacts.
 
