@@ -1,0 +1,36 @@
+.planning/phases/03-observability/03-03-plan-observability-md-and-tests.md
+  s_317248355a3d0e::t_c0033949bb4b16 1-11,14-522
+  s_e595791b137881::t_a833f9a9749b01 12-13
+.planning/phases/03-observability/03-02-plan-buffer-http-cobra.md
+  s_e595791b137881::t_ba009549731657 667
+  s_e595791b137881::t_fa2aadbaa0324b 1078-1083
+  s_317248355a3d0e::t_1d09724556f474 1-666,668-1077,1084-1320
+.planning/phases/03-observability/03-01-plan-package-identity-interface.md
+  s_317248355a3d0e::t_560b805c8194f9 35-52
+  s_317248355a3d0e::t_b0f3d862371312 1-13,16-34
+  s_e595791b137881::t_4e3dae9bb1595b 14-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "56a820e21e4090263f5d48f8f6af98b37d772364",
+  "prompts": {},
+  "sessions": {
+    "s_317248355a3d0e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1478619b0ffexUEROvxQ30Tqn1",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
