@@ -1,0 +1,19 @@
+packages/cli/internal/telemetry/observability_test.go
+  s_5c5823cbdf6ef0::t_8cee69ec43fffd 1-180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5d575ca40fbdaf1c297659d1b986e6fcdab6e373",
+  "prompts": {},
+  "sessions": {
+    "s_5c5823cbdf6ef0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14506e8b8ffeBMw5oygzFlKFuw",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
