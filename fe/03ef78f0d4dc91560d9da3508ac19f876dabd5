@@ -1,0 +1,34 @@
+.planning/phases/05-local-only-anonymous-telemetry/05-RESEARCH.md
+  s_e595791b137881::t_a72af78cc6dd19 1-360
+.planning/REQUIREMENTS.md
+  s_e595791b137881::t_342092f30dd628 78-148
+.planning/phases/05-local-only-anonymous-telemetry/05-03-plan-docs-privacy-and-observability.md
+  s_e595791b137881::t_c8780be3a5ec23 1-14,16-23,25-125,141,157-158,164-165,171,178-193,209-210,219-222,225-252
+  s_e595791b137881::t_1ae82f98ccedcb 24
+  s_e595791b137881::t_4c8ed0854d91be 15
+  s_e595791b137881::t_af21cfaf71a707 126-140,142-156,159-163,166-170,172-177
+  s_e595791b137881::t_1b37d524f6ab3d 194-208,211-218,223-224
+.planning/phases/05-local-only-anonymous-telemetry/05-02-plan-cli-surface.md
+  s_e595791b137881::t_e5193488076008 1-282
+.planning/phases/05-local-only-anonymous-telemetry/05-01-plan-recorder-core-refactor.md
+  s_e595791b137881::t_f49179040cf18e 1-141,143-253
+  s_e595791b137881::t_3f4c5c33dfc5b1 142
+AGENTS.md
+  s_e595791b137881::t_84d760e92dd47a 31,33-34,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fe03ef78f0d4dc91560d9da3508ac19f876dabd5",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
