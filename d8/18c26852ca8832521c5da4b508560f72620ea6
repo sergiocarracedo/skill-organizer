@@ -1,0 +1,21 @@
+packages/cli/go.sum
+  s_76c928682d8da7::t_9e7ef2e6d8cd51 57-59
+packages/cli/go.mod
+  s_76c928682d8da7::t_b4693f8b7032a2 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d818c26852ca8832521c5da4b508560f72620ea6",
+  "prompts": {},
+  "sessions": {
+    "s_76c928682d8da7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14542d62cffeg97QcEScCrLMeg",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
