@@ -6,24 +6,34 @@
 
 ## Current Phase
 
-**Phase 3 — Observability (REQ-8) ✓ complete** (2026-06-12).
+**Phase 4 — Telemetry backend selection (REQ-9) — plan 04-01 ✓**
+(2026-06-12).
 
-All 3 phases of the v0.x roadmap are now complete. REQ-8 acceptance
-observably met: default install emits no telemetry; first-run opt-in
-flow works; schema doc matches emitted payload byte-for-byte; zero
-egress when disabled; sticky opt-in via the first-run prompt.
+The Phase 4 receive-side recorder is wired: `NewRelicRecorder`
+struct + `Record` method + 3-way factory + env-var wiring in
+`cmd/root.go` + extended `telemetry status` output + 9 new
+httptest.NewServer smoke tests. Plan 04-02 (the OBSERVABILITY.md
+"Backend: New Relic" docs section) is the next step.
 
 Plan progress:
+- 04-01: NewRelicRecorder + factory + status + smoke test (Wave 1) ✓ implemented
+- 04-02: OBSERVABILITY.md "Backend: New Relic" section (Wave 2, docs-only) — next
+
+Phase 3 — Observability (REQ-8) ✓ complete (2026-06-12). All 3
+phases of the v0.x roadmap completed before Phase 4 was added.
+REQ-8 acceptance observably met: default install emits no
+telemetry; first-run opt-in flow works; schema doc matches
+emitted payload byte-for-byte; zero egress when disabled; sticky
+opt-in via the first-run prompt.
+
 - 03-01: package + identity + interface (Wave 1, no deps) ✓ implemented
 - 03-02: buffer + HTTPRecorder + first-run prompt + cobra (Wave 2, depends on 01) ✓ implemented
 - 03-03: OBSERVABILITY.md + byte-for-byte schema test + e2e (Wave 3, depends on 01+02) ✓ implemented
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
-Verification: 60/60 must-haves passed (3 plans × 14+24+13). 200 PASS,
-1 SKIP, 0 FAIL across 19 packages. Verifier commit `48ab04d`.
-
-Next learnship step: `audit-milestone`.
+Next learnship step: `execute-phase 4` (plan 04-02) or
+`audit-milestone` if the docs are folded into the next phase.
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
@@ -39,6 +49,90 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 4 — Telemetry backend selection (REQ-9) — plan 04-01 ✓** (2026-06-12)
+  - 6 atomic commits; SUMMARY at
+    `.planning/phases/04-observability-product-selection/04-01-plan-SUMMARY.md`
+  - `NewRelicRecorder` struct (Endpoint, InsertKey, HTTPClient,
+    Version) with `Record` method that wraps the flat 7-field
+    `Event` in a New-Relic-shaped JSON-array envelope
+    (`eventType: "skill_organizer_command"` prefix + the
+    project's `timestamp` field renamed to `clientTime` in the
+    envelope only — RESEARCH NP1)
+  - 413/429 hard-drop: returns `nil`, logs a one-line warning
+    via `WarningFunc` (pterm.Warning), no buffer fallback
+    (RESEARCH NP4)
+  - 503 retry: `time.After(250ms)` + `select` on `ctx.Done()`,
+    one retry then fall through to the error path (RESEARCH NP3)
+  - `X-Insert-Key` header from
+    `SKILL_ORGANIZER_NEWRELIC_INSERT_KEY` env var; `User-Agent:
+    skill-organizer/<version>` when `Version` is non-empty
+  - `SetDefaultFactory` 3-way switch: `NewRelicRecorder` (both
+    NewRelic env vars set) → `HTTPRecorder` (endpoint set) →
+    `NoopRecorder`. `RecorderConfig` extended with `AccountID` +
+    `InsertKey`; backwards-compatible (existing
+    `{Enabled, Endpoint}` callers continue to work)
+  - `cmd/root.go` `PersistentPreRun` reads
+    `SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID`,
+    `SKILL_ORGANIZER_NEWRELIC_INSERT_KEY`, sets
+    `RecorderVersion` and `SetDefaultFactory` BEFORE
+    `telemetrypkg.New(...)` (Phase 3 BUG #2 fix from STATE.md)
+  - `telemetry status` output extended to 8 lines (Enabled,
+    Endpoint, Recorder, Account ID, Insert key, Install ID, Host
+    ID, Buffer file); new `recorderTypeName`, `shortAccountID`,
+    `keyPresence` helpers
+  - 9 new tests in `recorder_test.go`:
+    `TestNewRelicRecorderContractEnforced` (5 CONTEXT
+    assertions + User-Agent + the "timestamp key absent" guard),
+    `TestNewRelicRecorderHardDropsOn413`/On429 (with
+    `WarningFunc` stubbed to assert the warning fired once),
+    `TestNewRelicRecorderRetriesOn503` (503 → 200 in 2 hits,
+    ~250ms), `TestNewRelicRecorderHonorsContextCancellation`
+    (50ms timeout fires during the 503 backoff; no retry),
+    `TestRecorderFactoryPicksNewRelicWhenEnvVarsSet` (account_id
+    substituted in the endpoint),
+    `TestRecorderFactoryFallsBackToHTTPRecorderWhenNewRelicIncomplete`
+    (only AccountID, no InsertKey, endpoint set),
+    `TestRecorderFactoryFallsBackToNoopWhenNewRelicIncomplete`
+    (only AccountID, no endpoint),
+    `TestRecorderFactoryPicksHTTPRecorderWhenNewRelicNotConfigured`
+    (Phase 3 happy path preserved)
+  - 3 new tests in `telemetry_test.go`:
+    `TestTelemetryStatusSubcommand` (extended with
+    Recorder/Account ID/Insert key substrings),
+    `TestTelemetryStatusSubcommand_NewRelicConfigured` (full
+    NewRelic env vars set, asserts NewRelicRecorder + `1234...` +
+    `present` in the output),
+    `TestTelemetryStatusSubcommand_NewRelicIncomplete` (only
+    AccountID set, asserts HTTPRecorder + `<not set>` in the
+    output)
+  - Deviations:
+    - The `NewNewRelicRecorder` constructor was stubbed in
+      commit 1 (returns `NoopRecorder{}`) and updated in commit
+      2 to return a real `*NewRelicRecorder`. The plan's task
+      split between "RecorderConfig + factory" and "struct +
+      Record method" is preserved in spirit, but the
+      constructor's body in commit 1 can't reference a struct
+      that doesn't exist yet without breaking compilation.
+    - The `TestNewRelicRecorderHonorsContextCancellation` test
+      uses `context.WithTimeout(50ms)` instead of cancelling
+      before `Record` is called. The plan's literal mechanics
+      ("the first send will still hit the server because the
+      request was already built") is incorrect — Go's HTTP
+      client respects the context and aborts the request before
+      sending when the context is already cancelled. The
+      timeout-based test preserves the test's intent (the 250ms
+      backoff's `select` on `ctx.Done()` short-circuits the
+      retry) and is deterministic.
+    - The status test assertions use unambiguous substrings
+      (e.g., `NewRelicRecorder`, `<not set>`, `1234...`) rather
+      than the full formatted line (e.g.,
+      `Recorder: NewRelicRecorder`). The format strings use
+      width specifiers and the substring check is more readable
+      and resilient to padding changes.
+  - Build, vet, full test suite (17/17 packages pass; 52
+    telemetry tests + 66 cmd tests + 200+ across the rest), and
+    lefthook pre-commit all green
 
 - **Phase 3 — Observability (REQ-8) — plan 03-03 ✓** (2026-06-12)
   - 5 atomic commits; SUMMARY at
@@ -196,6 +290,39 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Recent decisions
 
+- **NewRelicRecorder constructor body is stubbed in the first
+  commit and real in the second** (Phase 4 plan 04-01,
+  plan-checker deviation). The plan split the struct definition
+  and the `Record` method into separate tasks, but the
+  constructor's body in task 04-01-01 references the struct as
+  a `Recorder` (interface), which forces the struct to satisfy
+  the interface (i.e., have a `Record` method) for the
+  constructor to compile. The cleanest path is to add the
+  constructor in commit 1 as a stub (returns `NoopRecorder{}`)
+  and the real struct + `Record` method in commit 2. The
+  factory's NewRelic branch is "wired but inert" between
+  commits 1 and 2; commit 2 makes it real.
+- **`TestNewRelicRecorderHonorsContextCancellation` uses
+  `context.WithTimeout(50ms)` instead of `cancel()` before
+  `Record`** (Phase 4 plan 04-01, plan-checker deviation). The
+  plan's literal mechanics ("the first send will still hit the
+  server because the request was already built") is incorrect —
+  Go's HTTP client respects the context and aborts the request
+  before sending when the context is already cancelled. The
+  timeout-based test preserves the test's intent (the 250ms
+  backoff's `select` on `ctx.Done()` short-circuits the retry)
+  and is deterministic. The first POST hits the server (returns
+  503 in <10ms), the backoff's `select` fires on `ctx.Done()` at
+  50ms, the recorder returns `context.DeadlineExceeded`, and
+  the server is hit exactly once.
+- **`telemetry status` test assertions use unambiguous substrings**
+  (Phase 4 plan 04-01, plan-checker deviation). The format
+  strings in `telemetry.go` use width specifiers
+  (`Recorder:     %s`, `Insert key:   %s`) and a substring
+  check (`NewRelicRecorder`, `<not set>`, `1234...`) is more
+  readable and resilient to padding changes than an exact line
+  match. The full formatted line is still produced and visible
+  in the test output.
 - **`TelemetryConfig` is a type alias in the telemetry package** of `configpkg.TelemetryConfig`. The plan calls `telemetrypkg.TelemetryConfig{...}` from the cmd package but the YAML persistence layer lives in `config.TelemetryConfig`. A type alias avoids duplication while letting the cmd package construct the struct from the same fields that have `yaml:` tags.
 - **Buffer auto-evicts inside `Append` (post-condition pattern from RESEARCH P7).** The plan's `TestBufferFIFOEvictionAt1MB` assumed an explicit `evictLocked()` call after the file exceeded the cap. The auto-evict is the cleaner pattern (the file is never observed to exceed 1 MB), so the test was rewritten to assert the post-condition: `file <= 1 MB` AND `oldest events dropped` AND `newest preserved`.
 - **e2e test pre-creates the `telemetry-prompted` sentinel** in `newCLIEnv` (with content `no`). The first-run prompt would otherwise block the e2e PTY tests, which don't drive that prompt. The sentinel short-circuits the prompt and exercises the "user has already answered" path.
