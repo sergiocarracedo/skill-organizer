@@ -14,13 +14,12 @@ import (
 // format; tests below assert the recorder's output matches.
 var exampleRe = regexp.MustCompile("(?s)```json\n(.*?)\n```")
 
-// sectionHeaders are the 7 required sections of OBSERVABILITY.md.
-// TestOBSERVABILITYHasAllSevenSections asserts each is present.
+// sectionHeaders are the 6 required sections of OBSERVABILITY.md.
+// TestOBSERVABILITYHasAllSixSections asserts each is present.
 var sectionHeaders = []string{
 	"## What is collected",
 	"## Schema",
 	"## How to enable / disable",
-	"## Endpoint configuration",
 	"## Data retention",
 	"## Privacy guarantees",
 	"## FAQ",
@@ -160,11 +159,11 @@ func TestOBSERVABILITYExampleMatchesEmitted(t *testing.T) {
 	}
 }
 
-// TestOBSERVABILITYHasAllSevenSections guards against a refactor
-// that accidentally drops a section from OBSERVABILITY.md. The 7
+// TestOBSERVABILITYHasAllSixSections guards against a refactor
+// that accidentally drops a section from OBSERVABILITY.md. The 6
 // sections are the contract documented in
-// .planning/phases/03-observability/03-CONTEXT.md.
-func TestOBSERVABILITYHasAllSevenSections(t *testing.T) {
+// .planning/phases/05-local-only-anonymous-telemetry/05-CONTEXT.md.
+func TestOBSERVABILITYHasAllSixSections(t *testing.T) {
 	path := findObservabilityMD(t)
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -175,6 +174,20 @@ func TestOBSERVABILITYHasAllSevenSections(t *testing.T) {
 		if !strings.Contains(body, header) {
 			t.Fatalf("OBSERVABILITY.md missing section %q\nfile: %s", header, path)
 		}
+	}
+}
+
+// TestOBSERVABILITYLinksToPRIVACY asserts the OBSERVABILITY.md
+// file links to PRIVACY.md. The link should appear near the top
+// of the file as a one-liner cross-reference.
+func TestOBSERVABILITYLinksToPRIVACY(t *testing.T) {
+	path := findObservabilityMD(t)
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile(%q) = %v", path, err)
+	}
+	if !strings.Contains(string(content), "PRIVACY.md") {
+		t.Fatalf("OBSERVABILITY.md does not reference PRIVACY.md\nfile: %s", path)
 	}
 }
 
