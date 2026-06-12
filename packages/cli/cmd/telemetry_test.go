@@ -150,8 +150,8 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	wantSubstrings := []string{
 		"Enabled:",
 		"https://example.com",
-		"01234567",            // short install_id prefix
-		"fedcba98",            // short host_id prefix
+		"01234567", // short install_id prefix
+		"fedcba98", // short host_id prefix
 		"Buffer file:",
 	}
 	for _, want := range wantSubstrings {

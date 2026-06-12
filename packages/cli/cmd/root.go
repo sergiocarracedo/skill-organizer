@@ -21,7 +21,7 @@ var (
 	commit  = "unknown"
 	date    = "unknown"
 
-	configPath       string
+	configPath        string
 	telemetryEndpoint string
 )
 

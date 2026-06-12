@@ -18,9 +18,9 @@ func TestCommandNameNormalization(t *testing.T) {
 		{"off", "disable"},
 		{"install", "add"},
 		{"rm", "delete"},
-		{"add", "add"},                       // passthrough
-		{"delete", "delete"},                 // passthrough
-		{"check-overlap", "check-overlap"},   // passthrough (no alias)
+		{"add", "add"},                         // passthrough
+		{"delete", "delete"},                   // passthrough
+		{"check-overlap", "check-overlap"},     // passthrough (no alias)
 		{"unknown-command", "unknown-command"}, // passthrough
 	}
 	for _, tc := range cases {

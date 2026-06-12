@@ -100,8 +100,8 @@ func (s *Service) DrainBuffer(ctx context.Context) error {
 }
 
 // MaybeRunFirstRunPrompt shows the first-run prompt if and only if:
-//   1. stdin is a TTY
-//   2. <appDir>/telemetry-prompted does not exist
+//  1. stdin is a TTY
+//  2. <appDir>/telemetry-prompted does not exist
 //
 // On non-TTY (CI, pipes), the function returns silently WITHOUT
 // writing the sentinel — the next TTY run will re-prompt (Pitfall
