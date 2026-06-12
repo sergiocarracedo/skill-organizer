@@ -1,0 +1,19 @@
+packages/cli/cmd/root.go
+  s_eb672b2f30af0d::t_fa684458593591 92,103-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b4ba5ac2ed5b2c1f1345b9bb20839e608f248f02",
+  "prompts": {},
+  "sessions": {
+    "s_eb672b2f30af0d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1448ee53fffemlXi0sWRtfvuPQ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
