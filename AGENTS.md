@@ -28,13 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓ (all 3 plans complete; REQ-8 acceptance observably met)
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓ (all 3 phases complete; REQ-3/4/8 all observably met)
 
-**Phase:** 3 — Observability (REQ-8) — all 3 plans implemented
-**Status:** phase 3 complete; OBSERVABILITY.md at the repo root documents the schema, byte-for-byte schema test asserts the doc matches the recorder, 3 e2e tests exercise the user-facing flow
+**Phase:** 3 — Observability (REQ-8) — verifying (60/60 must-haves passed)
+**Status:** v0.x roadmap complete; next learnship step is `audit-milestone`
 **Last updated:** 2026-06-12
 
-See `.planning/phases/03-observability/` for the plan artifacts.
+See `.planning/STATE.md` for the full state, `.planning/phases/03-observability/` for the plan artifacts, and `OBSERVABILITY.md` at the repo root for the telemetry schema.
 
 Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
 Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`

@@ -81,7 +81,7 @@ refactor + the actual conflict-detection rule.
 
 ---
 
-## Phase 3 — Observability (REQ-8)
+## Phase 3 — Observability (REQ-8) ✓ Complete
 
 **Goal:** Opt-in, anonymous telemetry that records command
 invocations without args / paths / PII. Disabled by default.

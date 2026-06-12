@@ -6,7 +6,12 @@
 
 ## Current Phase
 
-**Phase 3 — Observability (REQ-8)** — all 3 plans complete 2026-06-12; REQ-8 acceptance is observably met.
+**Phase 3 — Observability (REQ-8) ✓ complete** (2026-06-12).
+
+All 3 phases of the v0.x roadmap are now complete. REQ-8 acceptance
+observably met: default install emits no telemetry; first-run opt-in
+flow works; schema doc matches emitted payload byte-for-byte; zero
+egress when disabled; sticky opt-in via the first-run prompt.
 
 Plan progress:
 - 03-01: package + identity + interface (Wave 1, no deps) ✓ implemented
@@ -15,7 +20,10 @@ Plan progress:
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
-Verification: 200 PASS, 1 SKIP, 0 FAIL across 19 packages; 13 new tests in plan 03-03; go vet clean; go build clean; lefthook pre-commit e2e green; end-to-end demo path (build -> telemetry status -> enable -> inspect YAML) completes.
+Verification: 60/60 must-haves passed (3 plans × 14+24+13). 200 PASS,
+1 SKIP, 0 FAIL across 19 packages. Verifier commit `48ab04d`.
+
+Next learnship step: `audit-milestone`.
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
