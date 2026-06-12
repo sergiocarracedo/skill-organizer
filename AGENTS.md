@@ -28,11 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 ✓ (REQ-9)
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 ✓ (REQ-9), Phase 5 plans ready (REQ-10)
 
-**Phase:** 4 — Telemetry backend selection (REQ-9) — plans 01 and 02 done, 2026-06-12
-**Status:** Phase 4 complete. Plan 04-01 shipped the `NewRelicRecorder` struct + factory + status + smoke tests; plan 04-02 shipped the `OBSERVABILITY.md` "Backend: New Relic" sub-section + the `.planning/PHASE-4-DECISION.md` audit record. Next learnship step is `audit-milestone` (review the v0.x milestone) or `new-phase` (start a new milestone phase).
+**Phase:** 5 — Local-only anonymous telemetry (REQ-10) — planning, 2026-06-12
+**Status:** plans 05-01, 05-02, 05-03 ready (3 plans, wave 1→2→3, plan-checker APPROVE). Next learnship step is `execute-phase 5`.
 **Last updated:** 2026-06-12
+
+See `.planning/phases/05-local-only-anonymous-telemetry/` for `05-CONTEXT.md` (decisions), `05-DISCUSSION-LOG.md` (audit), `05-RESEARCH.md` (7 pillars + 10 pitfalls), and the 3 PLAN.md files.
 
 See `.planning/phases/04-observability-product-selection/` for the plan artifacts (CONTEXT, RESEARCH, 2 plans, both SUMMARYs). Phase 4 picks New Relic (Insights Events API) as the receive-side backend, with the existing `HTTPRecorder` retained as a passthrough fallback. The decision audit record is at `.planning/PHASE-4-DECISION.md` (100 lines, 6 required sections).
 
