@@ -28,13 +28,13 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓ (all 3 phases complete; REQ-3/4/8 all observably met)
+**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 plans ready (REQ-9)
 
-**Phase:** 3 — Observability (REQ-8) — verifying (60/60 must-haves passed)
-**Status:** v0.x roadmap complete; next learnship step is `audit-milestone`
+**Phase:** 4 — Telemetry backend selection (REQ-9) — plans ready, 2026-06-12
+**Status:** planning complete; next learnship step is `execute-phase 4`
 **Last updated:** 2026-06-12
 
-See `.planning/STATE.md` for the full state, `.planning/phases/03-observability/` for the plan artifacts, and `OBSERVABILITY.md` at the repo root for the telemetry schema.
+See `.planning/phases/04-observability-product-selection/` for the plan artifacts (CONTEXT, RESEARCH, 2 plans). Phase 4 picks New Relic (Insights Events API) as the receive-side backend, with the existing `HTTPRecorder` retained as a passthrough fallback.
 
 Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
 Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`
