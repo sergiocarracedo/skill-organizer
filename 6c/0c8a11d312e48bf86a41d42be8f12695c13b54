@@ -1,0 +1,21 @@
+.planning/phases/04-observability-product-selection/04-DISCUSSION-LOG.md
+  s_e595791b137881::t_0aa485883ce5e5 1-167
+.planning/phases/04-observability-product-selection/04-CONTEXT.md
+  s_e595791b137881::t_ab4492a9fe78b3 1-249
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6c0c8a11d312e48bf86a41d42be8f12695c13b54",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
