@@ -1,0 +1,21 @@
+.planning/phases/06-ai-model-visibility-security/06-CONTEXT.md
+  s_e595791b137881::t_ae4832c5452215 1-122
+.planning/phases/06-ai-model-visibility-security/06-DISCUSSION-LOG.md
+  s_e595791b137881::t_0860a5a9c42bbd 1-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b4f4bbe31740d2857b1433361352e69625eb9edc",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
