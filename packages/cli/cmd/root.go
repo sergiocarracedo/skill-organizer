@@ -21,8 +21,7 @@ var (
 	commit  = "unknown"
 	date    = "unknown"
 
-	configPath        string
-	telemetryEndpoint string
+	configPath string
 )
 
 var rootCmd = &cobra.Command{
@@ -72,7 +71,6 @@ func init() {
 	// the telemetry package doesn't import the cmd package.
 	telemetrypkg.ConfirmFunc = confirm
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a project config file")
-	rootCmd.PersistentFlags().StringVar(&telemetryEndpoint, "telemetry-endpoint", "", "Endpoint URL for telemetry events (env: SKILL_ORGANIZER_TELEMETRY_ENDPOINT, yaml: telemetry.endpoint)")
 	rootCmd.Version = version
 	rootCmd.SetVersionTemplate(fmt.Sprintf("%s\n%s\ncommit %s, built %s\n", cliLogo(), version, commit, date))
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, _ []string) {
@@ -89,38 +87,30 @@ func init() {
 			maintenancepkg.MaybeNotifySkillUpdates(cmd.Context(), cmd.OutOrStdout())
 		}
 
-		// ---- Telemetry (REQ-8 / REQ-9) ----
-		// Resolve the AppDir and the final endpoint value (flag > env > YAML).
+		// ---- Telemetry (REQ-10) ----
+		// Phase 5: the user-facing config is one key (telemetry.enabled).
+		// The endpoint and API key are build-time vars
+		// (telemetrypkg.NewRelicEndpoint, telemetrypkg.NewRelicAPIKey)
+		// set via -ldflags at release time; the factory reads them
+		// directly. There are no env-var reads, no flag, and no
+		// TelemetryConfig.Endpoint in this path.
 		appDir, appDirErr := configpkg.AppDir()
 		if appDirErr == nil {
 			registryPath, _ := configpkg.RegistryPath()
 			cfg, _ := configpkg.LoadTelemetryConfigOrDefault(registryPath)
-			resolvedEndpoint := telemetrypkg.ResolveEndpoint(
-				telemetryEndpoint,
-				os.Getenv("SKILL_ORGANIZER_TELEMETRY_ENDPOINT"), // env override (flag > env > YAML precedence)
-				cfg.Endpoint,
-			)
-			// Phase 4: read the two New Relic env vars and the version.
-			// The RecorderVersion var is read by NewNewRelicRecorder
+			// RecorderVersion is read by the NewRelicRecorder
 			// (User-Agent header). The factory closure is set BEFORE
 			// telemetrypkg.New(...) so the Service captures the right
 			// recorder (Phase 3 BUG #2 fix from STATE.md).
 			telemetrypkg.RecorderVersion = version
-			newRelicAccountID := os.Getenv("SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID")
-			newRelicInsertKey := os.Getenv("SKILL_ORGANIZER_NEWRELIC_INSERT_KEY")
-			telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{
-				Enabled:   cfg.Enabled,
-				Endpoint:  resolvedEndpoint,
-				AccountID: newRelicAccountID,
-				InsertKey: newRelicInsertKey,
-			})
+			telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: cfg.Enabled})
 			// The Service is constructed and stored on the command's
 			// Context so the PersistentPostRun can pick it up. We use
 			// a custom context-key type to avoid collisions.
-			svc, svcErr := telemetrypkg.New(appDir, version, telemetrypkg.TelemetryConfig{Enabled: cfg.Enabled, Endpoint: resolvedEndpoint})
+			svc, svcErr := telemetrypkg.New(appDir, version, telemetrypkg.TelemetryConfig{Enabled: cfg.Enabled})
 			if svcErr == nil {
 				svc.MaybeRunFirstRunPrompt(cmd.Context(), cmd.OutOrStdout(), cmd.InOrStdin(), func(yes bool) error {
-					return configpkg.SaveTelemetryConfig(registryPath, telemetrypkg.TelemetryConfig{Enabled: yes, Endpoint: resolvedEndpoint})
+					return configpkg.SaveTelemetryConfig(registryPath, telemetrypkg.TelemetryConfig{Enabled: yes})
 				})
 				_ = svc.DrainBuffer(cmd.Context())
 				cmd.SetContext(withTelemetryService(cmd.Context(), svc))

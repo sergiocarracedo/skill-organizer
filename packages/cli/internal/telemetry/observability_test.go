@@ -67,11 +67,18 @@ func readExampleBlock(t *testing.T, path string) string {
 }
 
 // TestOBSERVABILITYExampleMatchesEmitted parses the example block in
-// OBSERVABILITY.md, asserts the 3 deterministic fields are present
-// with the expected types, asserts the 4 volatile fields match
-// their regex shapes, then emits a real Event through the recorder
-// and asserts the volatile fields also match their regexes (the
-// values are fresh, the shape is fixed).
+// OBSERVABILITY.md, asserts the 5 schema fields are present and
+// match the emitted Event shape, then emits a real Event through
+// the recorder and asserts the volatile fields also match their
+// regexes (the values are fresh, the shape is fixed).
+//
+// Phase 5 (REQ-10) deviation: OBSERVABILITY.md is updated in
+// plan 05-03 to the 5-field schema. Until then, the example block
+// in the doc may carry install_id/host_id from the Phase 3
+// schema. This test asserts the 5 common fields (the ones present
+// in both the example and the emitted event); the dropped identity
+// fields are tested separately in TestEventHasNoIdentityFields and
+// TestService_RecordEvent_NoIdentityFields.
 func TestOBSERVABILITYExampleMatchesEmitted(t *testing.T) {
 	path := findObservabilityMD(t)
 	example := readExampleBlock(t, path)
@@ -80,8 +87,15 @@ func TestOBSERVABILITYExampleMatchesEmitted(t *testing.T) {
 	if err := json.Unmarshal([]byte(example), &exampleMap); err != nil {
 		t.Fatalf("example block is not valid JSON: %v\nblock:\n%s", err, example)
 	}
-	if len(exampleMap) != 7 {
-		t.Fatalf("example keys count = %d, want 7 (got %v)", len(exampleMap), exampleMap)
+
+	// The 5 schema fields must be present in the example.
+	// (OBSERVABILITY.md may carry legacy 7-field keys until
+	// plan 05-03; the 5 common keys are the contract.)
+	wantCommonKeys := []string{"command", "exit_status", "timestamp", "version", "event_id"}
+	for _, k := range wantCommonKeys {
+		if _, ok := exampleMap[k]; !ok {
+			t.Fatalf("example missing key %q (block:\n%s)", k, example)
+		}
 	}
 
 	// Deterministic keys: must be present with the expected types.
@@ -97,16 +111,9 @@ func TestOBSERVABILITYExampleMatchesEmitted(t *testing.T) {
 
 	// Volatile keys: must be present and match the regex shapes
 	// (not the example values, which are placeholders).
-	hexRe := regexp.MustCompile(`^[0-9a-f]{32}$`)
 	ulidRe := regexp.MustCompile(`^[0-9A-HJKMNP-TV-Z]{26}$`)
 	tsRe := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`)
 
-	if v, ok := exampleMap["install_id"].(string); !ok || !hexRe.MatchString(v) {
-		t.Fatalf("example install_id = %v, want 32 hex chars", exampleMap["install_id"])
-	}
-	if v, ok := exampleMap["host_id"].(string); !ok || !hexRe.MatchString(v) {
-		t.Fatalf("example host_id = %v, want 32 hex chars", exampleMap["host_id"])
-	}
 	if v, ok := exampleMap["event_id"].(string); !ok || !ulidRe.MatchString(v) {
 		t.Fatalf("example event_id = %v, want 26-char ULID", exampleMap["event_id"])
 	}
@@ -126,6 +133,16 @@ func TestOBSERVABILITYExampleMatchesEmitted(t *testing.T) {
 	if err := json.Unmarshal(emittedBody, &emittedMap); err != nil {
 		t.Fatalf("emitted body is not valid JSON: %v", err)
 	}
+	// The emitted event must have exactly 5 keys (the 5 schema
+	// fields). The dropped identity fields must NOT be present.
+	if len(emittedMap) != 5 {
+		t.Fatalf("emitted keys count = %d, want 5 (got %v)", len(emittedMap), emittedMap)
+	}
+	for _, banned := range []string{"install_id", "host_id"} {
+		if _, present := emittedMap[banned]; present {
+			t.Fatalf("emitted body must NOT contain %q (Phase 5 REQ-10 drops both identity fields)", banned)
+		}
+	}
 	if emittedMap["command"] != exampleMap["command"] {
 		t.Fatalf("emitted command = %v, example command = %v (must match byte-for-byte)", emittedMap["command"], exampleMap["command"])
 	}
@@ -134,12 +151,6 @@ func TestOBSERVABILITYExampleMatchesEmitted(t *testing.T) {
 	}
 	if emittedMap["version"] != exampleMap["version"] {
 		t.Fatalf("emitted version = %v, example version = %v (must match byte-for-byte)", emittedMap["version"], exampleMap["version"])
-	}
-	if v, ok := emittedMap["install_id"].(string); !ok || !hexRe.MatchString(v) {
-		t.Fatalf("emitted install_id = %v, want 32 hex chars", emittedMap["install_id"])
-	}
-	if v, ok := emittedMap["host_id"].(string); !ok || !hexRe.MatchString(v) {
-		t.Fatalf("emitted host_id = %v, want 32 hex chars", emittedMap["host_id"])
 	}
 	if v, ok := emittedMap["event_id"].(string); !ok || !ulidRe.MatchString(v) {
 		t.Fatalf("emitted event_id = %v, want 26-char ULID", emittedMap["event_id"])

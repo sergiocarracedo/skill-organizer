@@ -56,24 +56,29 @@ func TestRootPersistentPostRun_EmitsEvent(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", appDir)
 
 	originalFactory := telemetrypkg.RecorderFactoryFunc
+	originalEndpoint := telemetrypkg.NewRelicEndpoint
+	originalKey := telemetrypkg.NewRelicAPIKey
 	t.Cleanup(func() {
 		telemetrypkg.RecorderFactoryFunc = originalFactory
+		telemetrypkg.NewRelicEndpoint = originalEndpoint
+		telemetrypkg.NewRelicAPIKey = originalKey
 	})
 
-	// Initialize the default factory (which will return an
-	// HTTPRecorder given the enabled + endpoint config) and THEN
+	// Initialize the default factory (Enabled=true) and THEN
 	// swap RecorderFactoryFunc for a closure that returns our
 	// capturing recorder. The order matters: SetDefaultFactory
 	// replaces RecorderFactoryFunc, so the custom swap must come
-	// after.
-	telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: true, Endpoint: "https://example.com"})
+	// after. (Build-time vars are empty in this test so the
+	// factory would otherwise route to NoopRecorder, but we
+	// override the closure directly.)
+	telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: true})
 
 	captured := &eventCapture{}
 	telemetrypkg.RecorderFactoryFunc = func() telemetrypkg.Recorder {
 		return captured
 	}
 
-	svc, err := telemetrypkg.New(appDir, "1.0.0", telemetrypkg.TelemetryConfig{Enabled: true, Endpoint: "https://example.com"})
+	svc, err := telemetrypkg.New(appDir, "1.0.0", telemetrypkg.TelemetryConfig{Enabled: true})
 	if err != nil {
 		t.Fatalf("telemetrypkg.New() = %v", err)
 	}
@@ -95,12 +100,6 @@ func TestRootPersistentPostRun_EmitsEvent(t *testing.T) {
 	}
 	if got.ExitStatus != 0 {
 		t.Fatalf("captured event ExitStatus = %d, want 0", got.ExitStatus)
-	}
-	if got.InstallID != svc.Identity.InstallID {
-		t.Fatalf("captured event InstallID = %q, want %q", got.InstallID, svc.Identity.InstallID)
-	}
-	if got.HostID != svc.Identity.HostID {
-		t.Fatalf("captured event HostID = %q, want %q", got.HostID, svc.Identity.HostID)
 	}
 	if got.Version != "1.0.0" {
 		t.Fatalf("captured event Version = %q, want %q", got.Version, "1.0.0")
@@ -130,7 +129,7 @@ func TestRootPersistentPreRun_FiresFirstRunPrompt_OnFirstRun(t *testing.T) {
 
 	telemetrypkg.IsStdInTTYFunc = func() bool { return true }
 	telemetrypkg.ConfirmFunc = func(_ string, _ bool) (bool, error) { return true, nil }
-	telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: false, Endpoint: ""})
+	telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: false})
 
 	cmd := &cobra.Command{Use: "sync"}
 	cmd.SetOut(os.Stdout)

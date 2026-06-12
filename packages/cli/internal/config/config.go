@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 type Location struct {
@@ -45,13 +44,14 @@ type BackupConfig struct {
 	RetentionDays int `yaml:"retention-days,omitempty"`
 }
 
-// TelemetryConfig holds the opt-in telemetry settings. The Enabled flag
-// controls whether the first-run prompt is sticky-yes; the Endpoint
-// field is the URL the HTTPRecorder POSTs events to. An empty Endpoint
-// forces the recorder to NoopRecorder regardless of Enabled (per CONTEXT).
+// TelemetryConfig holds the opt-in telemetry settings. The Enabled
+// flag is the only user-facing key (Phase 5 REQ-10). The endpoint
+// and API key are build-time vars set via -ldflags on the
+// `telemetry.NewRelicEndpoint` and `telemetry.NewRelicAPIKey` vars
+// in the internal/telemetry package — they never appear in YAML
+// (the user never configures them).
 type TelemetryConfig struct {
-	Enabled  bool   `yaml:"enabled"`
-	Endpoint string `yaml:"endpoint,omitempty"`
+	Enabled bool `yaml:"enabled"`
 }
 
 type AppConfig struct {
@@ -129,7 +129,10 @@ func (c *BackupConfig) Normalize() {
 }
 
 func (c *TelemetryConfig) Normalize() {
-	c.Endpoint = strings.TrimSpace(c.Endpoint)
+	// Phase 5 REQ-10: TelemetryConfig is a single bool. No
+	// normalization needed; method kept for symmetry with the
+	// other config types (Normalize is called by AppConfig.Normalize).
+	_ = c
 }
 
 const DefaultLogLevel = "info"

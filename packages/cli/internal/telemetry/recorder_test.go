@@ -142,9 +142,19 @@ func TestNewRelicRecorderSchemaByteForByte(t *testing.T) {
 	}
 	inner := arr[0]
 
-	const wantInnerKeyCount = 5
+	// The inner object has 6 keys: 5 schema fields plus the
+	// "eventType" prefix the New Relic envelope requires. The
+	// "5-field schema" must_have is the schema fields, not the
+	// envelope keys; this test asserts the full envelope shape
+	// (5 schema + eventType prefix).
+	const wantInnerKeyCount = 6
 	if len(inner) != wantInnerKeyCount {
 		t.Fatalf("inner-object json keys count = %d, want %d (got %v)", len(inner), wantInnerKeyCount, inner)
+	}
+
+	// eventType prefix is the New Relic namespace.
+	if inner["eventType"] != "skill_organizer_command" {
+		t.Fatalf("eventType = %v, want %q", inner["eventType"], "skill_organizer_command")
 	}
 
 	// Deterministic fields: byte-for-byte equality.
@@ -185,9 +195,11 @@ func TestNewRelicRecorderSchemaByteForByte(t *testing.T) {
 }
 
 // TestNewRelicRecorderSchemaFieldOrder pins the inner-object key
-// order: command, exit_status, clientTime, version, event_id. The
-// outer envelope is a JSON array of length 1; ordering inside the
-// inner object is preserved by the recorder's map literal.
+// count to 6: 5 schema fields (command, exit_status, clientTime,
+// version, event_id) plus the New Relic envelope "eventType"
+// prefix. Map keys in Go are unordered, so the byte-for-byte test
+// (above) is the source of truth for the key set; this test pins
+// the count to 6 (no extra fields are added by mistake).
 func TestNewRelicRecorderSchemaFieldOrder(t *testing.T) {
 	var gotBody []byte
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -211,11 +223,6 @@ func TestNewRelicRecorderSchemaFieldOrder(t *testing.T) {
 		t.Fatalf("NewRelicRecorder.Record() = %v, want nil", err)
 	}
 
-	// Map keys in Go are unordered; the recorder constructs the
-	// inner object via a map literal, so field order in the
-	// resulting JSON is not stable. The byte-for-byte test (above)
-	// is the source of truth for the key set; this test pins the
-	// count to 5 (no extra fields are added by mistake).
 	var arr []map[string]any
 	if err := json.Unmarshal(gotBody, &arr); err != nil {
 		t.Fatalf("json.Unmarshal() = %v\nbody = %s", err, gotBody)
@@ -224,14 +231,15 @@ func TestNewRelicRecorderSchemaFieldOrder(t *testing.T) {
 		t.Fatalf("body array length = %d, want 1 (got %s)", len(arr), gotBody)
 	}
 	inner := arr[0]
-	if len(inner) != 5 {
-		t.Fatalf("inner-object keys count = %d, want 5 (got %v)", len(inner), inner)
+	if len(inner) != 6 {
+		t.Fatalf("inner-object keys count = %d, want 6 (5 schema + eventType prefix) (got %v)", len(inner), inner)
 	}
 }
 
-// TestNewRelicRecorderFieldCount is the "no extra fields" guard for
-// the 5-field inner object. Adding a 6th is a breaking change and
-// must be caught at CI time.
+// TestNewRelicRecorderFieldCount is the "no extra fields" guard.
+// The inner object has exactly 6 keys (5 schema fields +
+// eventType envelope prefix). Adding a 7th is a breaking change
+// and must be caught at CI time.
 func TestNewRelicRecorderFieldCount(t *testing.T) {
 	var gotBody []byte
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -263,12 +271,12 @@ func TestNewRelicRecorderFieldCount(t *testing.T) {
 		t.Fatalf("body array length = %d, want 1", len(arr))
 	}
 	inner := arr[0]
-	if len(inner) != 5 {
+	if len(inner) != 6 {
 		keys := make([]string, 0, len(inner))
 		for k := range inner {
 			keys = append(keys, k)
 		}
-		t.Fatalf("inner-object keys count = %d, want 5 (got %v)", len(inner), keys)
+		t.Fatalf("inner-object keys count = %d, want 6 (5 schema + eventType prefix) (got %v)", len(inner), keys)
 	}
 }
 

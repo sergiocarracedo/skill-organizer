@@ -770,9 +770,10 @@ func TestTelemetryFirstRunPromptFiresOnce(t *testing.T) {
 
 // TestTelemetryDisabledNoBuffer asserts the "disabled" state never
 // writes the on-disk buffer (per REQ-8 acceptance: zero network
-// egress and zero on-disk writes when disabled). The
-// install_id and host_id files DO exist because Identity is loaded
-// even when telemetry is disabled.
+// egress and zero on-disk writes when disabled).
+//
+// Phase 5 REQ-10: the Identity module is removed, so install_id
+// and host_id files must NOT be created in any state.
 func TestTelemetryDisabledNoBuffer(t *testing.T) {
 	t.Parallel()
 	env := newCLIEnv(t)
@@ -782,7 +783,7 @@ func TestTelemetryDisabledNoBuffer(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(registryYAML), 0o755); err != nil {
 		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(registryYAML), err)
 	}
-	env.writeFile(registryYAML, "telemetry:\n  enabled: false\n  endpoint: \"\"\n")
+	env.writeFile(registryYAML, "telemetry:\n  enabled: false\n")
 
 	// Run a command; the buffer file must not be created.
 	_ = env.run(t, env.workspace, nil, "sync")
@@ -792,23 +793,21 @@ func TestTelemetryDisabledNoBuffer(t *testing.T) {
 		t.Fatalf("telemetry buffer file was created at %q even though telemetry is disabled (stat err = %v)", bufferPath, err)
 	}
 
-	// Positive control: the Identity is loaded even when telemetry is
-	// disabled, so install_id and host_id files should exist.
-	installIDPath := filepath.Join(env.configHome, "skill-organizer", "install_id")
-	hostIDPath := filepath.Join(env.configHome, "skill-organizer", "host_id")
-	if _, err := os.Stat(installIDPath); err != nil {
-		t.Fatalf("install_id file not created at %q: %v (Identity must be loaded even when telemetry is disabled)", installIDPath, err)
-	}
-	if _, err := os.Stat(hostIDPath); err != nil {
-		t.Fatalf("host_id file not created at %q: %v (Identity must be loaded even when telemetry is disabled)", hostIDPath, err)
+	// Phase 5 REQ-10: install_id and host_id files are NOT
+	// created. The Identity module is removed.
+	for _, name := range []string{"install_id", "host_id"} {
+		path := filepath.Join(env.configHome, "skill-organizer", name)
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Fatalf("%s file must NOT be created (Phase 5 REQ-10 drops the identity module); stat err = %v", name, err)
+		}
 	}
 }
 
 // TestTelemetryStatusSubcommandE2E asserts the `telemetry status`
-// subcommand prints the 5 expected lines (Enabled, Endpoint,
-// Install ID, Host ID, Buffer file) when telemetry is enabled.
-// The endpoint is a placeholder; the status subcommand is in the
-// skip set, so it never POSTs to the endpoint.
+// subcommand prints the Phase 5 REQ-10 two-line output (Enabled,
+// Recorder) when telemetry is enabled. The recorder type falls
+// back to NoopRecorder in the e2e binary (no build-time creds
+// are baked in for the test build).
 func TestTelemetryStatusSubcommandE2E(t *testing.T) {
 	t.Parallel()
 	env := newCLIEnv(t)
@@ -818,13 +817,20 @@ func TestTelemetryStatusSubcommandE2E(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(registryYAML), 0o755); err != nil {
 		t.Fatalf("MkdirAll(%q) error = %v", filepath.Dir(registryYAML), err)
 	}
-	env.writeFile(registryYAML, "telemetry:\n  enabled: true\n  endpoint: \"https://example.invalid\"\n")
+	env.writeFile(registryYAML, "telemetry:\n  enabled: true\n")
 
 	output := env.run(t, env.workspace, nil, "telemetry", "status")
 
-	for _, needle := range []string{"Enabled:", "true", "https://example.invalid", "Install ID:", "Host ID:"} {
+	for _, needle := range []string{"Enabled:", "true", "Recorder:", "NoopRecorder"} {
 		if !strings.Contains(output, needle) {
 			t.Fatalf("telemetry status output missing %q\noutput:\n%s", needle, output)
+		}
+	}
+	// The OLD (Phase 3/4) 8-line fields are NOT present.
+	banned := []string{"Endpoint:", "Account ID:", "Insert key:", "Install ID:", "Host ID:", "Buffer file:"}
+	for _, b := range banned {
+		if strings.Contains(output, b) {
+			t.Fatalf("telemetry status output must not contain %q (Phase 5 REQ-10 collapses to 2 lines)\noutput:\n%s", b, output)
 		}
 	}
 }

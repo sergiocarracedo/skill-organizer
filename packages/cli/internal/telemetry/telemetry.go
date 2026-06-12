@@ -10,7 +10,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 )
@@ -19,6 +18,14 @@ import (
 // layer. It is a type alias of configpkg.TelemetryConfig so the cmd
 // package can construct it from the same struct that holds the YAML
 // persistence tags.
+//
+// Phase 5 (REQ-10): only the `Enabled` field is user-facing. The
+// endpoint is no longer user-configurable; it is a build-time
+// variable (NewRelicEndpoint) set via -ldflags. The
+// configpkg.TelemetryConfig struct may still carry a deprecated
+// `endpoint` field for YAML backwards compatibility, but the
+// recorder factory ignores it — the build-time var is the only
+// source of truth.
 type TelemetryConfig = configpkg.TelemetryConfig
 
 // promptSentinelFile marks that the first-run prompt has been answered.
@@ -32,7 +39,6 @@ const promptSentinelFile = "telemetry-prompted"
 // and uses it in PersistentPostRun.
 type Service struct {
 	AppDir   string
-	Identity Identity
 	Version  string
 	Cfg      TelemetryConfig // for inspection; the recorder factory reads from a snapshot
 	Recorder Recorder
@@ -42,19 +48,16 @@ type Service struct {
 // New builds a Service from a resolved TelemetryConfig and a resolved
 // appDir. The factory must be set via SetDefaultFactory BEFORE New is
 // called, so RecorderFactoryFunc is the current production closure.
-// Identity is loaded (or created) from <appDir>/{install_id, host_id}.
-// Buffer is a JSONL spool at <appDir>/telemetry-buffer.jsonl.
+//
+// Phase 5 (REQ-10): no identity module. The Service no longer writes
+// install_id or host_id files. Existing files left on disk from a
+// prior version are ignored — the loader that read them is gone.
 func New(appDir string, version string, cfg TelemetryConfig) (*Service, error) {
 	if err := os.MkdirAll(appDir, 0o755); err != nil {
 		return nil, fmt.Errorf("create app dir: %w", err)
 	}
-	identity, err := LoadOrCreate(appDir)
-	if err != nil {
-		return nil, fmt.Errorf("load identity: %w", err)
-	}
 	return &Service{
 		AppDir:   appDir,
-		Identity: identity,
 		Version:  version,
 		Cfg:      cfg,
 		Recorder: NewRecorder(),
@@ -66,12 +69,14 @@ func New(appDir string, version string, cfg TelemetryConfig) (*Service, error) {
 // On Recorder error, the event is appended to the on-disk buffer for
 // a later opportunistic drain. Returns any error from the recorder
 // OR the buffer (whichever fails last).
+//
+// Phase 5 (REQ-10): the 5-field event is built inline; there is no
+// Identity to read from. The EventID is fresh per call (ULID from
+// crypto/rand-backed ulid.Make).
 func (s *Service) RecordEvent(ctx context.Context, command string, exitStatus int) error {
 	event := Event{
 		Command:    command,
 		ExitStatus: exitStatus,
-		InstallID:  s.Identity.InstallID,
-		HostID:     s.Identity.HostID,
 		Timestamp:  NewTimestamp(),
 		Version:    s.Version,
 		EventID:    NewEventID(),
@@ -152,18 +157,4 @@ func NormalizeCommandName(name string) string {
 		return canonical
 	}
 	return name
-}
-
-// ResolveEndpoint returns the highest-precedence non-empty value
-// from flagValue, envValue, and yamlValue. Whitespace is treated as
-// unset for flag and env. (The cmd package calls this from the
-// PersistentPreRun before constructing the Service.)
-func ResolveEndpoint(flagValue, envValue, yamlValue string) string {
-	if strings.TrimSpace(flagValue) != "" {
-		return flagValue
-	}
-	if strings.TrimSpace(envValue) != "" {
-		return envValue
-	}
-	return yamlValue
 }
