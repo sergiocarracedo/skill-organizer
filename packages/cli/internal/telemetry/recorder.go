@@ -99,40 +99,48 @@ func NewHTTPRecorder(endpoint string) Recorder {
 	return HTTPRecorder{Endpoint: endpoint, Client: NewHTTPClientFunc()}
 }
 
+// NewRelicEndpoint and NewRelicAPIKey are injected at build time via
+// -ldflags. The user never configures these. An empty value means
+// the binary was not built with credentials; the factory falls back
+// to NoopRecorder.
+var (
+	NewRelicEndpoint = ""
+	NewRelicAPIKey   = ""
+)
+
 // RecorderConfig is the input to the default factory. The cmd
-// package's PersistentPreRun sets this from the resolved
-// TelemetryConfig (Phase 3) plus the two New Relic env vars
-// (Phase 4). AccountID and InsertKey are env-only (no YAML) per
-// the CONTEXT: secrets don't belong in the user's YAML file.
+// package's PersistentPreRun sets this from the user's
+// TelemetryConfig (Phase 5 REQ-10: one key, telemetry.enabled).
+// The New Relic endpoint and API key are build-time vars, not
+// user-configurable: see NewRelicEndpoint and NewRelicAPIKey above.
 type RecorderConfig struct {
-	Enabled   bool
-	Endpoint  string
-	AccountID string // SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID
-	InsertKey string // SKILL_ORGANIZER_NEWRELIC_INSERT_KEY
+	Enabled bool
 }
 
-// SetDefaultFactory swaps RecorderFactoryFunc to a 3-way closure:
+// SetDefaultFactory swaps RecorderFactoryFunc to a 2-way closure:
 //
-//  1. NewRelicRecorder when telemetry is enabled AND both AccountID
-//     and InsertKey are non-empty (the user has configured the New
-//     Relic backend).
-//  2. HTTPRecorder (the Phase 3 passthrough) when telemetry is
-//     enabled AND a non-empty endpoint is set.
-//  3. NoopRecorder otherwise (zero network egress).
+//  1. NewRelicRecorder when telemetry is enabled AND both
+//     NewRelicEndpoint and NewRelicAPIKey build-time vars are
+//     non-empty (the binary was built with credentials).
+//  2. NoopRecorder otherwise (zero network egress).
 //
 // The "0 network egress when disabled" guarantee is preserved: the
 // closure returns a NoopRecorder{} value when !cfg.Enabled, which
-// has no methods that touch the network.
+// has no methods that touch the network. A dev build that leaves
+// the build-time vars empty also routes to NoopRecorder (the
+// empty-string guard is the dev-build escape hatch).
 func SetDefaultFactory(cfg RecorderConfig) {
 	RecorderFactoryFunc = func() Recorder {
 		if !cfg.Enabled {
 			return NoopRecorder{}
 		}
-		if cfg.AccountID != "" && cfg.InsertKey != "" {
-			return NewNewRelicRecorder(cfg.AccountID, cfg.InsertKey, cfg.Endpoint)
-		}
-		if cfg.Endpoint != "" {
-			return NewHTTPRecorder(cfg.Endpoint)
+		if NewRelicEndpoint != "" && NewRelicAPIKey != "" {
+			return &NewRelicRecorder{
+				Endpoint:   NewRelicEndpoint,
+				InsertKey:  NewRelicAPIKey,
+				HTTPClient: NewHTTPClientFunc(),
+				Version:    RecorderVersion,
+			}
 		}
 		return NoopRecorder{}
 	}
