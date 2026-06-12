@@ -463,3 +463,12 @@ Phase 2 discuss-phase completed 2026-06-10:
   the loop by choosing the receive side. No recorder code change
   expected — the work is configuration, documentation, and a
   smoke test against the chosen backend.
+- **2026-06-12** — Phase 5 added: Local-only anonymous telemetry
+  (REQ-10). Drops the New Relic backend picked in Phase 4
+  (operational cost + GDPR posture for a shared account) and
+  the planned hosted relay. Ships a binary with no built-in
+  telemetry endpoint; users who opt in point `telemetry.endpoint`
+  at a server they (or their org) control. The 7-field schema
+  is preserved and the privacy posture is documented in
+  `OBSERVABILITY.md`. Depends on Phase 4 (which it supersedes
+  for the receive-side decision).

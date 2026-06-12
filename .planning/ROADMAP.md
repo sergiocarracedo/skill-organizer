@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-> 3 phases. Each phase is a vertical slice that ships a demoable
+> 4 phases. Each phase is a vertical slice that ships a demoable
 > behavior end-to-end. Phases are ordered so the next big bet
 > (skill security check, REQ-4) ships first and unblocks the rest.
 
@@ -216,3 +216,90 @@ data flowing" story end-to-end.
   small, that's a future phase with its own decision.
 
 **Status:** ✓ Complete (2026-06-12). See `.planning/PHASE-4-DECISION.md` for the decision audit record.
+
+---
+
+## Phase 5 — Local-only anonymous telemetry (REQ-10)
+
+**Goal:** Strip the New Relic backend and the planned hosted relay.
+The CLI ships with no built-in telemetry backend. End users who
+opt in point `telemetry.endpoint` at any HTTP server they (or
+their organization) control; everyone else stays at `noop`. The
+7-field schema is preserved, no path or argument data is ever
+collected, and `install_id` / `host_id` are random UUIDs (never
+derived from machine identifiers). GDPR-friendly by construction.
+
+**Status:** [ ] Not started
+**Depends on:** Phase 4
+
+### Why this phase exists
+
+Phase 4 picked a managed backend (New Relic) on the assumption
+that the project author would receive aggregate data from real
+users. That model has two problems we did not surface during
+planning:
+
+1. **Operational cost.** A managed backend has rate limits,
+   retention rules, and an account that needs to be maintained
+   by a human. For a small CLI it is more infrastructure than
+   the project warrants.
+2. **GDPR posture.** A shared backend collects events from many
+   users into one account, which is a data-controller posture.
+   For an open-source CLI with no formal entity behind it, that
+   is a fragile position. The cleanest fix is to not run a
+   shared backend at all.
+
+The user (CLI author) keeps observability of their own
+machine. Organizations that want fleet-level observability
+deploy a single HTTP receiver and point every install at it
+via `telemetry.endpoint`. Hobbyist users with no such setup
+stay at `noop` by default.
+
+### Scope (in)
+
+- Drop `NewRelicRecorder` and the factory's New Relic branch
+  (the entire `X-Insert-Key` / `clientTime` envelope path).
+- Drop the `SKILL_ORGANIZER_NEWRELIC_*` env vars and the related
+  wiring in `cmd/root.go` and `cmd/telemetry.go`.
+- Keep `HTTPRecorder` (Phase 3 passthrough) as the *only* opt-in
+  recorder. Default endpoint: empty. The user fills it in.
+- Verify `install_id` and `host_id` are random UUIDs (no MAC /
+  hostname / username leak) and lock that behind a unit test.
+- Add a `telemetry wipe` subcommand that deletes the on-disk
+  buffer and rotates `install_id` (GDPR right-to-erasure).
+- Update `OBSERVABILITY.md` with a Privacy section that
+  documents the GDPR posture, the 7-field schema, and how to
+  inspect / wipe local data.
+- Add REQ-10 to `.planning/REQUIREMENTS.md` and link it to
+  this phase in the traceability matrix.
+
+### Out of scope (this phase)
+
+- A hosted relay (deferred — see the discussion captured in
+  `.planning/phases/05-local-only-anonymous-telemetry/` once
+  CONTEXT.md lands).
+- A per-binary publishable token (deferred with the relay).
+- Real-user aggregate analytics (not a v0.x concern; the
+  project author gets their own data only).
+
+### Acceptance
+
+- `go build` produces a binary that contains no New Relic
+  string (`strings ./skill-organizer | grep -i newrelic` is
+  empty).
+- `telemetry status` shows `Recorder: noop` when no endpoint
+  is configured and `Recorder: http` when one is.
+- `telemetry enable` requires an `endpoint` to be set; without
+  one it returns an actionable error.
+- `telemetry wipe` deletes the buffer and rotates `install_id`
+  in one operation; the new id is logged to stdout.
+- `OBSERVABILITY.md` has a "Privacy & GDPR" section that
+  names the 7 fields, explains why no PII is collected, and
+  links to the `telemetry wipe` command.
+- A test asserts that no field in the schema can be set to a
+  value that contains a path-like substring (defensive, in
+  case the schema is ever extended).
+
+### Plans
+
+*Not yet planned — run `plan-phase 5`*
