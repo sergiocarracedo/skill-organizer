@@ -35,68 +35,23 @@ func (NoopRecorder) Record(_ context.Context, _ Event) error {
 // RecorderFactoryFunc is a swappable function variable for
 // NewRecorder. Tests reassign this to inject fakes; production code
 // calls NewRecorder (the wrapper) so the swap is transparent to
-// callers. Plan 02 replaces the default factory to return an
-// HTTPRecorder when telemetry is enabled and an endpoint is
-// configured.
+// callers. The default closure is the 2-way SetDefaultFactory logic.
 var RecorderFactoryFunc = func() Recorder { return NoopRecorder{} }
 
 // NewRecorder returns the package's current Recorder implementation.
 // The factory is invoked on every call so callers receive a fresh
-// recorder (and, in the HTTPRecorder case, a fresh *http.Client).
+// recorder (and, in the NewRelicRecorder case, a fresh *http.Client).
 func NewRecorder() Recorder {
 	return RecorderFactoryFunc()
 }
 
 // NewHTTPClientFunc is a swappable function variable for the HTTP
-// client the HTTPRecorder uses to POST events. The default returns
-// a *http.Client with a 10-second timeout. Plan 02 wires it; tests
-// in plan 02 (and the future zero-egress test) swap it to return a
-// client with a counting transport.
+// client the NewRelicRecorder uses to POST events. The default
+// returns a *http.Client with a 10-second timeout. The
+// counting-transport tests swap it to return a client with a
+// counting transport to assert zero network egress.
 var NewHTTPClientFunc = func() *http.Client {
 	return &http.Client{Timeout: 10 * time.Second}
-}
-
-// HTTPRecorder POSTs each event as a JSON body to a fixed endpoint.
-// The transport is swappable via NewHTTPClientFunc (the package var
-// declared above), so the counting-transport test in plan 03 can
-// intercept the call. The HTTP client has a 10s timeout (the default
-// from NewHTTPClientFunc).
-type HTTPRecorder struct {
-	Endpoint string
-	Client   *http.Client
-}
-
-// Record marshals event to JSON, POSTs it to the configured endpoint,
-// and returns an error on any non-2xx status. 4xx and 5xx are failures
-// (the caller should append the event to the buffer for a later drain).
-// 3xx redirects are followed by the default http.Client; a final 2xx
-// counts as success.
-func (r HTTPRecorder) Record(ctx context.Context, event Event) error {
-	body, err := json.Marshal(event)
-	if err != nil {
-		return fmt.Errorf("marshal event: %w", err)
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, r.Endpoint, bytes.NewReader(body))
-	if err != nil {
-		return fmt.Errorf("build request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := r.Client.Do(req)
-	if err != nil {
-		return fmt.Errorf("post event: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("post event: unexpected status %d", resp.StatusCode)
-	}
-	return nil
-}
-
-// NewHTTPRecorder returns an HTTPRecorder with a default client. The
-// client is built by calling NewHTTPClientFunc (the package-level seam
-// for the counting-transport test injection).
-func NewHTTPRecorder(endpoint string) Recorder {
-	return HTTPRecorder{Endpoint: endpoint, Client: NewHTTPClientFunc()}
 }
 
 // NewRelicEndpoint and NewRelicAPIKey are injected at build time via
@@ -192,9 +147,9 @@ func NewNewRelicRecorder(accountID, insertKey, endpointTemplate string) Recorder
 //     New Relic RESERVES the "timestamp" attribute name for
 //     Unix-epoch integers (RESEARCH NP1); an RFC3339 string sent
 //     in the "timestamp" field is silently dropped at ingest. The
-//     rename is an envelope-only transform — the flat 7-field
-//     schema in event.go and the byte-for-byte HTTPRecorder test
-//     are unchanged.
+//     rename is an envelope-only transform — the flat 5-field
+//     schema in event.go and the byte-for-byte NewRelicRecorder
+//     test are unchanged.
 //
 // Status code handling:
 //   - 2xx: return nil. Service moves on.
@@ -224,14 +179,14 @@ type NewRelicRecorder struct {
 // Record marshals the event as a New-Relic-shaped JSON array, POSTs
 // it to the configured endpoint with the X-Insert-Key auth header,
 // and handles 413/429 (hard drop) and 503 (1 retry) per the
-// struct's doc.
+// struct's doc. The envelope is the 5 schema fields plus
+// eventType (the New Relic namespace) and clientTime (the RFC3339
+// timestamp renamed per the struct's doc).
 func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 	elem := map[string]any{
 		"eventType":   "skill_organizer_command",
 		"command":     event.Command,
 		"exit_status": event.ExitStatus,
-		"install_id":  event.InstallID,
-		"host_id":     event.HostID,
 		"clientTime":  event.Timestamp, // renamed: see struct doc
 		"version":     event.Version,
 		"event_id":    event.EventID,
