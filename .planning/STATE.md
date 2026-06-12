@@ -6,11 +6,11 @@
 
 ## Current Phase
 
-**All v0.x phases complete** (Phases 1-5, REQ-3/4/8/9/10).
-**Phase 6 — AI model visibility and security tooling** added to
-roadmap but not yet planned.
+**Phase 6 — AI model visibility and security tooling**
+- discuss-phase ✓ complete (2026-06-12)
+- Next: `plan-phase 6`
 
-Next learnship step: `discuss-phase 6` or `plan-phase 6`.
+All v0.x phases (1-5, REQ-3/4/8/9/10) remain ✓ complete.
 
 Phase 5 summary:
 - Recorder API: 2 implementations (Noop + NewRelic), HTTPRecorder dropped.
