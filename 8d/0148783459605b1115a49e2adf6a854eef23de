@@ -1,0 +1,23 @@
+packages/cli/e2e_test.go
+  s_5c5823cbdf6ef0::t_014ac0120e4781 18
+  s_5c5823cbdf6ef0::t_4d2cdf15d88f3a 737-743,745-747,752-756
+  s_5c5823cbdf6ef0::t_a1737b59b6b747 790
+  s_5c5823cbdf6ef0::t_6cd20d929a0506 19
+  s_5c5823cbdf6ef0::t_58f460f9fb91b3 705-736,744,748-751,757-789,791-830
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8d0148783459605b1115a49e2adf6a854eef23de",
+  "prompts": {},
+  "sessions": {
+    "s_5c5823cbdf6ef0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14506e8b8ffeBMw5oygzFlKFuw",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
