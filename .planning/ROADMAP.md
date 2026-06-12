@@ -126,6 +126,7 @@ behavior data from the security check (P1) and the overlap refactor
 | REQ-3 Overlap evaluation          | P2    |
 | REQ-4 Skill security check        | P1    |
 | REQ-8 Observability (opt-in)      | P3    |
+| REQ-9 Telemetry backend selection  | P4    |
 
 ## Cross-cutting
 
@@ -144,3 +145,72 @@ behavior data from the security check (P1) and the overlap refactor
 - **Dropped requirements** (REQ-1, REQ-2, REQ-5, REQ-6, REQ-7,
   REQ-9) are listed in REQUIREMENTS.md under "Dropped from this
   version" so the next cycle can pick them up cleanly.
+
+---
+
+## Phase 4 — Telemetry backend selection (REQ-9)
+
+**Goal:** A user can run `skill-organizer telemetry status` and see
+a real, free-of-charge telemetry backend that accepts the events
+the CLI emits (7-field snake_case JSON, one POST per command).
+
+**Status:** [ ] Not started
+**Depends on:** Phase 3 (Observability) — the recorder, buffer,
+endpoint config, and the byte-for-byte schema test already exist
+in `internal/telemetry/` and `OBSERVABILITY.md`. Phase 4 picks a
+real product (or self-hosted sink) to point the recorder at.
+
+**Why now:** Phase 3 ships the **emit side** (event schema, buffer
+on disk, opt-in prompt, no-op when disabled) and the **schema
+doc**. What it does not ship is a real **receive side** — the
+endpoint currently defaults to a no-op sink. We need a real
+backend before we can ship the v0.x "first-run opt-in, real
+data flowing" story end-to-end.
+
+### Scope (proposed)
+
+- **Research and select a free / open-source telemetry backend.**
+  Candidates to evaluate (each with a free tier or self-hosted
+  option, all accepting the project's 7-field JSON schema):
+  - **Managed free tiers:** New Relic (100 GB/month free),
+    Grafana Cloud (10k metrics free), Sentry (5k events/month
+    free), BetterStack, Logtail, Highlight.io.
+  - **Self-hosted / open source:** Grafana Loki + Prometheus +
+    Tempo (logs/metrics/traces), OpenObserve (single binary,
+    MIT), SigNoz (Apache-2.0, OTLP), Quickwit (logs search,
+    AGPL-3), HyperDX (MIT, ClickHouse-based).
+  - **Project-agnostic simple sinks:** a tiny self-hosted Go
+    receiver (httptest-style), a JSONL-on-disk + `tail -f`
+    workflow, or a Cloudflare Worker.
+- **Document the decision** in a new file
+  `.planning/PHASE-4-DECISION.md`: chosen product, why, free-tier
+  limits, how the project points the recorder at it (env var or
+  YAML endpoint), and the per-event ingestion math (events/day ×
+  bytes/event × free-tier GB/month).
+- **No code change to the recorder** — `HTTPRecorder` already
+  POSTs JSON to whatever endpoint the user configures. The
+  work is configuration, documentation, and an end-to-end
+  smoke test against the chosen backend.
+
+### Acceptance
+
+- `OBSERVABILITY.md` is updated with a "How to point at the
+  chosen backend" section (env var, YAML, free-tier quota).
+- The recorder's existing byte-for-byte schema test continues to
+  pass — the schema is unchanged.
+- A short smoke test (Go test or shell script) POSTs a single
+  fake event at the configured endpoint and asserts the chosen
+  backend accepted it (HTTP 2xx or a backend-specific check).
+- A section in `OBSERVABILITY.md` lists the chosen product, the
+  free-tier limits, the per-event payload size, and the roll-over
+  behavior once the free tier is hit.
+
+### Out of scope (this phase)
+
+- **Server-side retention policy** — defined by the chosen
+  product, not by us.
+- **Per-tool breakdown dashboards** — comes after we have data.
+- **Alerting rules** — not a v0.x concern; the product gives us
+  dashboards, we don't ship alerts.
+- **Migration to a paid tier** — if the free tier proves too
+  small, that's a future phase with its own decision.

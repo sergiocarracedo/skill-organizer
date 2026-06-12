@@ -236,3 +236,13 @@ Phase 2 discuss-phase completed 2026-06-10:
 - `go test ./...` (CLI)
 - `git status` — should be clean after phase complete
 - `git log --oneline -20` — see recent commits
+
+## Roadmap Evolution
+
+- **2026-06-12** — Phase 4 added: Telemetry backend selection (REQ-9).
+  Scope: research and pick a free-of-charge telemetry backend
+  (or self-hosted sink) for the v0.x CLI to point its
+  `HTTPRecorder` at. Phase 3 ships the emit side; Phase 4 closes
+  the loop by choosing the receive side. No recorder code change
+  expected — the work is configuration, documentation, and a
+  smoke test against the chosen backend.
