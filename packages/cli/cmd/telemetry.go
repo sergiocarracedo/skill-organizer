@@ -25,6 +25,10 @@ var (
 	}
 	telemetryInfo    = func(format string, args ...any) { pterm.Info.Printfln(format, args...) }
 	telemetrySuccess = func(format string, args ...any) { pterm.Success.Printfln(format, args...) }
+	// Phase 4: read the New Relic env vars for the status output.
+	// Package-level func-vars for test injection.
+	telemetryNewRelicAccountID = func() string { return os.Getenv("SKILL_ORGANIZER_NEWRELIC_ACCOUNT_ID") }
+	telemetryNewRelicInsertKey = func() string { return os.Getenv("SKILL_ORGANIZER_NEWRELIC_INSERT_KEY") }
 )
 
 // newTelemetryCommand is the parent `telemetry` cobra subcommand. It
@@ -101,13 +105,14 @@ func newTelemetryDisableCommand() *cobra.Command {
 }
 
 // newTelemetryStatusCommand prints the current telemetry state to
-// stdout: enabled flag, endpoint, install/host ID prefixes, and the
-// current buffer file size. The format matches the OBSERVABILITY.md
-// "How to inspect" section.
+// stdout: enabled flag, endpoint, recorder type, account id prefix,
+// insert-key presence, install/host ID prefixes, and the current
+// buffer file size. The format matches the OBSERVABILITY.md "How to
+// inspect" section.
 func newTelemetryStatusCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
-		Short: "Show current telemetry state (enabled, endpoint, install_id, host_id, buffer size)",
+		Short: "Show current telemetry state (enabled, endpoint, recorder, account_id, install_id, host_id, buffer size)",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			registryPath, err := configpkg.RegistryPath()
 			if err != nil {
@@ -124,8 +129,26 @@ func newTelemetryStatusCommand() *cobra.Command {
 			if info, statErr := os.Stat(bufferPath); statErr == nil {
 				bufferBytes = info.Size()
 			}
+			// Phase 4: resolve the recorder type via the factory closure.
+			// The factory was set by root.go's PersistentPreRun (when
+			// running a real command). For the `telemetry status`
+			// subcommand, we set the factory here using the same inputs
+			// root.go would have set, so the resolved type matches what
+			// a real command invocation would pick.
+			newRelicAccountID := telemetryNewRelicAccountID()
+			newRelicInsertKey := telemetryNewRelicInsertKey()
+			telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{
+				Enabled:   cfg.Enabled,
+				Endpoint:  cfg.Endpoint,
+				AccountID: newRelicAccountID,
+				InsertKey: newRelicInsertKey,
+			})
+			recType := recorderTypeName(telemetrypkg.NewRecorder())
 			telemetryInfo("Enabled:      %v", cfg.Enabled)
 			telemetryInfo("Endpoint:     %s", emptyAsNone(cfg.Endpoint))
+			telemetryInfo("Recorder:     %s", recType)
+			telemetryInfo("Account ID:   %s", shortAccountID(newRelicAccountID))
+			telemetryInfo("Insert key:   %s", keyPresence(newRelicInsertKey))
 			telemetryInfo("Install ID:   %s", shortID(identity.InstallID))
 			telemetryInfo("Host ID:      %s", shortID(identity.HostID))
 			telemetryInfo("Buffer file:  %s (%d bytes)", bufferPath, bufferBytes)
@@ -175,4 +198,45 @@ func shortID(s string) string {
 		return s
 	}
 	return s[:8] + "..."
+}
+
+// recorderTypeName maps the 3 known Recorder implementations to
+// a short, human-friendly name for the status output. Unknown
+// types fall back to "%T" (the standard Go type-string) so a
+// future custom recorder is still observable.
+func recorderTypeName(r telemetrypkg.Recorder) string {
+	switch r.(type) {
+	case *telemetrypkg.NewRelicRecorder:
+		return "NewRelicRecorder"
+	case telemetrypkg.HTTPRecorder:
+		return "HTTPRecorder"
+	case telemetrypkg.NoopRecorder:
+		return "NoopRecorder"
+	default:
+		return fmt.Sprintf("%T", r)
+	}
+}
+
+// shortAccountID returns the first 4 chars of the account ID
+// plus "..." for the status output, or "<unset>" if empty.
+// The full account_id is a New Relic account number (a positive
+// integer); the 4-char prefix is enough to disambiguate users in
+// the status output.
+func shortAccountID(id string) string {
+	if id == "" {
+		return "<unset>"
+	}
+	if len(id) <= 4 {
+		return id
+	}
+	return id[:4] + "..."
+}
+
+// keyPresence returns "present" if the key is non-empty,
+// "<not set>" otherwise.
+func keyPresence(key string) string {
+	if key == "" {
+		return "<not set>"
+	}
+	return "present"
 }
