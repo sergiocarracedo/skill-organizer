@@ -1,0 +1,25 @@
+packages/cli/cmd/telemetry_test.go
+  s_eb672b2f30af0d::t_276586ccb5406e 114-115,122-123,138-142,162-164,176-223,227-282
+  s_eb672b2f30af0d::t_6d662e08cc8e68 224-226
+  s_eb672b2f30af0d::t_066ff809ea4901 283-285
+packages/cli/internal/telemetry/recorder_test.go
+  s_eb672b2f30af0d::t_83cbe1b6c4f031 371-579,584-590,596-601,604-605,607-718
+  s_eb672b2f30af0d::t_f39dcee4b14133 6
+  s_eb672b2f30af0d::t_082aaf2cf3d98c 580-583,591-595,602-603,606
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bfef607e080ead060f2d8593394bd7f2d007dc68",
+  "prompts": {},
+  "sessions": {
+    "s_eb672b2f30af0d": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1448ee53fffemlXi0sWRtfvuPQ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
