@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -96,6 +97,41 @@ func TestFirstRunPromptStickyNo(t *testing.T) {
 	}
 	if _, err := os.Stat(sentinel); err != nil {
 		t.Fatalf("sentinel not created: %v", err)
+	}
+}
+
+func TestFirstRunPromptCopyMentionsDisableOffRamp(t *testing.T) {
+	originalTTY := IsStdInTTYFunc
+	originalConfirm := ConfirmFunc
+	t.Cleanup(func() {
+		IsStdInTTYFunc = originalTTY
+		ConfirmFunc = originalConfirm
+	})
+
+	IsStdInTTYFunc = func() bool { return true }
+	var capturedPrompt string
+	ConfirmFunc = func(prompt string, defaultValue bool) (bool, error) {
+		capturedPrompt = prompt
+		return false, nil
+	}
+
+	appDir := t.TempDir()
+	svc, err := New(appDir, "1.0.0", TelemetryConfig{})
+	if err != nil {
+		t.Fatalf("New() = %v", err)
+	}
+	sentinel := filepath.Join(appDir, promptSentinelFile)
+
+	svc.MaybeRunFirstRunPrompt(context.Background(), io.Discard, nil, (&firstRunCall{}).callback(sentinel))
+
+	if capturedPrompt == "" {
+		t.Fatal("ConfirmFunc not called")
+	}
+	if !strings.Contains(capturedPrompt, "telemetry disable") {
+		t.Errorf("first-run prompt copy must mention `telemetry disable` as the off-ramp; got %q", capturedPrompt)
+	}
+	if !strings.Contains(capturedPrompt, "only command names") {
+		t.Errorf("first-run prompt copy must mention 'only command names' as the schema summary; got %q", capturedPrompt)
 	}
 }
 

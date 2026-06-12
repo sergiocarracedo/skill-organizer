@@ -48,7 +48,7 @@ func defaultConfirm(prompt string, defaultValue bool) (bool, error) {
 // "Default = off"). The caller (MaybeRunFirstRunPrompt) is responsible
 // for persisting the answer.
 func FirstRunPrompt(stdout io.Writer, stdin io.Reader) (bool, error) {
-	return ConfirmFunc("Enable anonymous telemetry? (only command names, no args/paths/PII)", false)
+	return ConfirmFunc("Enable anonymous telemetry? (only command names, no args/paths/PII; use `telemetry disable` to turn off at any time)", false)
 }
 
 // MaybeRunFirstRunPrompt is the fire-and-forget wrapper that mirrors
