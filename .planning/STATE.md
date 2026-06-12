@@ -6,14 +6,17 @@
 
 ## Current Phase
 
-**Phase 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 ✓** (2026-06-12).
+**Phase 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 ✓, 05-03 ✓** (2026-06-12).
 Plan 05-01 (recorder core refactor) is complete. The 5-field
 Event schema, 2-way Recorder factory, build-time NewRelic vars,
-and identity module removal are landed. Plan 05-02 (CLI surface
-cleanup) and 05-03 (docs: OBSERVABILITY.md update + PRIVACY.md
-creation) are next.
+and identity module removal are landed. Plan 05-03 (docs:
+OBSERVABILITY.md update + PRIVACY.md creation) is complete.
+Plan 05-02 (CLI surface cleanup) is next.
 
 Plan progress:
+- 05-03: PRIVACY.md (4 required sections) + OBSERVABILITY.md updated to 5-field schema, 6 H2, Build-time backend, PRIVACY.md link ✓ implemented
+  (4 atomic commits; SUMMARY at
+  `.planning/phases/05-local-only-anonymous-telemetry/05-03-plan-SUMMARY.md`)
 - 05-01: 5-field Event schema, 2-way Recorder factory, identity module removed ✓ implemented
   (4 atomic refactor commits + 1 atomic test commit; SUMMARY at
   `.planning/phases/05-local-only-anonymous-telemetry/05-01-plan-SUMMARY.md`)
@@ -27,7 +30,7 @@ Plan progress:
   - `telemetry status` is two lines: Enabled + Recorder
   - First-run prompt unchanged structurally; one-line copy tweak to mention `telemetry disable`
 
-Next learnship step: `execute-phase 5` (continue with plans 05-02 and 05-03).
+Next learnship step: `execute-phase 5` (continue with plan 05-02).
 
 Phase 4 status preserved below for reference.
 
@@ -181,6 +184,25 @@ Phase 2 discuss-phase completed 2026-06-10:
     "## Endpoint configuration" to "## Build-time backend" with
     the `-ldflags` contract, add a one-line link to `PRIVACY.md`,
     and create the new `PRIVACY.md` with 4 required sections.
+
+- **Phase 5 — Local-only anonymous telemetry (REQ-10) — plan 05-03 ✓** (2026-06-12)
+  - 4 atomic commits; SUMMARY at
+    `.planning/phases/05-local-only-anonymous-telemetry/05-03-plan-SUMMARY.md`
+  - PRIVACY.md created at repo root with 4 H2 sections: Field-by-field
+    disclosure (5-column table), Legal basis and data retention (consent,
+    on-device 1 MB FIFO, backend 8-day window), Data-controller statement
+    (maintainer as controller, New Relic as processor), Schema-change
+    protocol (explicit never-collect list, breaking change policy)
+  - OBSERVABILITY.md updated: ~180 lines, 6 H2 sections (removed
+    "Endpoint configuration" H2), 5-field JSON example (dropped
+    install_id, host_id), Build-time backend H3 under "How to
+    enable / disable", PRIVACY.md link at top, no env-var references,
+    Privacy guarantees updated for 5-field schema and wipe command
+  - observability_test.go updated: `TestOBSERVABILITYHasAllSevenSections`
+    renamed to `TestOBSERVABILITYHasAllSixSections`, sectionHeaders
+    trimmed to 6, new `TestOBSERVABILITYLinksToPRIVACY` test
+  - Build, vet, full test suite (230 passing in 19 packages), and
+    lefthook pre-commit (`pnpm run test:cli:e2e`) all green
 
 - **Phase 4 — Telemetry backend selection (REQ-9) — plan 04-02 ✓** (2026-06-12)
   - 3 atomic commits; SUMMARY at
