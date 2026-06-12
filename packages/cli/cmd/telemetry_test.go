@@ -111,12 +111,16 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	originalIdentity := telemetryIdentity
 	originalInfo := telemetryInfo
 	originalSuccess := telemetrySuccess
+	originalNRAcc := telemetryNewRelicAccountID
+	originalNRKey := telemetryNewRelicInsertKey
 	t.Cleanup(func() {
 		telemetryLoadConfig = originalLoad
 		telemetryAppDir = originalAppDir
 		telemetryIdentity = originalIdentity
 		telemetryInfo = originalInfo
 		telemetrySuccess = originalSuccess
+		telemetryNewRelicAccountID = originalNRAcc
+		telemetryNewRelicInsertKey = originalNRKey
 	})
 
 	appDir := t.TempDir()
@@ -131,6 +135,11 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 			HostID:    "fedcba9876543210fedcba9876543210",
 		}, nil
 	}
+	// Phase 4: stub the New Relic env reads to ensure the test is
+	// hermetic. With both empty, the factory returns HTTPRecorder
+	// (endpoint is set, but no NewRelic creds).
+	telemetryNewRelicAccountID = func() string { return "" }
+	telemetryNewRelicInsertKey = func() string { return "" }
 
 	var buf bytes.Buffer
 	telemetryInfo = func(format string, args ...any) {
@@ -150,9 +159,130 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	wantSubstrings := []string{
 		"Enabled:",
 		"https://example.com",
+		"Recorder:",
+		"Account ID:",
+		"Insert key:",
 		"01234567", // short install_id prefix
 		"fedcba98", // short host_id prefix
 		"Buffer file:",
+	}
+	for _, want := range wantSubstrings {
+		if !strings.Contains(got, want) {
+			t.Fatalf("status output missing %q\noutput:\n%s", want, got)
+		}
+	}
+}
+
+// TestTelemetryStatusSubcommand_NewRelicConfigured asserts that
+// when both New Relic env vars are set, the status output reports
+// the NewRelicRecorder type with a 4-char account-id prefix and
+// "present" for the insert key.
+func TestTelemetryStatusSubcommand_NewRelicConfigured(t *testing.T) {
+	originalLoad := telemetryLoadConfig
+	originalAppDir := telemetryAppDir
+	originalIdentity := telemetryIdentity
+	originalInfo := telemetryInfo
+	originalSuccess := telemetrySuccess
+	originalNRAcc := telemetryNewRelicAccountID
+	originalNRKey := telemetryNewRelicInsertKey
+	t.Cleanup(func() {
+		telemetryLoadConfig = originalLoad
+		telemetryAppDir = originalAppDir
+		telemetryIdentity = originalIdentity
+		telemetryInfo = originalInfo
+		telemetrySuccess = originalSuccess
+		telemetryNewRelicAccountID = originalNRAcc
+		telemetryNewRelicInsertKey = originalNRKey
+	})
+
+	appDir := t.TempDir()
+
+	telemetryLoadConfig = func(_ string) (telemetrypkg.TelemetryConfig, error) {
+		return telemetrypkg.TelemetryConfig{Enabled: true, Endpoint: "https://insights-collector.newrelic.com/v1/accounts/1234/events"}, nil
+	}
+	telemetryAppDir = func() (string, error) { return appDir, nil }
+	telemetryIdentity = func(_ string) (telemetrypkg.Identity, error) { return telemetrypkg.Identity{}, nil }
+	telemetryNewRelicAccountID = func() string { return "1234567890" }
+	telemetryNewRelicInsertKey = func() string { return "test-insert-key" }
+
+	var buf bytes.Buffer
+	telemetryInfo = func(format string, args ...any) {
+		fmt.Fprintf(&buf, format, args...)
+		buf.WriteString("\n")
+	}
+	telemetrySuccess = func(_ string, _ ...any) {}
+
+	cmd := newTelemetryStatusCommand()
+	cmd.SetOut(io.Discard)
+	cmd.SetErr(io.Discard)
+	if err := cmd.RunE(cmd, nil); err != nil {
+		t.Fatalf("RunE() = %v", err)
+	}
+
+	got := buf.String()
+	wantSubstrings := []string{
+		"NewRelicRecorder",
+		"1234...",
+		"present",
+	}
+	for _, want := range wantSubstrings {
+		if !strings.Contains(got, want) {
+			t.Fatalf("status output missing %q\noutput:\n%s", want, got)
+		}
+	}
+}
+
+// TestTelemetryStatusSubcommand_NewRelicIncomplete asserts the
+// fallback path: only AccountID is set (no InsertKey), so the
+// factory picks HTTPRecorder (because the endpoint is configured)
+// and the insert key is shown as "<not set>".
+func TestTelemetryStatusSubcommand_NewRelicIncomplete(t *testing.T) {
+	originalLoad := telemetryLoadConfig
+	originalAppDir := telemetryAppDir
+	originalIdentity := telemetryIdentity
+	originalInfo := telemetryInfo
+	originalSuccess := telemetrySuccess
+	originalNRAcc := telemetryNewRelicAccountID
+	originalNRKey := telemetryNewRelicInsertKey
+	t.Cleanup(func() {
+		telemetryLoadConfig = originalLoad
+		telemetryAppDir = originalAppDir
+		telemetryIdentity = originalIdentity
+		telemetryInfo = originalInfo
+		telemetrySuccess = originalSuccess
+		telemetryNewRelicAccountID = originalNRAcc
+		telemetryNewRelicInsertKey = originalNRKey
+	})
+
+	appDir := t.TempDir()
+
+	telemetryLoadConfig = func(_ string) (telemetrypkg.TelemetryConfig, error) {
+		return telemetrypkg.TelemetryConfig{Enabled: true, Endpoint: "https://example.com/in"}, nil
+	}
+	telemetryAppDir = func() (string, error) { return appDir, nil }
+	telemetryIdentity = func(_ string) (telemetrypkg.Identity, error) { return telemetrypkg.Identity{}, nil }
+	telemetryNewRelicAccountID = func() string { return "1234" }
+	telemetryNewRelicInsertKey = func() string { return "" }
+
+	var buf bytes.Buffer
+	telemetryInfo = func(format string, args ...any) {
+		fmt.Fprintf(&buf, format, args...)
+		buf.WriteString("\n")
+	}
+	telemetrySuccess = func(_ string, _ ...any) {}
+
+	cmd := newTelemetryStatusCommand()
+	cmd.SetOut(io.Discard)
+	cmd.SetErr(io.Discard)
+	if err := cmd.RunE(cmd, nil); err != nil {
+		t.Fatalf("RunE() = %v", err)
+	}
+
+	got := buf.String()
+	wantSubstrings := []string{
+		"Recorder:",
+		"HTTPRecorder",
+		"<not set>",
 	}
 	for _, want := range wantSubstrings {
 		if !strings.Contains(got, want) {

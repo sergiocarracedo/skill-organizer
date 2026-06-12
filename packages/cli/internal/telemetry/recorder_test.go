@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -365,5 +366,353 @@ func TestRecorderFactoryReturnsNoopWhenDisabled(t *testing.T) {
 	rec := NewRecorder()
 	if _, ok := rec.(NoopRecorder); !ok {
 		t.Fatalf("NewRecorder() = %T, want NoopRecorder (enabled=false must short-circuit regardless of endpoint)", rec)
+	}
+}
+
+// TestNewRelicRecorderContractEnforced is the smoke test from the
+// Phase 4 CONTEXT. It stands up an httptest.NewServer, fires one
+// Record(ctx, event) call on a NewRelicRecorder pointing at it, and
+// asserts the 5 CONTEXT properties:
+//
+//  1. POST URL path == /v1/accounts/{account_id}/events
+//  2. X-Insert-Key header matches the recorder's InsertKey
+//  3. body is a JSON array of length 1
+//  4. arr[0]["eventType"] == "skill_organizer_command"
+//  5. the 7 schema fields match (with timestamp renamed to
+//     clientTime in the envelope)
+//
+// Plus the User-Agent header and the "timestamp key absent" guard.
+func TestNewRelicRecorderContractEnforced(t *testing.T) {
+	const (
+		accountID  = "test-12345"
+		insertKey  = "test-key-xxxxxx"
+		versionStr = "0.4.0"
+	)
+	var (
+		gotPath        string
+		gotInsertKey   string
+		gotUserAgent   string
+		gotContentType string
+		gotBody        []byte
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotInsertKey = r.Header.Get("X-Insert-Key")
+		gotUserAgent = r.Header.Get("User-Agent")
+		gotContentType = r.Header.Get("Content-Type")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("server: read body: %v", err)
+			http.Error(w, "read body", http.StatusInternalServerError)
+			return
+		}
+		gotBody = body
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	expectedPath := "/v1/accounts/" + accountID + "/events"
+	endpoint := srv.URL + expectedPath
+	rec := NewRelicRecorder{
+		Endpoint:   endpoint,
+		InsertKey:  insertKey,
+		HTTPClient: &http.Client{Timeout: 5 * time.Second},
+		Version:    versionStr,
+	}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("NewRelicRecorder.Record() = %v, want nil", err)
+	}
+
+	// Assertion 1: POST URL path.
+	if gotPath != expectedPath {
+		t.Fatalf("URL path = %q, want %q", gotPath, expectedPath)
+	}
+	// Assertion 2: X-Insert-Key header.
+	if gotInsertKey != insertKey {
+		t.Fatalf("X-Insert-Key = %q, want %q", gotInsertKey, insertKey)
+	}
+	// User-Agent header (per AGENTS.md, smoke test asserts it too).
+	wantUA := "skill-organizer/" + versionStr
+	if gotUserAgent != wantUA {
+		t.Fatalf("User-Agent = %q, want %q", gotUserAgent, wantUA)
+	}
+	if !strings.HasPrefix(gotContentType, "application/json") {
+		t.Fatalf("Content-Type = %q, want application/json", gotContentType)
+	}
+	if !json.Valid(gotBody) {
+		t.Fatalf("server body is not valid JSON: %s", gotBody)
+	}
+	// Assertion 3: body is array of length 1.
+	var arr []map[string]any
+	if err := json.Unmarshal(gotBody, &arr); err != nil {
+		t.Fatalf("json.Unmarshal([]) = %v\nbody = %s", err, gotBody)
+	}
+	if len(arr) != 1 {
+		t.Fatalf("body array length = %d, want 1 (got %s)", len(arr), gotBody)
+	}
+	// Assertion 4: first element has eventType.
+	if arr[0]["eventType"] != "skill_organizer_command" {
+		t.Fatalf("arr[0][eventType] = %v, want %q", arr[0]["eventType"], "skill_organizer_command")
+	}
+	// Assertion 5: the 7 schema fields match the recorder's input
+	// (with timestamp renamed to clientTime in the envelope).
+	// The 3 deterministic fields are byte-for-byte; the 4 volatile
+	// fields are checked against the regexes.
+	if arr[0]["command"] != "check-security" {
+		t.Fatalf("arr[0][command] = %v, want %q", arr[0]["command"], "check-security")
+	}
+	if arr[0]["exit_status"] != float64(0) {
+		t.Fatalf("arr[0][exit_status] = %v, want 0", arr[0]["exit_status"])
+	}
+	if arr[0]["version"] != "0.4.0" {
+		t.Fatalf("arr[0][version] = %v, want %q", arr[0]["version"], "0.4.0")
+	}
+	hexRe := regexp.MustCompile(`^[0-9a-f]{32}$`)
+	ulidRe := regexp.MustCompile(`^[0-9A-HJKMNP-TV-Z]{26}$`)
+	tsRe := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`)
+	for _, key := range []string{"install_id", "host_id"} {
+		v, ok := arr[0][key].(string)
+		if !ok {
+			t.Fatalf("arr[0][%q] is not a string (got %T)", key, arr[0][key])
+		}
+		if !hexRe.MatchString(v) {
+			t.Fatalf("arr[0][%q] = %q, want 32 hex chars", key, v)
+		}
+	}
+	if v, ok := arr[0]["event_id"].(string); !ok || !ulidRe.MatchString(v) {
+		t.Fatalf("arr[0][event_id] = %v, want 26-char ULID", arr[0]["event_id"])
+	}
+	// The timestamp is renamed to clientTime in the envelope.
+	if v, ok := arr[0]["clientTime"].(string); !ok || !tsRe.MatchString(v) {
+		t.Fatalf("arr[0][clientTime] = %v, want RFC3339 UTC (the renamed timestamp)", arr[0]["clientTime"])
+	}
+	// The "timestamp" key must NOT be present in the envelope
+	// (NP1 — would be silently dropped at ingest by New Relic).
+	if _, present := arr[0]["timestamp"]; present {
+		t.Fatalf("arr[0][timestamp] must NOT be present in the New Relic envelope (renamed to clientTime; NP1)")
+	}
+}
+
+// TestNewRelicRecorderHardDropsOn413 asserts that a 413 response
+// makes the recorder return nil (hard drop, no buffer fallback) and
+// that the WarningFunc fires exactly once. RESEARCH NP4: returning a
+// non-nil error on 413/429 would trigger Service's "recorder failed
+// -> buffer write" path, creating an infinite drain loop.
+func TestNewRelicRecorderHardDropsOn413(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+	}))
+	defer srv.Close()
+	// Silence the warning; assert it WAS called exactly once.
+	originalWarning := WarningFunc
+	var warnCalled int
+	WarningFunc = func(_ string, _ ...any) { warnCalled++ }
+	t.Cleanup(func() { WarningFunc = originalWarning })
+
+	rec := NewRelicRecorder{
+		Endpoint:   srv.URL,
+		InsertKey:  "test-key",
+		HTTPClient: &http.Client{Timeout: 5 * time.Second},
+	}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("NewRelicRecorder.Record() on 413 = %v, want nil (hard drop, no buffer fallback)", err)
+	}
+	if warnCalled != 1 {
+		t.Fatalf("WarningFunc called %d times, want 1 (the hard-drop warning)", warnCalled)
+	}
+}
+
+// TestNewRelicRecorderHardDropsOn429 is the 429 twin of the 413 test
+// above. 429 (Too Many Requests) is the rate-limit signal; the same
+// hard-drop contract applies.
+func TestNewRelicRecorderHardDropsOn429(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusTooManyRequests)
+	}))
+	defer srv.Close()
+	originalWarning := WarningFunc
+	var warnCalled int
+	WarningFunc = func(_ string, _ ...any) { warnCalled++ }
+	t.Cleanup(func() { WarningFunc = originalWarning })
+
+	rec := NewRelicRecorder{
+		Endpoint:   srv.URL,
+		InsertKey:  "test-key",
+		HTTPClient: &http.Client{Timeout: 5 * time.Second},
+	}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("NewRelicRecorder.Record() on 429 = %v, want nil (hard drop, no buffer fallback)", err)
+	}
+	if warnCalled != 1 {
+		t.Fatalf("WarningFunc called %d times, want 1 (the hard-drop warning)", warnCalled)
+	}
+}
+
+// TestNewRelicRecorderRetriesOn503 asserts the 503 path: the first
+// POST returns 503, the recorder waits 250ms (the backoff), and the
+// second POST returns 200. Record returns nil and the server is hit
+// exactly twice.
+func TestNewRelicRecorderRetriesOn503(t *testing.T) {
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		hits++
+		if hits == 1 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+	rec := NewRelicRecorder{
+		Endpoint:   srv.URL,
+		InsertKey:  "test-key",
+		HTTPClient: &http.Client{Timeout: 5 * time.Second},
+	}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("Record() = %v, want nil (first 503 retries to 200)", err)
+	}
+	if hits != 2 {
+		t.Fatalf("server hits = %d, want 2 (1 initial + 1 retry)", hits)
+	}
+}
+
+// TestNewRelicRecorderHonorsContextCancellation asserts that a
+// context that becomes done DURING the 503 backoff returns
+// ctx.Err() and does not retry. The 250ms select on ctx.Done()
+// short-circuits the retry so the cancellation is honored
+// immediately (RESEARCH NP3).
+func TestNewRelicRecorderHonorsContextCancellation(t *testing.T) {
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		hits++
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer srv.Close()
+	// 50ms timeout: the first POST completes (server returns 503
+	// in <10ms), the backoff's select fires on ctx.Done() at
+	// 50ms, no retry.
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
+	t.Cleanup(cancel)
+	rec := NewRelicRecorder{
+		Endpoint:   srv.URL,
+		InsertKey:  "test-key",
+		HTTPClient: &http.Client{Timeout: 5 * time.Second},
+	}
+	err := rec.Record(ctx, validEvent())
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("Record() on timed-out ctx = %v, want context.DeadlineExceeded", err)
+	}
+	if hits != 1 {
+		t.Fatalf("server hits = %d, want 1 (cancelled during backoff, no retry)", hits)
+	}
+}
+
+// TestRecorderFactoryPicksNewRelicWhenEnvVarsSet asserts the happy
+// path: when both New Relic env vars are set, the factory returns a
+// *NewRelicRecorder with the right Endpoint (account_id substituted
+// in the placeholder) and InsertKey.
+func TestRecorderFactoryPicksNewRelicWhenEnvVarsSet(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	const (
+		accountID  = "1234567890"
+		insertKey  = "test-insert-key"
+		endpointIn = "https://insights-collector.newrelic.com/v1/accounts/$ACCOUNT_ID/events"
+	)
+	SetDefaultFactory(RecorderConfig{
+		Enabled:   true,
+		Endpoint:  endpointIn,
+		AccountID: accountID,
+		InsertKey: insertKey,
+	})
+
+	rec := NewRecorder()
+	nr, ok := rec.(*NewRelicRecorder)
+	if !ok {
+		t.Fatalf("NewRecorder() = %T, want *NewRelicRecorder", rec)
+	}
+	wantEndpoint := "https://insights-collector.newrelic.com/v1/accounts/" + accountID + "/events"
+	if nr.Endpoint != wantEndpoint {
+		t.Fatalf("NewRelicRecorder.Endpoint = %q, want %q", nr.Endpoint, wantEndpoint)
+	}
+	if nr.InsertKey != insertKey {
+		t.Fatalf("NewRelicRecorder.InsertKey = %q, want %q", nr.InsertKey, insertKey)
+	}
+}
+
+// TestRecorderFactoryFallsBackToHTTPRecorderWhenNewRelicIncomplete
+// asserts that when only the AccountID is set (no InsertKey) but
+// the endpoint is configured, the factory returns the HTTPRecorder
+// (the Phase 3 passthrough). The NewRelic branch requires BOTH
+// env vars.
+func TestRecorderFactoryFallsBackToHTTPRecorderWhenNewRelicIncomplete(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	SetDefaultFactory(RecorderConfig{
+		Enabled:   true,
+		Endpoint:  "https://example.com/in",
+		AccountID: "1234",
+		// InsertKey deliberately omitted
+	})
+
+	rec := NewRecorder()
+	if _, ok := rec.(HTTPRecorder); !ok {
+		t.Fatalf("NewRecorder() = %T, want HTTPRecorder (AccountID only, no InsertKey, falls back to passthrough)", rec)
+	}
+}
+
+// TestRecorderFactoryFallsBackToNoopWhenNewRelicIncomplete asserts
+// that when only the AccountID is set (no InsertKey) AND the
+// endpoint is empty, the factory returns the NoopRecorder (no
+// recorder has the minimum config to fire).
+func TestRecorderFactoryFallsBackToNoopWhenNewRelicIncomplete(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	SetDefaultFactory(RecorderConfig{
+		Enabled:   true,
+		Endpoint:  "",
+		AccountID: "1234",
+		// InsertKey and Endpoint deliberately omitted
+	})
+
+	rec := NewRecorder()
+	if _, ok := rec.(NoopRecorder); !ok {
+		t.Fatalf("NewRecorder() = %T, want NoopRecorder (AccountID only, no InsertKey, no endpoint)", rec)
+	}
+}
+
+// TestRecorderFactoryPicksHTTPRecorderWhenNewRelicNotConfigured
+// asserts the Phase 3 happy path is preserved: enabled=true and a
+// non-empty endpoint, with no NewRelic fields, returns an
+// HTTPRecorder.
+func TestRecorderFactoryPicksHTTPRecorderWhenNewRelicNotConfigured(t *testing.T) {
+	original := RecorderFactoryFunc
+	t.Cleanup(func() { RecorderFactoryFunc = original })
+
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		hits++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	SetDefaultFactory(RecorderConfig{Enabled: true, Endpoint: srv.URL})
+
+	rec := NewRecorder()
+	hr, ok := rec.(HTTPRecorder)
+	if !ok {
+		t.Fatalf("NewRecorder() = %T, want HTTPRecorder (Phase 3 happy path preserved)", rec)
+	}
+	if hr.Endpoint != srv.URL {
+		t.Fatalf("HTTPRecorder.Endpoint = %q, want %q", hr.Endpoint, srv.URL)
+	}
+	if err := rec.Record(t.Context(), validEvent()); err != nil {
+		t.Fatalf("rec.Record() = %v, want nil", err)
+	}
+	if hits != 1 {
+		t.Fatalf("server hits = %d, want 1", hits)
 	}
 }
