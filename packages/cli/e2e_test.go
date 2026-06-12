@@ -307,6 +307,14 @@ func newCLIEnv(t *testing.T) *cliEnv {
 		"PATH="+binDir+string(os.PathListSeparator)+os.Getenv("PATH"),
 	)
 	env.writeFile(filepath.Join(configHome, "skill-organizer", ".cache.yml"), "last-checked-at: \"2100-01-01T00:00:00Z\"\nlatest-version: dev\nlatest-page-url: https://example.invalid/releases/latest\n")
+	// Pre-create the telemetry-prompted sentinel so the
+	// PersistentPreRun does not fire the first-run prompt during
+	// e2e tests (the test PTY does not drive that prompt and the
+	// binary would block on it). Default answer is "no" so
+	// telemetry is opt-out for the e2e environment.
+	if err := os.WriteFile(filepath.Join(configHome, "skill-organizer", "telemetry-prompted"), []byte("no"), 0o644); err != nil {
+		t.Fatalf("WriteFile(telemetry-prompted) error = %v", err)
+	}
 	env.saveFakeSkillsState()
 	env.writeFakeSkillsShim()
 	return env

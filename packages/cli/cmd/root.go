@@ -12,6 +12,7 @@ import (
 	maintenancepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/maintenance"
 	selfupdatepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/selfupdate"
 	servicepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/service"
+	telemetrypkg "github.com/sergiocarracedo/skill-organizer/cli/internal/telemetry"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,8 @@ var (
 	commit  = "unknown"
 	date    = "unknown"
 
-	configPath string
+	configPath       string
+	telemetryEndpoint string
 )
 
 var rootCmd = &cobra.Command{
@@ -66,14 +68,18 @@ func init() {
 		}
 		return servicepkg.IsRunning(registryPath)
 	}
+	// Wire the prompt's func-var seam to the local confirm helper so
+	// the telemetry package doesn't import the cmd package.
+	telemetrypkg.ConfirmFunc = confirm
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "", "Path to a project config file")
+	rootCmd.PersistentFlags().StringVar(&telemetryEndpoint, "telemetry-endpoint", "", "Endpoint URL for telemetry events (env: SKILL_ORGANIZER_TELEMETRY_ENDPOINT, yaml: telemetry.endpoint)")
 	rootCmd.Version = version
 	rootCmd.SetVersionTemplate(fmt.Sprintf("%s\n%s\ncommit %s, built %s\n", cliLogo(), version, commit, date))
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, _ []string) {
 		if cmd == rootCmd {
 			return
 		}
-		if cmd.Name() == "completion" || cmd.Name() == "help" {
+		if cmd.Name() == "completion" || cmd.Name() == "help" || cmd.Name() == "telemetry" {
 			return
 		}
 		printCLIHeader(cmd.OutOrStdout())
@@ -82,6 +88,50 @@ func init() {
 		if cmd.Name() != "check-updates" {
 			maintenancepkg.MaybeNotifySkillUpdates(cmd.Context(), cmd.OutOrStdout())
 		}
+
+		// ---- Telemetry (REQ-8) ----
+		// Resolve the AppDir and the final endpoint value (flag > env > YAML).
+		appDir, appDirErr := configpkg.AppDir()
+		if appDirErr == nil {
+			registryPath, _ := configpkg.RegistryPath()
+			cfg, _ := configpkg.LoadTelemetryConfigOrDefault(registryPath)
+			resolvedEndpoint := telemetrypkg.ResolveEndpoint(
+				telemetryEndpoint,
+				os.Getenv("SKILL_ORGANIZER_TELEMETRY_ENDPOINT"), // env override (flag > env > YAML precedence)
+				cfg.Endpoint,
+			)
+			// The Service is constructed and stored on the command's
+			// Context so the PersistentPostRun can pick it up. We use
+			// a custom context-key type to avoid collisions.
+			svc, svcErr := telemetrypkg.New(appDir, version, telemetrypkg.TelemetryConfig{Enabled: cfg.Enabled, Endpoint: resolvedEndpoint})
+			if svcErr == nil {
+				svc.MaybeRunFirstRunPrompt(cmd.Context(), cmd.OutOrStdout(), cmd.InOrStdin(), func(yes bool) error {
+					return configpkg.SaveTelemetryConfig(registryPath, telemetrypkg.TelemetryConfig{Enabled: yes, Endpoint: resolvedEndpoint})
+				})
+				_ = svc.DrainBuffer(cmd.Context())
+				cmd.SetContext(withTelemetryService(cmd.Context(), svc))
+			}
+		}
+	}
+	rootCmd.PersistentPostRun = func(cmd *cobra.Command, _ []string) {
+		if cmd == rootCmd {
+			return
+		}
+		if cmd.Name() == "completion" || cmd.Name() == "help" || cmd.Name() == "telemetry" {
+			return
+		}
+		svc, ok := telemetryServiceFromContext(cmd.Context())
+		if !ok {
+			return
+		}
+		// Cobra does not call PersistentPostRun when RunE returns an
+		// error (it short-circuits the post-run path on error). For
+		// the success case the exit status is 0; for the error case
+		// PersistentPostRun is skipped entirely, so this hook fires
+		// only on the success path. exit_status = 0 is correct for
+		// the success case.
+		exitStatus := 0
+		_ = svc.RecordEvent(cmd.Context(), telemetrypkg.NormalizeCommandName(cmd.Name()), exitStatus)
 	}
 	defaultHelpFunc := rootCmd.HelpFunc()
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
@@ -116,4 +166,27 @@ func init() {
 
 	rootCmd.SetOut(os.Stdout)
 	rootCmd.SetErr(os.Stderr)
+}
+
+// ctxKey is the unexported type used for the PersistentPreRun/PostRun
+// context plumbing. The two keys (telemetry service, run error) avoid
+// collisions with other packages that may also use context values.
+type ctxKey int
+
+const (
+	ctxKeyTelemetry ctxKey = iota
+)
+
+// withTelemetryService attaches a *telemetrypkg.Service to the given
+// context so PersistentPostRun can pick it up.
+func withTelemetryService(ctx context.Context, svc *telemetrypkg.Service) context.Context {
+	return context.WithValue(ctx, ctxKeyTelemetry, svc)
+}
+
+// telemetryServiceFromContext returns the *telemetrypkg.Service
+// previously attached via withTelemetryService, or (nil, false) if
+// no Service is in the context.
+func telemetryServiceFromContext(ctx context.Context) (*telemetrypkg.Service, bool) {
+	svc, ok := ctx.Value(ctxKeyTelemetry).(*telemetrypkg.Service)
+	return svc, ok
 }
