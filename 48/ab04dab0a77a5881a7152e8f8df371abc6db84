@@ -1,0 +1,19 @@
+.planning/phases/03-observability/03-VERIFICATION.md
+  s_7183ac8a41a479::t_1121ecbef7617d 1-218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "48ab04dab0a77a5881a7152e8f8df371abc6db84",
+  "prompts": {},
+  "sessions": {
+    "s_7183ac8a41a479": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_144edb429ffe9738IcRSLedh6s",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
