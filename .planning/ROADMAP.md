@@ -214,3 +214,5 @@ data flowing" story end-to-end.
   dashboards, we don't ship alerts.
 - **Migration to a paid tier** — if the free tier proves too
   small, that's a future phase with its own decision.
+
+**Status:** ✓ Complete (2026-06-12). See `.planning/PHASE-4-DECISION.md` for the decision audit record.

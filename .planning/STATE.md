@@ -6,8 +6,21 @@
 
 ## Current Phase
 
-**Phase 4 — Telemetry backend selection (REQ-9) — plan 04-02 ✓**
-(2026-06-12). Phase 4 is complete.
+**Phase 4 — Telemetry backend selection (REQ-9) ✓ complete**
+(2026-06-12). All v0.x phases are now done. REQ-9 acceptance
+observably met: a real, free-of-charge telemetry backend
+(New Relic Insights Events API, 100 GB/mo free tier) is wired
+as the default. `telemetry status` shows the new Recorder
+type, account ID prefix, and insert-key presence. See
+`.planning/PHASE-4-DECISION.md` for the decision audit record.
+
+Plan progress:
+- 04-01: NewRelicRecorder + factory + env-var wiring + status extension (Wave 1, no deps) ✓ implemented
+- 04-02: OBSERVABILITY.md "Backend: New Relic" sub-section + PHASE-4-DECISION.md audit record (Wave 2, depends on 01) ✓ implemented
+
+Verification: 40/40 must-haves passed (verifier commit `a6971b2`).
+247 tests pass across 19 packages; go vet clean; go build clean;
+lefthook pre-commit passes.
 
 The Phase 4 receive-side recorder is wired (plan 04-01):
 `NewRelicRecorder` struct + `Record` method + 3-way factory +
