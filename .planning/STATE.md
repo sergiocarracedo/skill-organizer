@@ -6,13 +6,27 @@
 
 ## Current Phase
 
-**Phase 4 — Telemetry backend selection (REQ-9) ✓ complete**
-(2026-06-12). All v0.x phases are now done. REQ-9 acceptance
-observably met: a real, free-of-charge telemetry backend
-(New Relic Insights Events API, 100 GB/mo free tier) is wired
-as the default. `telemetry status` shows the new Recorder
-type, account ID prefix, and insert-key presence. See
-`.planning/PHASE-4-DECISION.md` for the decision audit record.
+**Phase 5 — Local-only anonymous telemetry (REQ-10) — context
+captured** (2026-06-12). Phase 4 is complete. The v0.x roadmap
+extended with a fifth phase after the user pushed back on the
+Phase 4 end-user setup flow (env-var wiring only worked on the
+maintainer's own machine). See `.planning/phases/05-local-only-
+anonymous-telemetry/05-CONTEXT.md` for the new design.
+
+Plan progress:
+- 05-context: design captured via discuss-phase workflow (5 areas, all decided)
+  - Recorder API collapses from 3 implementations to 2 (Noop + NewRelic; HTTPRecorder dropped)
+  - NewRelic endpoint + token are build-time vars (-ldflags); user never configures
+  - User-facing config: one key, `telemetry.enabled`
+  - Schema shrinks from 7 fields to 5 (drop install_id, host_id)
+  - `telemetry wipe` is the GDPR right-to-erasure command
+  - Separate top-level PRIVACY.md with 4 sections
+  - `telemetry status` is two lines: Enabled + Recorder
+  - First-run prompt unchanged structurally; one-line copy tweak to mention `telemetry disable`
+
+Next learnship step: `plan-phase 5`.
+
+Phase 4 status preserved below for reference.
 
 Plan progress:
 - 04-01: NewRelicRecorder + factory + env-var wiring + status extension (Wave 1, no deps) ✓ implemented
