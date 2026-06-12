@@ -6,25 +6,16 @@
 
 ## Current Phase
 
-**Phase 3 — Observability (REQ-8)** — plan 03-01 implemented 2026-06-12, 03-02 and 03-03 ready to execute next.
+**Phase 3 — Observability (REQ-8)** — plans 03-01 + 03-02 implemented 2026-06-12, 03-03 ready to execute next.
 
 Plan progress:
 - 03-01: package + identity + interface (Wave 1, no deps) ✓ implemented
-- 03-02: buffer + HTTPRecorder + first-run prompt + cobra (Wave 2, depends on 01) — ready to execute
+- 03-02: buffer + HTTPRecorder + first-run prompt + cobra (Wave 2, depends on 01) ✓ implemented
 - 03-03: OBSERVABILITY.md + byte-for-byte schema test + e2e (Wave 3, depends on 01+02) — ready to execute
 - 02-01: `--allow-overlap` flag + non-zero exit code ✓ (committed 2026-06-11)
 - 02-02: curated fixtures + overlap-package tests ✓ (committed 2026-06-11)
 
-Verification: 14/14 must-haves passed (`9ab7ef1`).
-
-Phase 3 discuss-phase completed 2026-06-11:
-- First-run prompt: fires on first run of any command, default=no, sticky
-- Event schema: JSON, 7 fields (command, exit_status, install_id, host_id, timestamp RFC3339 UTC, version, event_id ULID), snake_case
-- Identity: two distinct IDs (install_id never rotates, host_id rotatable via `telemetry rotate-host-id`); 32 hex chars from 16 random bytes via crypto/rand
-- Endpoint: no-op default + YAML/env/flag (precedence: flag > env > YAML); `Recorder` interface with `NoopRecorder` (drops) and `HTTPRecorder` (POSTs JSON); factory func var for test injection
-- Network gating: zero egress when disabled; **buffer on disk** (`<AppDir>/telemetry-buffer.jsonl`, 1 MB cap FIFO eviction) for retry on offline
-- OBSERVABILITY.md: full 7-section doc at repo root
-- Test strategy: Recorder interface + httptest server (FakeRecorder + counting transport for zero-network; httptest.NewServer for schema byte-for-byte)
+Verification: 223/223 tests pass (185 baseline + 38 new in plan 03-02); go vet clean; go build clean; lefthook pre-commit e2e green.
 
 Phase 1 (Skill security check, REQ-4) complete on 2026-06-10 with
 all 4 plans executed, ~30 new tests, ~12 files changed.
@@ -40,6 +31,57 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 3 — Observability (REQ-8) — plan 03-02 ✓** (2026-06-12)
+  - 12 atomic commits; SUMMARY at
+    `.planning/phases/03-observability/03-02-plan-SUMMARY.md`
+  - HTTPRecorder (POSTs JSON, 4xx/5xx = failure) +
+    `SetDefaultFactory` closure
+  - Buffer JSONL spool with O_APPEND writes and 1 MB FIFO
+    eviction (post-condition enforced inside Append)
+  - TTY-gated FirstRunPrompt; non-TTY does NOT persist "no"
+    (Pitfall P10)
+  - Service umbrella with `RecordEvent` (single write path;
+    falls back to buffer on failure) and `DrainBuffer`
+  - `NormalizeCommandName` alias canonicalisation
+    (on→enable, off→disable, install→add, rm→delete)
+  - `ResolveEndpoint` flag > env > YAML precedence
+  - `TelemetryConfig` YAML struct +
+    `LoadTelemetryConfigOrDefault` / `SaveTelemetryConfig`
+  - `cmd/telemetry.go` with `enable|disable|status|rotate-host-id`
+    subcommands (all skip the first-run prompt via the
+    `cmd.Name() == "telemetry"` guard in PersistentPreRun)
+  - root.go: new `--telemetry-endpoint` persistent flag;
+    PersistentPreRun guard extended to skip `telemetry`
+    (in addition to `completion` and `help`); new
+    PersistentPostRun emits one event per non-skipped command
+  - 38 new tests (53 telemetry + 75 cmd + 23 config; 223 total
+    in 19 packages, up from 185 baseline)
+  - Two plan-checker bugs fixed and documented in the
+    SUMMARY:
+    - **BUG #1**: env var is
+      `SKILL_ORGANIZER_TELEMETRY_ENDPOINT`, not
+      `_ENABLED` (CONTEXT, RESEARCH, and the flag's own help
+      text all specify `_ENDPOINT`)
+    - **BUG #2**:
+      `TestService_RecordEvent_NoEgressWhenDisabled` calls
+      `SetDefaultFactory` BEFORE `telemetry.New` because
+      `Service.Recorder` is captured inside `New` via
+      `NewRecorder()` → `RecorderFactoryFunc()` at construction
+      time (swapping after is a no-op)
+  - Deviations: (1) `TelemetryConfig` is a type alias of
+    `configpkg.TelemetryConfig` so the cmd package can
+    construct it from the same struct that holds the YAML
+    tags; (2) the buffer auto-evicts inside `Append` (the
+    RESEARCH P7 post-condition pattern), so the FIFO test
+    was rewritten to assert the post-condition rather than
+    `file > 1 MB` followed by an explicit `evictLocked()`
+    call; (3) `e2e_test.go` pre-creates the
+    `telemetry-prompted` sentinel in `newCLIEnv` so the
+    binary's first-run prompt does not block the e2e PTY
+    tests
+  - Build, vet, full test suite (223 passing in 19 packages),
+    and lefthook pre-commit (`pnpm run test:cli:e2e`) all green
 
 - **Phase 3 — Observability (REQ-8) — plan 03-01 ✓** (2026-06-12)
   - New `packages/cli/internal/telemetry/` package with
@@ -107,6 +149,11 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Recent decisions
 
+- **`TelemetryConfig` is a type alias in the telemetry package** of `configpkg.TelemetryConfig`. The plan calls `telemetrypkg.TelemetryConfig{...}` from the cmd package but the YAML persistence layer lives in `config.TelemetryConfig`. A type alias avoids duplication while letting the cmd package construct the struct from the same fields that have `yaml:` tags.
+- **Buffer auto-evicts inside `Append` (post-condition pattern from RESEARCH P7).** The plan's `TestBufferFIFOEvictionAt1MB` assumed an explicit `evictLocked()` call after the file exceeded the cap. The auto-evict is the cleaner pattern (the file is never observed to exceed 1 MB), so the test was rewritten to assert the post-condition: `file <= 1 MB` AND `oldest events dropped` AND `newest preserved`.
+- **e2e test pre-creates the `telemetry-prompted` sentinel** in `newCLIEnv` (with content `no`). The first-run prompt would otherwise block the e2e PTY tests, which don't drive that prompt. The sentinel short-circuits the prompt and exercises the "user has already answered" path.
+- **BUG #1 fix (plan 03-02, plan-checker)**: env var for the endpoint is `SKILL_ORGANIZER_TELEMETRY_ENDPOINT`, not `_ENABLED`. The CONTEXT, RESEARCH, the flag's help text, and OBSERVABILITY.md all specify `_ENDPOINT`. The plan's task 03-02-06 had `_ENABLED`; we use `_ENDPOINT` in `cmd/root.go`.
+- **BUG #2 fix (plan 03-02, plan-checker)**: `TestService_RecordEvent_NoEgressWhenDisabled` must call `SetDefaultFactory` BEFORE `telemetry.New(...)`. The `Service.Recorder` field is set inside `New` via `NewRecorder()` → `RecorderFactoryFunc()` at construction time. Swapping the factory after `New` returns is a no-op for that Service.
 - **Telemetry dep workflow: `go get` first, `go mod tidy` after the first caller exists.** Running `go mod tidy` with no caller silently removes an unused dep from `go.mod`. The plan's task 1 step said "go get && go mod tidy" but the verify step (`go list -m`) required the dep to remain. Splitting the two commands across the dep-add and the first-caller tasks preserves the dep in `go.mod` and lets `tidy` promote it from indirect to direct at the right moment.
 - **`fakeRecorder` is a package-level test double** in the telemetry test file, not a function-local type. Go does not allow method declarations inside function bodies, so the type and its `Record` method must live at package scope. The factory-swap test instantiates a fresh `*fakeRecorder` per swap.
 - **ToolSelector** signature is `func(prompt string, labels []string, defaultOption string) (string, error)` (3 args, not 2 as plan 02 specified). Required so `selectOption` from `prompt.go` can be passed directly without an adapter.
