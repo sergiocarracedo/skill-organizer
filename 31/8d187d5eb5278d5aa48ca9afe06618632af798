@@ -1,0 +1,20 @@
+packages/cli/internal/status/status.go
+  s_6ad89969e95830::t_208f500b0eb848 117-120
+  s_6ad89969e95830::t_2974e677751d17 33-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "318d187d5eb5278d5aa48ca9afe06618632af798",
+  "prompts": {},
+  "sessions": {
+    "s_6ad89969e95830": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef4082fffee0Zvxv0g2j6p4n",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
