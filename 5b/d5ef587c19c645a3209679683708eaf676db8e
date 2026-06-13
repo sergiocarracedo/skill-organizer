@@ -1,0 +1,29 @@
+packages/cli/cmd/skill_security.go
+  s_3d1531d017a36e::t_3c494061af77d5 45-59
+  s_3d1531d017a36e::t_63a0a366b731b8 199
+  s_3d1531d017a36e::t_1d2d4460eca6b7 253
+  s_3d1531d017a36e::t_6f6fb01f41decb 106
+  s_3d1531d017a36e::t_ffd4cd7ceadb3f 25
+  s_3d1531d017a36e::t_56c211b7908591 35
+  s_3d1531d017a36e::t_cef03045f0033d 135
+packages/cli/cmd/skill_security_test.go
+  s_3d1531d017a36e::t_ac216678547b84 352-377
+  s_3d1531d017a36e::t_44bff53f5395cd 137,225
+  s_3d1531d017a36e::t_fedb1fa0fb5517 303
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "5bd5ef587c19c645a3209679683708eaf676db8e",
+  "prompts": {},
+  "sessions": {
+    "s_3d1531d017a36e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef41521ffeMnQ1x2BKmFodQh",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
