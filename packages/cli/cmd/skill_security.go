@@ -22,6 +22,7 @@ var (
 	securityToolID      string
 	securityChooseTool  bool
 	securityAllSkills   bool
+	securityModelID     string
 )
 
 var (
@@ -31,7 +32,7 @@ var (
 	securitySaveConfigFunc       = configpkg.SaveAgentSelectionConfig
 	securityCollectSkills        = securitypkg.CollectSkills
 	securityBuildPrompt          = securitypkg.BuildPrompt
-	securityRunAnalysis          = securitypkg.Run
+	securityRunAnalysis          = defaultSecurityRunAnalysis
 	securityConfirm              = confirm
 	securityUpdateMetadata       = skills.UpdateManagedMetadata
 	securityWriteDisabled        = skills.RewriteManagedFields
@@ -40,6 +41,21 @@ var (
 	securityPrintSuccess         = func(format string, args ...any) { pterm.Success.Printfln(format, args...) }
 	securityPrintWarning         = func(format string, args ...any) { pterm.Warning.Printfln(format, args...) }
 )
+
+// defaultSecurityRunAnalysis wraps securitypkg.Run with model selection.
+// If a model is specified and the tool supports it (ModelArgs != nil),
+// ModelArgs is used instead of Args to build the CLI arguments.
+func defaultSecurityRunAnalysis(ctx context.Context, tool agenttools.InstalledTool, prompt string, model string, onStatus func(string)) (securitypkg.SecurityReport, error) {
+	if model != "" && tool.Tool.ModelArgs != nil {
+		m := model
+		t := tool
+		t.Tool.Args = func(p string) []string {
+			return tool.Tool.ModelArgs(m, p)
+		}
+		return securitypkg.Run(ctx, t, prompt, onStatus)
+	}
+	return securitypkg.Run(ctx, tool, prompt, onStatus)
+}
 
 func newCheckSecurityCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -87,7 +103,7 @@ func newCheckSecurityCommand() *cobra.Command {
 				return err
 			}
 
-			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, securityToolID, securityChooseTool, selectOption, "")
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, securityToolID, securityChooseTool, selectOption, securityModelID)
 			if err != nil {
 				return err
 			}
@@ -116,7 +132,7 @@ func newCheckSecurityCommand() *cobra.Command {
 			}
 			defer agenttools.ShowCursor()
 
-			report, err := securityRunAnalysis(cmd.Context(), tool, prompt, func(status string) {
+			report, err := securityRunAnalysis(cmd.Context(), tool, prompt, agentCfg.DefaultModel, func(status string) {
 				spinner.UpdateText(limitSpinnerText("Analyzing skills: "+status, 80))
 			})
 			if err != nil {
@@ -180,6 +196,7 @@ func newCheckSecurityCommand() *cobra.Command {
 
 	cmd.Flags().BoolVar(&securityPrintPrompt, "print-prompt", false, "Print the generated security prompt without invoking an external tool")
 	cmd.Flags().StringVar(&securityToolID, "tool", "", "Use a specific installed tool id (claude, codex, opencode, cursor, antigravity)")
+	cmd.Flags().StringVar(&securityModelID, "model", "", "AI model to use (format: provider/model)")
 	cmd.Flags().BoolVar(&securityChooseTool, "choose-tool", false, "Prompt to choose the agent tool again")
 	cmd.Flags().BoolVar(&securityAllSkills, "include-disabled", false, "Include disabled skills in the analysis")
 
@@ -233,7 +250,7 @@ func RunCheckSecurityForSkill(skill skills.Skill, location configpkg.Location) e
 
 	tool := installed[0]
 
-	report, err := securityRunAnalysis(context.Background(), tool, prompt, func(_ string) {})
+	report, err := securityRunAnalysis(context.Background(), tool, prompt, "", func(_ string) {})
 	if err != nil {
 		return fmt.Errorf("security analysis failed: %w", err)
 	}

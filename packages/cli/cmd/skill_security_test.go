@@ -134,7 +134,7 @@ func TestCheckSecurityStoresRiskScoreOnLowRisk(t *testing.T) {
 		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	securitySaveConfigFunc = func(_ string, _ configpkg.AgentSelectionConfig) error { return nil }
-	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
+	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
 		return securitypkg.SecurityReport{Results: []securitypkg.SkillResult{{
 			Name:       "personal--alpha",
 			RiskScore:  25,
@@ -222,7 +222,7 @@ func TestCheckSecurityPromptsToDisableHighRisk(t *testing.T) {
 		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	securitySaveConfigFunc = func(_ string, _ configpkg.AgentSelectionConfig) error { return nil }
-	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
+	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
 		return securitypkg.SecurityReport{Results: []securitypkg.SkillResult{{
 			Name:       "personal--alpha",
 			RiskScore:  85,
@@ -300,7 +300,7 @@ func TestCheckSecurityWritesScoreEvenWhenDecliningDisable(t *testing.T) {
 		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	securitySaveConfigFunc = func(_ string, _ configpkg.AgentSelectionConfig) error { return nil }
-	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
+	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
 		return securitypkg.SecurityReport{Results: []securitypkg.SkillResult{{
 			Name:       "personal--alpha",
 			RiskScore:  85,
@@ -347,5 +347,31 @@ func TestCheckSecurityWritesScoreEvenWhenDecliningDisable(t *testing.T) {
 	}
 	if captured.RiskScore != 85 {
 		t.Fatalf("UpdateManagedMetadata RiskScore = %d, want 85", captured.RiskScore)
+	}
+}
+
+func TestCheckSecurity_ModelFlagParsed(t *testing.T) {
+	originalModelID := securityModelID
+	t.Cleanup(func() { securityModelID = originalModelID })
+
+	cmd := newCheckSecurityCommand()
+	flag := cmd.Flags().Lookup("model")
+	if flag == nil {
+		t.Fatal("check-security command has no --model flag")
+	}
+	if flag.DefValue != "" {
+		t.Fatalf("--model flag default = %q, want empty string", flag.DefValue)
+	}
+	// Verify the usage text mentions the expected format.
+	if !strings.Contains(flag.Usage, "provider/model") {
+		t.Fatalf("--model flag usage = %q, want it to mention provider/model format", flag.Usage)
+	}
+
+	// Simulate parsing --model via cobra.
+	if err := cmd.Flags().Set("model", "anthropic/claude-sonnet-4"); err != nil {
+		t.Fatalf("Set(--model) error = %v", err)
+	}
+	if securityModelID != "anthropic/claude-sonnet-4" {
+		t.Fatalf("securityModelID = %q, want %q after parsing --model flag", securityModelID, "anthropic/claude-sonnet-4")
 	}
 }
