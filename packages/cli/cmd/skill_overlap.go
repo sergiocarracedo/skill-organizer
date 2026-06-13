@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,6 +20,7 @@ import (
 var (
 	overlapChooseTool   bool
 	overlapToolID       string
+	overlapModelID      string
 	overlapAllSkills    bool
 	overlapPrintPrompt  bool
 	overlapMinType      string
@@ -39,7 +41,7 @@ var (
 		pterm.Println(prompt)
 	}
 	saveApplyPlanPrompt = writeApplyPlanPrompt
-	runOverlapAnalysis  = overlap.Run
+	runOverlapAnalysis  = defaultOverlapRunAnalysis
 	printInfoMessage    = func(format string, args ...any) {
 		pterm.Info.Printfln(format, args...)
 	}
@@ -50,6 +52,21 @@ var (
 		pterm.Warning.Printfln(format, args...)
 	}
 )
+
+// defaultOverlapRunAnalysis wraps overlap.Run with model selection.
+// If a model is specified and the tool supports it (ModelArgs != nil),
+// ModelArgs is used instead of Args to build the CLI arguments.
+func defaultOverlapRunAnalysis(ctx context.Context, tool agenttools.InstalledTool, prompt string, model string, onStatus func(string)) (overlap.Report, error) {
+	if model != "" && tool.Tool.ModelArgs != nil {
+		m := model
+		t := tool
+		t.Tool.Args = func(p string) []string {
+			return tool.Tool.ModelArgs(m, p)
+		}
+		return overlap.Run(ctx, t, prompt, onStatus)
+	}
+	return overlap.Run(ctx, tool, prompt, onStatus)
+}
 
 func newCheckOverlapCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -96,7 +113,7 @@ func newCheckOverlapCommand() *cobra.Command {
 				return err
 			}
 
-			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapChooseTool, selectToolOption, "")
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapChooseTool, selectToolOption, overlapModelID)
 			if err != nil {
 				return err
 			}
@@ -131,7 +148,7 @@ func newCheckOverlapCommand() *cobra.Command {
 			}
 			defer agenttools.ShowCursor()
 
-			report, err := runOverlapAnalysis(cmd.Context(), tool, prompt, func(status string) {
+			report, err := runOverlapAnalysis(cmd.Context(), tool, prompt, agentCfg.DefaultModel, func(status string) {
 				spinner.UpdateText(limitSpinnerText("Analyzing skills: "+status, 80))
 			})
 			if err != nil {
@@ -201,6 +218,7 @@ func newCheckOverlapCommand() *cobra.Command {
 
 	cmd.Flags().BoolVar(&overlapChooseTool, "choose-tool", false, "Prompt to choose the agent tool again")
 	cmd.Flags().StringVar(&overlapToolID, "tool", "", "Use a specific installed tool id (claude, codex, opencode, cursor, antigravity)")
+	cmd.Flags().StringVar(&overlapModelID, "model", "", "AI model to use (format: provider/model)")
 	cmd.Flags().BoolVar(&overlapAllSkills, "include-disabled", false, "Include disabled skills in the overlap analysis")
 	cmd.Flags().BoolVar(&overlapPrintPrompt, "print-prompt", false, "Print the generated overlap prompt without invoking an external tool")
 	cmd.Flags().StringVar(&overlapMinType, "min-overlap-type", "partial", "Minimum overlap type to show: adjacent|partial|duplicate or 1|2|3")

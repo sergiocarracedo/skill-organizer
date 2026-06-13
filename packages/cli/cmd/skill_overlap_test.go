@@ -314,7 +314,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
 	}
-	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (overlap.Report, error) {
 		return overlap.Report{Groups: []overlap.Group{{SkillNames: []string{"alpha", "beta"}, SkillPaths: []string{"personal/alpha", "personal/beta"}, Score: 72, OverlapType: "partial", WhyOverlap: "They overlap.", Recommendation: "Separate them."}}}, nil
 	}
 	var questions []string
@@ -481,7 +481,7 @@ func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
 	}
-	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (overlap.Report, error) {
 		return overlap.Report{Groups: []overlap.Group{{SkillNames: []string{"alpha", "beta"}, SkillPaths: []string{"personal/alpha", "personal/beta"}, Score: 72, OverlapType: "partial", WhyOverlap: "They overlap.", Recommendation: "Separate them."}}}, nil
 	}
 	confirmApplyPlan = func(prompt string, defaultValue bool) (bool, error) {
@@ -583,7 +583,7 @@ func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
 	}
-	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (overlap.Report, error) {
 		return overlap.Report{Groups: []overlap.Group{{SkillNames: []string{"alpha", "beta"}, SkillPaths: []string{"personal/alpha", "personal/beta"}, Score: 72, OverlapType: "partial", WhyOverlap: "They overlap.", Recommendation: "Separate them."}}}, nil
 	}
 	confirmApplyPlan = func(prompt string, defaultValue bool) (bool, error) {
@@ -678,7 +678,7 @@ func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
 	}
-	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ func(string)) (overlap.Report, error) {
+	runOverlapAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (overlap.Report, error) {
 		return overlap.Report{}, nil
 	}
 	confirmApplyPlan = func(prompt string, defaultValue bool) (bool, error) {
@@ -727,6 +727,30 @@ func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
 	overlapAllowOverlap = false
 	if err := cmd.RunE(cmd, nil); err != nil {
 		t.Fatalf("RunE() error = %v, want nil", err)
+	}
+}
+
+func TestCheckOverlap_ModelFlagParsed(t *testing.T) {
+	originalModelID := overlapModelID
+	t.Cleanup(func() { overlapModelID = originalModelID })
+
+	cmd := newCheckOverlapCommand()
+	flag := cmd.Flags().Lookup("model")
+	if flag == nil {
+		t.Fatal("check-overlap command has no --model flag")
+	}
+	if flag.DefValue != "" {
+		t.Fatalf("--model flag default = %q, want empty string", flag.DefValue)
+	}
+	if !strings.Contains(flag.Usage, "provider/model") {
+		t.Fatalf("--model flag usage = %q, want it to mention provider/model format", flag.Usage)
+	}
+
+	if err := cmd.Flags().Set("model", "openai/gpt-4o"); err != nil {
+		t.Fatalf("Set(--model) error = %v", err)
+	}
+	if overlapModelID != "openai/gpt-4o" {
+		t.Fatalf("overlapModelID = %q, want %q after parsing --model flag", overlapModelID, "openai/gpt-4o")
 	}
 }
 
