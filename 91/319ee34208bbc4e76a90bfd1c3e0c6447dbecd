@@ -1,0 +1,25 @@
+packages/cli/cmd/telemetry.go
+  s_3d1531d017a36e::t_2cc913a4532e21 104-105,113,123-127,135-141
+  s_3d1531d017a36e::t_31f00b2f9f1b2b 19-24
+packages/cli/cmd/telemetry_test.go
+  s_3d1531d017a36e::t_29abbeca6d680c 263,272,288-290,311-312
+  s_3d1531d017a36e::t_db9fe87e87cf3a 198,207,222-224,247-248
+  s_3d1531d017a36e::t_4075b022139a29 12
+  s_3d1531d017a36e::t_402f035c1bd2b8 109-110,112,118,127,143-145,168-169,187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "91319ee34208bbc4e76a90bfd1c3e0c6447dbecd",
+  "prompts": {},
+  "sessions": {
+    "s_3d1531d017a36e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef41521ffeMnQ1x2BKmFodQh",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
