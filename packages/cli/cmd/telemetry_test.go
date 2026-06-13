@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 	telemetrypkg "github.com/sergiocarracedo/skill-organizer/cli/internal/telemetry"
 )
 
@@ -105,15 +106,16 @@ func TestTelemetryDisableSubcommand(t *testing.T) {
 	}
 }
 
-// TestTelemetryStatusSubcommand asserts the Phase 5 REQ-10 two-line
-// status output. The factory is not pre-set in this test, so the
+// TestTelemetryStatusSubcommand asserts the Phase 5 REQ-10 status
+// output (3 lines). The factory is not pre-set in this test, so the
 // build-time vars (NewRelicEndpoint, NewRelicAPIKey) are empty and
-// the factory routes to NoopRecorder. The test asserts the two
+// the factory routes to NoopRecorder. The test asserts the relevant
 // substrings and that the OLD (Phase 3/4) 8-line fields are NOT
 // present.
 func TestTelemetryStatusSubcommand(t *testing.T) {
 	originalLoad := telemetryLoadConfig
 	originalAppDir := telemetryAppDir
+	originalLoadAgentCfg := telemetryLoadAgentCfg
 	originalFactory := telemetrypkg.RecorderFactoryFunc
 	originalInfo := telemetryInfo
 	originalSuccess := telemetrySuccess
@@ -122,6 +124,7 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	t.Cleanup(func() {
 		telemetryLoadConfig = originalLoad
 		telemetryAppDir = originalAppDir
+		telemetryLoadAgentCfg = originalLoadAgentCfg
 		telemetrypkg.RecorderFactoryFunc = originalFactory
 		telemetryInfo = originalInfo
 		telemetrySuccess = originalSuccess
@@ -136,6 +139,9 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 
 	telemetryLoadConfig = func(_ string) (telemetrypkg.TelemetryConfig, error) {
 		return telemetrypkg.TelemetryConfig{Enabled: true}, nil
+	}
+	telemetryLoadAgentCfg = func(_ string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultModel: "test-model"}, nil
 	}
 	telemetryAppDir = func() (string, error) { return appDir, nil }
 
@@ -154,12 +160,13 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	}
 
 	got := buf.String()
-	// Two lines, per Phase 5 REQ-10: Enabled + Recorder.
 	wantSubstrings := []string{
 		"Enabled:",
 		"true",
 		"Recorder:",
 		"NoopRecorder",
+		"Default model:",
+		"test-model",
 	}
 	for _, want := range wantSubstrings {
 		if !strings.Contains(got, want) {
@@ -177,7 +184,7 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	}
 	for _, b := range banned {
 		if strings.Contains(got, b) {
-			t.Fatalf("status output must not contain %q (Phase 5 REQ-10 collapses to 2 lines)\noutput:\n%s", b, got)
+			t.Fatalf("status output must not contain %q (Phase 5 REQ-10 collapses status)\noutput:\n%s", b, got)
 		}
 	}
 }
@@ -188,6 +195,7 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 func TestTelemetryStatusSubcommand_NewRelicConfigured(t *testing.T) {
 	originalLoad := telemetryLoadConfig
 	originalAppDir := telemetryAppDir
+	originalLoadAgentCfg := telemetryLoadAgentCfg
 	originalFactory := telemetrypkg.RecorderFactoryFunc
 	originalInfo := telemetryInfo
 	originalSuccess := telemetrySuccess
@@ -196,6 +204,7 @@ func TestTelemetryStatusSubcommand_NewRelicConfigured(t *testing.T) {
 	t.Cleanup(func() {
 		telemetryLoadConfig = originalLoad
 		telemetryAppDir = originalAppDir
+		telemetryLoadAgentCfg = originalLoadAgentCfg
 		telemetrypkg.RecorderFactoryFunc = originalFactory
 		telemetryInfo = originalInfo
 		telemetrySuccess = originalSuccess
@@ -209,6 +218,9 @@ func TestTelemetryStatusSubcommand_NewRelicConfigured(t *testing.T) {
 
 	telemetryLoadConfig = func(_ string) (telemetrypkg.TelemetryConfig, error) {
 		return telemetrypkg.TelemetryConfig{Enabled: true}, nil
+	}
+	telemetryLoadAgentCfg = func(_ string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultModel: "test-model"}, nil
 	}
 	telemetryAppDir = func() (string, error) { return appDir, nil }
 
@@ -232,6 +244,8 @@ func TestTelemetryStatusSubcommand_NewRelicConfigured(t *testing.T) {
 		"true",
 		"Recorder:",
 		"NewRelicRecorder",
+		"Default model:",
+		"test-model",
 	}
 	for _, want := range wantSubstrings {
 		if !strings.Contains(got, want) {
@@ -246,6 +260,7 @@ func TestTelemetryStatusSubcommand_NewRelicConfigured(t *testing.T) {
 func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 	originalLoad := telemetryLoadConfig
 	originalAppDir := telemetryAppDir
+	originalLoadAgentCfg := telemetryLoadAgentCfg
 	originalFactory := telemetrypkg.RecorderFactoryFunc
 	originalInfo := telemetryInfo
 	originalSuccess := telemetrySuccess
@@ -254,6 +269,7 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 	t.Cleanup(func() {
 		telemetryLoadConfig = originalLoad
 		telemetryAppDir = originalAppDir
+		telemetryLoadAgentCfg = originalLoadAgentCfg
 		telemetrypkg.RecorderFactoryFunc = originalFactory
 		telemetryInfo = originalInfo
 		telemetrySuccess = originalSuccess
@@ -268,6 +284,9 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 
 	telemetryLoadConfig = func(_ string) (telemetrypkg.TelemetryConfig, error) {
 		return telemetrypkg.TelemetryConfig{Enabled: true}, nil
+	}
+	telemetryLoadAgentCfg = func(_ string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultModel: ""}, nil
 	}
 	telemetryAppDir = func() (string, error) { return appDir, nil }
 
@@ -288,6 +307,9 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 	got := buf.String()
 	if !strings.Contains(got, "NoopRecorder") {
 		t.Fatalf("status output missing NoopRecorder (build vars empty)\noutput:\n%s", got)
+	}
+	if !strings.Contains(got, "(none)") {
+		t.Fatalf("status output should show (none) for empty DefaultModel\noutput:\n%s", got)
 	}
 }
 

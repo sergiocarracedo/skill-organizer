@@ -16,11 +16,12 @@ import (
 // skill_overlap.go pattern: production calls the real configpkg
 // functions, tests reassign in t.Cleanup.
 var (
-	telemetryLoadConfig = configpkg.LoadTelemetryConfigOrDefault
-	telemetrySaveConfig = configpkg.SaveTelemetryConfig
-	telemetryAppDir     = configpkg.AppDir
-	telemetryInfo       = func(format string, args ...any) { pterm.Info.Printfln(format, args...) }
-	telemetrySuccess    = func(format string, args ...any) { pterm.Success.Printfln(format, args...) }
+	telemetryLoadConfig      = configpkg.LoadTelemetryConfigOrDefault
+	telemetrySaveConfig      = configpkg.SaveTelemetryConfig
+	telemetryLoadAgentCfg    = configpkg.LoadAgentSelectionConfigOrDefault
+	telemetryAppDir          = configpkg.AppDir
+	telemetryInfo            = func(format string, args ...any) { pterm.Info.Printfln(format, args...) }
+	telemetrySuccess         = func(format string, args ...any) { pterm.Success.Printfln(format, args...) }
 )
 
 // newTelemetryCommand is the parent `telemetry` cobra subcommand. It
@@ -100,7 +101,8 @@ func newTelemetryDisableCommand() *cobra.Command {
 }
 
 // newTelemetryStatusCommand prints the current telemetry state to
-// stdout: two lines, per Phase 5 REQ-10. The endpoint, account id,
+// stdout: three lines. Shows enabled state, recorder type, and
+// the configured default model (if set). The endpoint, account id,
 // insert key, install id, host id, and buffer size are no longer
 // surfaced — they were either build-time (the recorder creds) or
 // removed (the identity fields). The full schema and posture is
@@ -108,13 +110,18 @@ func newTelemetryDisableCommand() *cobra.Command {
 func newTelemetryStatusCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
-		Short: "Show current telemetry state (enabled, recorder type)",
+		Short: "Show current telemetry state (enabled, recorder type, default model)",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			registryPath, err := configpkg.RegistryPath()
 			if err != nil {
 				return err
 			}
 			cfg, err := telemetryLoadConfig(registryPath)
+			if err != nil {
+				return err
+			}
+			// Load the agent selection config to read the default model.
+			agentCfg, err := telemetryLoadAgentCfg(registryPath)
 			if err != nil {
 				return err
 			}
@@ -125,8 +132,13 @@ func newTelemetryStatusCommand() *cobra.Command {
 			// touches the network (it lives in the skip set).
 			telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: cfg.Enabled})
 			recType := recorderTypeName(telemetrypkg.NewRecorder())
-			telemetryInfo("Enabled:  %v", cfg.Enabled)
-			telemetryInfo("Recorder: %s", recType)
+			modelValue := agentCfg.DefaultModel
+			if modelValue == "" {
+				modelValue = "(none)"
+			}
+			telemetryInfo("Enabled:       %v", cfg.Enabled)
+			telemetryInfo("Recorder:      %s", recType)
+			telemetryInfo("Default model: %s", modelValue)
 			return nil
 		},
 	}
