@@ -8,16 +8,15 @@
 
 **Phase 6 — AI model visibility and security tooling**
 - discuss-phase ✓ complete (2026-06-12)
-- Next: `plan-phase 6`
+- Next: phase 6 complete — all 3 plans (06-01, 06-02, 06-03) implemented
+- Next learnship step: `audit-milestone` or `new-phase`
 
 All v0.x phases (1-5, REQ-3/4/8/9/10) remain ✓ complete.
 
 Plan progress:
 - 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
 - 06-02: Model selection in tool picker + --model flags + persistence + status display (Wave 2, depends on 01) ✓ complete
-
-Plan progress:
-- 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
+- 06-03: Security rating in status tree with content-hash freshness (Wave 2, depends on 01) ✓ complete
 - 06-02: Model selection in tool picker + --model flags + persistence + status display (Wave 2, depends on 01) ✓ complete
 
 Phase 5 summary:
@@ -98,6 +97,17 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 6 — AI model visibility and security — plan 06-03 ✓** (2026-06-13)
+  - 4 atomic commits; SUMMARY at
+    `.planning/phases/06-ai-model-visibility-security/06-03-PLAN-SUMMARY.md`
+  - `ManagedMetadata` gains `RiskSourceHash` field with YAML round-trip (frontmatter.go)
+  - `ComputeSkillHash(skillDir)` helper: SHA-256 over SKILL.md body + non-metadata files (hash.go)
+  - `check-security` both in main command and hook mode computes and stores `RiskSourceHash`
+  - `SkillStatus` gains 4 risk fields (`RiskScore`, `RiskEvaluatedAt`, `RiskEvaluator`, `RiskSourceHash`)
+  - Status tree shows colored `[risk: N]` tags, `[risk: uncheck]` for unevaluated, `[risk: N (stale)]` when content changed
+  - 9 new tests (4 hash + 1 integration + 3 risk tag + 1 round-trip); 251 passing in 19 packages
+  - Build, vet, full test suite, and lefthook pre-commit all green
 
 - **Phase 6 — AI model visibility and security — plan 06-02 ✓** (2026-06-13)
   - 4 atomic commits; SUMMARY at
