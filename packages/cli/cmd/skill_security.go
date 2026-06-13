@@ -154,17 +154,25 @@ func newCheckSecurityCommand() *cobra.Command {
 					continue
 				}
 
-				updates := skills.ManagedMetadata{
-					RiskScore:       result.RiskScore,
-					RiskEvaluatedAt: now,
-					RiskEvaluator:   tool.Tool.ID,
-					RiskReason:      result.RiskReason,
-				}
+			updates := skills.ManagedMetadata{
+				RiskScore:       result.RiskScore,
+				RiskEvaluatedAt: now,
+				RiskEvaluator:   tool.Tool.ID,
+				RiskReason:      result.RiskReason,
+			}
 
-				concrete := toSkill(skill, location)
-				if err := securityUpdateMetadata(concrete, updates); err != nil {
-					return fmt.Errorf("write risk score for %s: %w", skill.FlattenedName, err)
-				}
+			concrete := toSkill(skill, location)
+
+			hash, hashErr := skills.ComputeSkillHash(concrete.Dir)
+			if hashErr == nil {
+				updates.RiskSourceHash = hash
+			} else {
+				securityPrintWarning("Failed to compute content hash for %q: %v", skill.Name, hashErr)
+			}
+
+			if err := securityUpdateMetadata(concrete, updates); err != nil {
+				return fmt.Errorf("write risk score for %s: %w", skill.FlattenedName, err)
+			}
 
 				if result.RiskScore < highRiskThreshold {
 					continue
@@ -266,6 +274,14 @@ func RunCheckSecurityForSkill(skill skills.Skill, location configpkg.Location) e
 			RiskEvaluator:   tool.Tool.ID,
 			RiskReason:      result.RiskReason,
 		}
+
+		hash, hashErr := skills.ComputeSkillHash(skill.Dir)
+		if hashErr == nil {
+			updates.RiskSourceHash = hash
+		} else {
+			pterm.Warning.Printfln("Failed to compute content hash for %q: %v", skill.FlattenedName, hashErr)
+		}
+
 		if err := skills.UpdateManagedMetadata(skill, updates); err != nil {
 			return fmt.Errorf("persist risk score: %w", err)
 		}

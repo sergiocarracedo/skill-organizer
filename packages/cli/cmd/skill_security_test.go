@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -347,6 +349,92 @@ func TestCheckSecurityWritesScoreEvenWhenDecliningDisable(t *testing.T) {
 	}
 	if captured.RiskScore != 85 {
 		t.Fatalf("UpdateManagedMetadata RiskScore = %d, want 85", captured.RiskScore)
+	}
+}
+
+func TestCheckSecurity_StoresRiskSourceHash(t *testing.T) {
+	// Create a real skill file in a temp dir so ComputeSkillHash can read it.
+	sourceDir := t.TempDir()
+	skillDir := filepath.Join(sourceDir, "personal", "alpha")
+	if err := os.MkdirAll(skillDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll() error = %v", err)
+	}
+	skillContent := "---\nname: alpha\ndescription: test\n---\n\n# Alpha\n"
+	if err := os.WriteFile(filepath.Join(skillDir, "SKILL.md"), []byte(skillContent), 0o644); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	originalLoad := securityLoadResolvedLocation
+	originalCollect := securityCollectSkills
+	originalDetect := securityDetectInstalledTools
+	originalLoadConfig := securityLoadConfigFunc
+	originalSaveConfig := securitySaveConfigFunc
+	originalRunAnalysis := securityRunAnalysis
+	originalUpdate := securityUpdateMetadata
+	originalWriteDisabled := securityWriteDisabled
+	originalConfirm := securityConfirm
+	originalSpinner := agenttools.StartSpinnerFunc
+
+	securityLoadResolvedLocation = func() (string, configpkg.Location, error) {
+		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: sourceDir, Target: t.TempDir()}, nil
+	}
+	securityCollectSkills = func(_ configpkg.Location, _ bool) ([]securitypkg.SkillInfo, error) {
+		return []securitypkg.SkillInfo{{
+			Name:          "alpha",
+			RelativePath:  "personal/alpha",
+			FlattenedName: "personal--alpha",
+			Description:   "Alpha description",
+		}}, nil
+	}
+	securityDetectInstalledTools = func() ([]agenttools.InstalledTool, error) {
+		return []agenttools.InstalledTool{mockInstalledTool("codex", "codex")}, nil
+	}
+	securityLoadConfigFunc = func(_ string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
+	}
+	securitySaveConfigFunc = func(_ string, _ configpkg.AgentSelectionConfig) error { return nil }
+	securityRunAnalysis = func(_ context.Context, _ agenttools.InstalledTool, _ string, _ string, _ func(string)) (securitypkg.SecurityReport, error) {
+		return securitypkg.SecurityReport{Results: []securitypkg.SkillResult{{
+			Name:       "personal--alpha",
+			RiskScore:  25,
+			RiskReason: "Plain markdown",
+		}}}, nil
+	}
+	var captured skills.ManagedMetadata
+	capturedSkillDir := ""
+	securityUpdateMetadata = func(skill skills.Skill, updates skills.ManagedMetadata) error {
+		captured = updates
+		capturedSkillDir = skill.Dir
+		return nil
+	}
+	securityWriteDisabled = func(_ skills.Skill, _ bool, _ bool) error { return nil }
+	securityConfirm = func(_ string, _ bool) (bool, error) { return false, nil }
+	agenttools.StartSpinnerFunc = func(_ string) (agenttools.SpinnerHandle, error) {
+		return stubSpinner{}, nil
+	}
+	t.Cleanup(func() {
+		securityLoadResolvedLocation = originalLoad
+		securityCollectSkills = originalCollect
+		securityDetectInstalledTools = originalDetect
+		securityLoadConfigFunc = originalLoadConfig
+		securitySaveConfigFunc = originalSaveConfig
+		securityRunAnalysis = originalRunAnalysis
+		securityUpdateMetadata = originalUpdate
+		securityWriteDisabled = originalWriteDisabled
+		securityConfirm = originalConfirm
+		agenttools.StartSpinnerFunc = originalSpinner
+	})
+
+	cmd := newCheckSecurityCommand()
+	if err := cmd.RunE(cmd, nil); err != nil {
+		t.Fatalf("RunE() error = %v", err)
+	}
+
+	if captured.RiskSourceHash == "" {
+		t.Fatalf("RiskSourceHash was not set after check-security")
+	}
+	if capturedSkillDir != skillDir {
+		t.Fatalf("skill Dir = %q, want %q", capturedSkillDir, skillDir)
 	}
 }
 
