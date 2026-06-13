@@ -30,6 +30,10 @@ type SkillStatus struct {
 	InstalledDate        string
 	AvailableVersion     string
 	AvailableCheckedDate string
+	RiskScore            int
+	RiskEvaluatedAt      string
+	RiskEvaluator        string
+	RiskSourceHash       string
 }
 
 type Report struct {
@@ -110,6 +114,10 @@ func Build(location configpkg.Location) (Report, error) {
 		metadata := doc.ManagedMetadata()
 		entry.InstalledVersion = metadata.InstalledVersion
 		entry.InstalledDate = metadata.LastUpdatedAt
+		entry.RiskScore = metadata.RiskScore
+		entry.RiskEvaluatedAt = metadata.RiskEvaluatedAt
+		entry.RiskEvaluator = metadata.RiskEvaluator
+		entry.RiskSourceHash = metadata.RiskSourceHash
 		if update, ok := lookupPendingUpdate(updateLookup, skill); ok {
 			entry.AvailableVersion = update.LatestVersion
 			entry.AvailableCheckedDate = update.CheckedAt
