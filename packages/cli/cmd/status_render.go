@@ -3,12 +3,14 @@ package cmd
 import (
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/pterm/pterm"
 	"golang.org/x/term"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
+	"github.com/sergiocarracedo/skill-organizer/cli/internal/skills"
 	statuspkg "github.com/sergiocarracedo/skill-organizer/cli/internal/status"
 	syncpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/sync"
 	versionfmtpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/versionfmt"
@@ -200,6 +202,9 @@ func formatSkillLabel(entry statuspkg.SkillStatus, sourceLeaf string) string {
 	if available := formatAvailableStatus(entry); available != "" {
 		parts = append(parts, available)
 	}
+	if risk := formatRiskTag(entry); risk != "" {
+		parts = append(parts, risk)
+	}
 	return sourceLeaf + " -> " + flattened + statusColumnSeparator() + strings.Join(parts, " ")
 }
 
@@ -217,6 +222,34 @@ func formatInstalledStatus(entry statuspkg.SkillStatus) string {
 		parts = append(parts, date)
 	}
 	return pterm.NewStyle(pterm.FgMagenta).Sprint("[" + strings.Join(parts, " ") + "]")
+}
+
+func formatRiskTag(entry statuspkg.SkillStatus) string {
+	// Unevaluated: no evaluator set
+	if entry.RiskEvaluator == "" {
+		return pterm.NewStyle(pterm.FgYellow).Sprint("[risk: uncheck]")
+	}
+
+	// Compute current content hash to check freshness
+	currentHash, err := skills.ComputeSkillHash(entry.Skill.Dir)
+	stale := err == nil && entry.RiskSourceHash != "" && currentHash != entry.RiskSourceHash
+
+	scoreStr := strconv.Itoa(entry.RiskScore)
+	if stale {
+		return pterm.NewStyle(pterm.FgYellow).Sprint("[risk: " + scoreStr + " (stale)]")
+	}
+
+	// Color by score range
+	var color pterm.Color
+	switch {
+	case entry.RiskScore >= 70:
+		color = pterm.FgRed
+	case entry.RiskScore >= 30:
+		color = pterm.FgYellow
+	default:
+		color = pterm.FgGreen
+	}
+	return pterm.NewStyle(color).Sprint("[risk: " + scoreStr + "]")
 }
 
 func formatAvailableStatus(entry statuspkg.SkillStatus) string {
