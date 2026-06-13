@@ -59,7 +59,7 @@ func TestChooseAgentToolUsesSavedDefault(t *testing.T) {
 		return "", fmt.Errorf("should not be called")
 	}
 
-	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "", false, errSelector)
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "", false, errSelector, "")
 	if err != nil {
 		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
@@ -84,7 +84,7 @@ func TestChooseAgentToolUsesExplicitID(t *testing.T) {
 		return "", fmt.Errorf("should not be called")
 	}
 
-	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "claude", false, errSelector)
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "claude", false, errSelector, "")
 	if err != nil {
 		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
@@ -104,7 +104,7 @@ func TestChooseAgentToolErrorsOnMissingExplicitID(t *testing.T) {
 		{Tool: supportedTools[0], Binary: "claude"},
 	}
 
-	_, _, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{}, "codex", false, nil)
+	_, _, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{}, "codex", false, nil, "")
 	if err == nil {
 		t.Fatalf("ChooseAgentTool() error = nil, want error")
 	}
@@ -230,6 +230,172 @@ func TestQueryToolModels_ReturnsErrorOnFailedCommand(t *testing.T) {
 	_, err := QueryToolModels(tool)
 	if err == nil {
 		t.Fatalf("QueryToolModels() error = nil, want error for failed command")
+	}
+}
+
+func TestChooseAgentTool_ExplicitModelFlag(t *testing.T) {
+	origChoose := ChooseAgentToolFunc
+	origQuery := QueryToolModelsFunc
+	defer func() {
+		ChooseAgentToolFunc = origChoose
+		QueryToolModelsFunc = origQuery
+	}()
+
+	// Should not call QueryToolModels when explicitModel is set.
+	QueryToolModelsFunc = func(_ InstalledTool) ([]string, error) {
+		return nil, fmt.Errorf("should not be called")
+	}
+
+	installed := []InstalledTool{
+		{Tool: Tool{ID: "opencode", Name: "OpenCode", ListModels: func(_ string) ([]string, error) { return nil, nil }}, Binary: "opencode"},
+	}
+
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{}, "opencode", false, nil, "anthropic/claude-sonnet-4")
+	if err != nil {
+		t.Fatalf("ChooseAgentTool() error = %v", err)
+	}
+	if tool.Tool.ID != "opencode" {
+		t.Fatalf("tool ID = %q, want %q", tool.Tool.ID, "opencode")
+	}
+	if cfg.DefaultModel != "anthropic/claude-sonnet-4" {
+		t.Fatalf("DefaultModel = %q, want %q", cfg.DefaultModel, "anthropic/claude-sonnet-4")
+	}
+}
+
+func TestChooseAgentTool_NoModelPromptWhenToolHasNoModels(t *testing.T) {
+	origChoose := ChooseAgentToolFunc
+	origQuery := QueryToolModelsFunc
+	defer func() {
+		ChooseAgentToolFunc = origChoose
+		QueryToolModelsFunc = origQuery
+	}()
+
+	// QueryToolModels should not be called since claude has ListModels: nil.
+	QueryToolModelsFunc = func(_ InstalledTool) ([]string, error) {
+		return nil, fmt.Errorf("should not be called")
+	}
+
+	installed := []InstalledTool{
+		{Tool: supportedTools[0], Binary: "claude"}, // claude has ListModels: nil
+	}
+
+	// Use saved default to skip interactive tool selection.
+	errSelector := func(_ string, _ []string, _ string) (string, error) {
+		return "", fmt.Errorf("should not be called")
+	}
+
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "", false, errSelector, "")
+	if err != nil {
+		t.Fatalf("ChooseAgentTool() error = %v", err)
+	}
+	if tool.Tool.ID != "claude" {
+		t.Fatalf("tool ID = %q, want %q", tool.Tool.ID, "claude")
+	}
+	if cfg.DefaultModel != "" {
+		t.Fatalf("DefaultModel = %q, want empty string", cfg.DefaultModel)
+	}
+}
+
+func TestChooseAgentTool_SelectsModelWhenToolExposesModels(t *testing.T) {
+	origChoose := ChooseAgentToolFunc
+	origQuery := QueryToolModelsFunc
+	defer func() {
+		ChooseAgentToolFunc = origChoose
+		QueryToolModelsFunc = origQuery
+	}()
+
+	QueryToolModelsFunc = func(_ InstalledTool) ([]string, error) {
+		return []string{"anthropic/claude-sonnet-4", "openai/gpt-4o"}, nil
+	}
+
+	installed := []InstalledTool{
+		{Tool: Tool{ID: "opencode", Name: "OpenCode", ListModels: func(_ string) ([]string, error) { return nil, nil }}, Binary: "opencode"},
+	}
+
+	// The selector is called for model selection, not tool selection
+	// (tool is resolved via saved default).
+	selector := func(_ string, labels []string, defaultOption string) (string, error) {
+		if len(labels) != 2 {
+			return "", fmt.Errorf("got %d labels, want 2", len(labels))
+		}
+		return labels[1], nil
+	}
+
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode"}, "", false, selector, "")
+	if err != nil {
+		t.Fatalf("ChooseAgentTool() error = %v", err)
+	}
+	if tool.Tool.ID != "opencode" {
+		t.Fatalf("tool ID = %q, want %q", tool.Tool.ID, "opencode")
+	}
+	if cfg.DefaultModel != "openai/gpt-4o" {
+		t.Fatalf("DefaultModel = %q, want %q", cfg.DefaultModel, "openai/gpt-4o")
+	}
+}
+
+func TestChooseAgentTool_UsesDefaultModel(t *testing.T) {
+	origChoose := ChooseAgentToolFunc
+	origQuery := QueryToolModelsFunc
+	defer func() {
+		ChooseAgentToolFunc = origChoose
+		QueryToolModelsFunc = origQuery
+	}()
+
+	QueryToolModelsFunc = func(_ InstalledTool) ([]string, error) {
+		return []string{"anthropic/claude-sonnet-4", "openai/gpt-4o"}, nil
+	}
+
+	installed := []InstalledTool{
+		{Tool: Tool{ID: "opencode", Name: "OpenCode", ListModels: func(_ string) ([]string, error) { return nil, nil }}, Binary: "opencode"},
+	}
+
+	// DefaultModel is in the list, so no prompt should be shown.
+	errSelector := func(_ string, _ []string, _ string) (string, error) {
+		return "", fmt.Errorf("should not be called")
+	}
+
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", DefaultModel: "anthropic/claude-sonnet-4"}, "", false, errSelector, "")
+	if err != nil {
+		t.Fatalf("ChooseAgentTool() error = %v", err)
+	}
+	if tool.Tool.ID != "opencode" {
+		t.Fatalf("tool ID = %q, want %q", tool.Tool.ID, "opencode")
+	}
+	if cfg.DefaultModel != "anthropic/claude-sonnet-4" {
+		t.Fatalf("DefaultModel = %q, want %q", cfg.DefaultModel, "anthropic/claude-sonnet-4")
+	}
+}
+
+func TestChooseAgentTool_ModelQueryErrorShowsToolWithoutModel(t *testing.T) {
+	origChoose := ChooseAgentToolFunc
+	origQuery := QueryToolModelsFunc
+	defer func() {
+		ChooseAgentToolFunc = origChoose
+		QueryToolModelsFunc = origQuery
+	}()
+
+	QueryToolModelsFunc = func(_ InstalledTool) ([]string, error) {
+		return nil, fmt.Errorf("query failed")
+	}
+
+	installed := []InstalledTool{
+		{Tool: Tool{ID: "opencode", Name: "OpenCode", ListModels: func(_ string) ([]string, error) { return nil, nil }}, Binary: "opencode"},
+	}
+
+	// Should not be called since model query fails, skipping model prompt.
+	errSelector := func(_ string, _ []string, _ string) (string, error) {
+		return "", fmt.Errorf("should not be called")
+	}
+
+	tool, cfg, err := ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode"}, "", false, errSelector, "")
+	if err != nil {
+		t.Fatalf("ChooseAgentTool() error = %v", err)
+	}
+	if tool.Tool.ID != "opencode" {
+		t.Fatalf("tool ID = %q, want %q", tool.Tool.ID, "opencode")
+	}
+	if cfg.DefaultModel != "" {
+		t.Fatalf("DefaultModel = %q, want empty string", cfg.DefaultModel)
 	}
 }
 

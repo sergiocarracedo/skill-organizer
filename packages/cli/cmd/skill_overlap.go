@@ -96,7 +96,7 @@ func newCheckOverlapCommand() *cobra.Command {
 				return err
 			}
 
-			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapChooseTool, selectToolOption)
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapChooseTool, selectToolOption, "")
 			if err != nil {
 				return err
 			}

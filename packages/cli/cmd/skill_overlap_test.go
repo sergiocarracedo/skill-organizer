@@ -24,7 +24,7 @@ func TestChooseOverlapToolUsesSavedInstalledDefault(t *testing.T) {
 		return "", fmt.Errorf("should not be called")
 	}
 
-	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "", false, selector)
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "codex"}, "", false, selector, "")
 	if err != nil {
 		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
@@ -47,7 +47,7 @@ func TestChooseOverlapToolUsesExplicitInstalledTool(t *testing.T) {
 		return "", fmt.Errorf("should not be called")
 	}
 
-	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "codex", false, selector)
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "codex", false, selector, "")
 	if err != nil {
 		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}
@@ -63,7 +63,7 @@ func TestChooseOverlapToolUsesExplicitInstalledTool(t *testing.T) {
 func TestChooseOverlapToolErrorsWhenExplicitToolIsMissing(t *testing.T) {
 	installed := []agenttools.InstalledTool{mockInstalledTool("claude", "claude")}
 
-	_, _, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{}, "codex", false, nil)
+	_, _, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{}, "codex", false, nil, "")
 	if err == nil {
 		t.Fatalf("ChooseAgentTool() error = nil, want error")
 	}
@@ -82,7 +82,7 @@ func TestChooseOverlapToolPromptsWhenRequested(t *testing.T) {
 		return labels[1], nil
 	}
 
-	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "", true, selector)
+	tool, cfg, err := agenttools.ChooseAgentTool(installed, configpkg.AgentSelectionConfig{DefaultAgentTool: "claude"}, "", true, selector, "")
 	if err != nil {
 		t.Fatalf("ChooseAgentTool() error = %v", err)
 	}

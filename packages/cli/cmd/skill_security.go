@@ -87,7 +87,7 @@ func newCheckSecurityCommand() *cobra.Command {
 				return err
 			}
 
-			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, securityToolID, securityChooseTool, selectOption)
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, securityToolID, securityChooseTool, selectOption, "")
 			if err != nil {
 				return err
 			}

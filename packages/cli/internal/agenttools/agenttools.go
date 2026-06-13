@@ -183,9 +183,16 @@ func detectToolBinary(tool Tool) (string, bool) {
 	return "", false
 }
 
+// QueryToolModelsFunc is a swappable function variable for QueryToolModels.
+var QueryToolModelsFunc = queryToolModelsImpl
+
 // QueryToolModels runs the tool's model-query command if ListModels is set.
 // Returns nil, nil when ListModels is nil (graceful skip).
 func QueryToolModels(tool InstalledTool) ([]string, error) {
+	return QueryToolModelsFunc(tool)
+}
+
+func queryToolModelsImpl(tool InstalledTool) ([]string, error) {
 	if tool.Tool.ListModels == nil {
 		return nil, nil
 	}
@@ -210,9 +217,10 @@ var ChooseAgentToolFunc = chooseAgentToolImpl
 var SelectInstalledToolFunc = selectInstalledToolImpl
 
 // ChooseAgentTool selects an agent tool from the installed list, using explicit ID,
-// saved default, or interactive prompt. Returns the selected tool and updated config.
-func ChooseAgentTool(installed []InstalledTool, cfg configpkg.AgentSelectionConfig, explicitID string, choose bool, selector ToolSelector) (InstalledTool, configpkg.AgentSelectionConfig, error) {
-	return ChooseAgentToolFunc(installed, cfg, explicitID, choose, selector)
+// saved default, or interactive prompt. If explicitModel is non-empty, it is used
+// as the default model without prompting. Returns the selected tool and updated config.
+func ChooseAgentTool(installed []InstalledTool, cfg configpkg.AgentSelectionConfig, explicitID string, choose bool, selector ToolSelector, explicitModel string) (InstalledTool, configpkg.AgentSelectionConfig, error) {
+	return ChooseAgentToolFunc(installed, cfg, explicitID, choose, selector, explicitModel)
 }
 
 // SelectInstalledTool prompts the user to select one of the installed tools.
@@ -220,18 +228,20 @@ func SelectInstalledTool(installed []InstalledTool, selector ToolSelector) (Inst
 	return SelectInstalledToolFunc(installed, selector)
 }
 
-func chooseAgentToolImpl(installed []InstalledTool, cfg configpkg.AgentSelectionConfig, explicitID string, choose bool, selector ToolSelector) (InstalledTool, configpkg.AgentSelectionConfig, error) {
+func chooseAgentToolImpl(installed []InstalledTool, cfg configpkg.AgentSelectionConfig, explicitID string, choose bool, selector ToolSelector, explicitModel string) (InstalledTool, configpkg.AgentSelectionConfig, error) {
 	if explicitID != "" {
 		tool, ok := FindInstalled(explicitID, installed)
 		if !ok {
 			return InstalledTool{}, cfg, fmt.Errorf("requested tool %q is not installed. Installed tools: %s", explicitID, FormatInstalledNames(installed))
 		}
 		cfg.DefaultAgentTool = tool.Tool.ID
+		cfg = selectModelForTool(tool, cfg, explicitModel, selector)
 		return tool, cfg, nil
 	}
 
 	if !choose && cfg.DefaultAgentTool != "" {
 		if tool, ok := FindInstalled(cfg.DefaultAgentTool, installed); ok {
+			cfg = selectModelForTool(tool, cfg, explicitModel, selector)
 			return tool, cfg, nil
 		}
 	}
@@ -242,7 +252,53 @@ func chooseAgentToolImpl(installed []InstalledTool, cfg configpkg.AgentSelection
 	}
 
 	cfg.DefaultAgentTool = selection.Tool.ID
+	cfg = selectModelForTool(selection, cfg, explicitModel, selector)
 	return selection, cfg, nil
+}
+
+// selectModelForTool handles model selection after a tool is chosen.
+// If explicitModel is set, uses it directly. Otherwise queries the tool's
+// available models and prompts the user to pick one if needed.
+func selectModelForTool(tool InstalledTool, cfg configpkg.AgentSelectionConfig, explicitModel string, selector ToolSelector) configpkg.AgentSelectionConfig {
+	if explicitModel != "" {
+		cfg.DefaultModel = explicitModel
+		return cfg
+	}
+
+	if tool.Tool.ListModels == nil {
+		return cfg
+	}
+
+	models, err := QueryToolModelsFunc(tool)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to query models for %s: %v\n", tool.Tool.Name, err)
+		return cfg
+	}
+
+	if len(models) == 0 {
+		return cfg
+	}
+
+	if cfg.DefaultModel != "" && containsModel(models, cfg.DefaultModel) {
+		return cfg
+	}
+
+	selection, err := selector("Select AI model", models, models[0])
+	if err != nil {
+		return cfg
+	}
+
+	cfg.DefaultModel = selection
+	return cfg
+}
+
+func containsModel(models []string, model string) bool {
+	for _, m := range models {
+		if m == model {
+			return true
+		}
+	}
+	return false
 }
 
 func selectInstalledToolImpl(installed []InstalledTool, selector ToolSelector) (InstalledTool, error) {
