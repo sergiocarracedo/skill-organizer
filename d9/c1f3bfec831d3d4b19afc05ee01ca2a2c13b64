@@ -1,0 +1,24 @@
+packages/cli/cmd/status_render_test.go
+  s_6ad89969e95830::t_58e9a54f615c7b 4-5,9
+  s_6ad89969e95830::t_8b94a6596d018d 13-101
+packages/cli/cmd/status_render.go
+  s_6ad89969e95830::t_409c5983152350 205-207
+  s_6ad89969e95830::t_8a971385e3e7d0 227-254
+  s_6ad89969e95830::t_2dc56616ffdeee 6,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d9c1f3bfec831d3d4b19afc05ee01ca2a2c13b64",
+  "prompts": {},
+  "sessions": {
+    "s_6ad89969e95830": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef4082fffee0Zvxv0g2j6p4n",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
