@@ -6,18 +6,32 @@
 
 ## Current Phase
 
-**Phase 6 — AI model visibility and security tooling**
-- discuss-phase ✓ complete (2026-06-12)
-- Next: phase 6 complete — all 3 plans (06-01, 06-02, 06-03) implemented
-- Next learnship step: `audit-milestone` or `new-phase`
+**Phase 6 — AI model visibility and security tooling** ✓ COMPLETE (2026-06-13)
 
-All v0.x phases (1-5, REQ-3/4/8/9/10) remain ✓ complete.
+- discuss-phase ✓ (2026-06-12)
+- plan-phase ✓ (2026-06-12)
+- execute-phase ✓ (2026-06-13)
+- Verification: 34/34 must-haves passed
+
+All v0.x phases (1-5) and Phase 6 now ✓ complete.
 
 Plan progress:
 - 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
 - 06-02: Model selection in tool picker + --model flags + persistence + status display (Wave 2, depends on 01) ✓ complete
 - 06-03: Security rating in status tree with content-hash freshness (Wave 2, depends on 01) ✓ complete
-- 06-02: Model selection in tool picker + --model flags + persistence + status display (Wave 2, depends on 01) ✓ complete
+
+▶ Next: `audit-milestone` to review the full cycle, then `/review` → `/ship` → `/compound`
+
+### Phase 6 summary
+
+- **Tool model query**: `ListModels`/`ModelArgs`/`VersionArgs` on `Tool` struct; `QueryToolModels` helper; OpenCode model query via `opencode models`
+- **Config**: `DefaultModel` (YAML-persisted) + `KnownModels` (runtime-only) on `AgentSelectionConfig`
+- **Model selection**: Interactive model picker after tool selection; `--model` flags on `check-security` and `check-overlap`; model-aware launch uses `ModelArgs`
+- **`telemetry status`**: Third line shows `Default model: <model>` or `(none)`
+- **Dangerous fixtures**: 4 curated SKILL.md files in `security/testdata/dangerous/` (shell_exec, env_exfil, download, obfuscated)
+- **Risk in status tree**: `[risk: N]` color-coded (green/yellow/red), `[risk: uncheck]` (yellow), `[risk: N (stale)]` (yellow when content changed)
+- **Content-hash freshness**: `ComputeSkillHash` SHA-256 over body + non-metadata files; stored as `RiskSourceHash` in `ManagedMetadata`
+- **Build**: ✓ | **vet**: ✓ | **tests**: 251 passing in 19 packages | **lefthook**: ✓
 
 Phase 5 summary:
 - Recorder API: 2 implementations (Noop + NewRelic), HTTPRecorder dropped.

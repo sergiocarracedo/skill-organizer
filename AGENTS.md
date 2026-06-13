@@ -16,13 +16,15 @@ Before making non-trivial changes, read the planning docs in order:
 2. `.planning/REQUIREMENTS.md` — 3 testable requirements
    (REQ-3, REQ-4, REQ-8) for the next version, plus a "Dropped from
    this version" section for traceability.
-3. `.planning/ROADMAP.md` — 5 phases (all complete for v0.x):
+3. `.planning/ROADMAP.md` — 6 phases (all complete for v0.x + P6):
    - **P1**: Skill security check (REQ-4) — includes extracting the
      agent-selection helper from the existing `skill-overlap` code.
    - **P2**: Overlap refactor (REQ-3) — reuses the P1 helper.
    - **P3**: Observability (REQ-8) — opt-in, anonymous telemetry layer.
    - **P4**: Telemetry backend selection (REQ-9) — New Relic backend.
    - **P5**: Local-only anonymous telemetry (REQ-10) — final privacy redesign.
+   - **P6**: AI model visibility & security tooling — model selection,
+     fixture skills, risk in status tree.
 
 Codebase maps live in `.planning/codebase/` (STACK, ARCHITECTURE,
 CONVENTIONS, TESTING, CONCERNS, INTEGRATIONS, STRUCTURE) — read these
@@ -32,9 +34,11 @@ to understand the existing code before adding to it.
 
 **Milestone:** v0.x+1 — Phase 6 — AI model visibility and security tooling
 
-**Phase:** 6 — AI model visibility + security tooling — CONTEXT ✓, RESEARCH ✓, 3 plans ✓
-**Status:** planning (ready for execute-phase 6)
-**Last updated:** 2026-06-12
+**Phase:** 6 — AI model visibility + security tooling ✓ complete
+**Status:** executed — all 3 plans, 34/34 must-haves passed
+**Last updated:** 2026-06-13
+
+▶ Next: `audit-milestone` to review the full cycle, then `/review` → `/ship` → `/compound`
 
 See `.planning/phases/06-ai-model-visibility-security/` for `06-CONTEXT.md` (decisions), `06-DISCUSSION-LOG.md` (audit), `06-RESEARCH.md`, and the 3 PLAN.md files (06-01 through 06-03).
 

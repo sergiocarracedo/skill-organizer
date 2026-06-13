@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-> 4 phases. Each phase is a vertical slice that ships a demoable
+> 6 phases. Each phase is a vertical slice that ships a demoable
 > behavior end-to-end. Phases are ordered so the next big bet
 > (skill security check, REQ-4) ships first and unblocks the rest.
 
@@ -127,6 +127,8 @@ behavior data from the security check (P1) and the overlap refactor
 | REQ-4 Skill security check        | P1    |
 | REQ-8 Observability (opt-in)      | P3    |
 | REQ-9 Telemetry backend selection  | P4    |
+| REQ-10 Local-only telemetry       | P5    |
+| P6-* AI model visibility & security | P6  |
 
 ## Cross-cutting
 
@@ -316,7 +318,7 @@ stay at `noop` by default.
 
 **Goal:** AI-tool-aware commands show which model they use and let the user select a different model interactively; `check-security` gets dangerous fixture skills for testing; security ratings appear in the status tree.
 
-**Status:** [ ] Not started
+**Status:** ✓ Complete (2026-06-13)
 **Depends on:** Phase 1 (check-security), Phase 2 (overlap — tree/report output)
 
 ### Scope
@@ -329,9 +331,15 @@ stay at `noop` by default.
 
 - `check-security --model` lists available models and lets the user pick one.
 - Dangerous fixture skills produce risk score ≥ 70 in `check-security`.
-- `status --tree` shows a security badge (e.g. `🟢 0-30`, `🟡 31-69`, `🔴 70-100`) per skill.
-- All existing tests still pass.
+- `status --tree` shows a security badge (e.g. `[risk: N]` colored green/yellow/red).
+- All existing tests still pass (251 passing in 19 packages).
 
 ### Plans
 
-*Not yet planned — run `plan-phase 6`*
+**Status:** ✓ Complete (2026-06-13). All 3 plans executed, 34/34 must-haves passed.
+
+| Plan | Status | What it built |
+|------|--------|---------------|
+| 06-01 (model infra + fixtures) | ✓ | Tool ListModels/ModelArgs/VersionArgs, QueryToolModels helper, config DefaultModel/KnownModels, 4 dangerous fixture skills |
+| 06-02 (CLI surface)           | ✓ | Model selection in tool picker, `--model` flags on check-security/overlap, model persistence, model in telemetry status |
+| 06-03 (risk in status tree)   | ✓ | RiskSourceHash in ManagedMetadata, ComputeSkillHash helper, `[risk: N]` / `[risk: uncheck]` / `[risk: N (stale)]` in status tree |
