@@ -1,0 +1,30 @@
+.planning/phases/06-ai-model-visibility-security/06-01-PLAN.md
+  s_e595791b137881::t_d15403df969425 1-15,17-18,22-63,67-69,71-110,116-220
+  s_e595791b137881::t_676fd20c5d1aa1 19-21
+  s_e595791b137881::t_fb9f452f996b20 16
+  s_e595791b137881::t_1ff0f8325caf30 111-115
+  s_e595791b137881::t_1ec2da660a029b 64-66,70
+.planning/phases/06-ai-model-visibility-security/06-RESEARCH.md
+  s_e595791b137881::t_d511f2c2da7df3 1-109
+.planning/phases/06-ai-model-visibility-security/06-02-PLAN.md
+  s_e595791b137881::t_0d0606cad0548b 124-128,130
+  s_e595791b137881::t_c6791372feb89f 1-123,129,131-209
+.planning/phases/06-ai-model-visibility-security/06-03-PLAN.md
+  s_e595791b137881::t_40607ebe74a75e 1-225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7523dacf4aad47051226ce4ae7a31437fc42aad0",
+  "prompts": {},
+  "sessions": {
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
