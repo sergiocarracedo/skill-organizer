@@ -30,16 +30,15 @@ to understand the existing code before adding to it.
 
 ## Current Phase
 
-**Milestone:** v0.x — Phase 1 ✓, Phase 2 ✓, Phase 3 ✓, Phase 4 ✓ (REQ-9), Phase 5 ✓ (REQ-10)
+**Milestone:** v0.x+1 — Phase 6 — AI model visibility and security tooling
 
-**Phase:** 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 ✓, 05-02 ✓, 05-03 ✓
-**Status:** all Phase 5 plans executed. 47/47 must-haves verified. All v0.x phases complete.
+**Phase:** 6 — AI model visibility + security tooling — CONTEXT ✓, RESEARCH ✓, 3 plans ✓
+**Status:** planning (ready for execute-phase 6)
 **Last updated:** 2026-06-12
 
-See `.planning/phases/05-local-only-anonymous-telemetry/` for `05-CONTEXT.md` (decisions), `05-DISCUSSION-LOG.md` (audit), `05-RESEARCH.md` (7 pillars + 10 pitfalls), the 3 PLAN.md files, the 3 SUMMARY files, and `05-VERIFICATION.md` (47/47 passed).
+See `.planning/phases/06-ai-model-visibility-security/` for `06-CONTEXT.md` (decisions), `06-DISCUSSION-LOG.md` (audit), `06-RESEARCH.md`, and the 3 PLAN.md files (06-01 through 06-03).
 
-Context: `.planning/phases/02-overlap-refactor/02-CONTEXT.md`
-Research: `.planning/phases/02-overlap-refactor/02-RESEARCH.md`
+All v0.x phases (1-5, REQ-3/4/8/9/10) remain ✓ complete.
 
 ## Anti-vision guards
 
