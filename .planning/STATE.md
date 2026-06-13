@@ -14,9 +14,11 @@ All v0.x phases (1-5, REQ-3/4/8/9/10) remain ✓ complete.
 
 Plan progress:
 - 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
+- 06-02: Model selection in tool picker + --model flags + persistence + status display (Wave 2, depends on 01) ✓ complete
 
 Plan progress:
 - 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
+- 06-02: Model selection in tool picker + --model flags + persistence + status display (Wave 2, depends on 01) ✓ complete
 
 Phase 5 summary:
 - Recorder API: 2 implementations (Noop + NewRelic), HTTPRecorder dropped.
@@ -96,6 +98,17 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 6 — AI model visibility and security — plan 06-02 ✓** (2026-06-13)
+  - 4 atomic commits; SUMMARY at
+    `.planning/phases/06-ai-model-visibility-security/06-02-PLAN-SUMMARY.md`
+  - Model selection integrated into `chooseAgentToolImpl`: new `explicitModel` param, `selectModelForTool` helper, `QueryToolModelsFunc` swappable var
+  - 5 new agenttools tests for model selection scenarios
+  - `--model` flag added to `check-security` (var `securityModelID`) and `check-overlap` (var `overlapModelID`)
+  - Model-aware wrappers (`defaultSecurityRunAnalysis`, `defaultOverlapRunAnalysis`) use `ModelArgs` when a model is set
+  - `telemetry status` shows `Default model:` as third line (reads `AgentSelectionConfig.DefaultModel`)
+  - Build, vet, full test suite (cmd tests pass), and lefthook pre-commit all green
+  - Note: pre-existing uncommitted `frontmatter.go` test (`TestManagedMetadata_RiskSourceHashRoundTrip`) fails — unrelated to this plan (touches `internal/skills`)
 
 - **Phase 6 — AI model visibility and security — plan 06-01 ✓** (2026-06-13)
   - 5 atomic commits; SUMMARY at
@@ -514,6 +527,9 @@ Phase 2 discuss-phase completed 2026-06-10:
 
 ## Recent decisions
 
+- **Model-aware wrapper pattern for analysis functions** (Phase 6 plan 06-02). Instead of modifying `securitypkg.Run`/`overlap.Run` signatures, wrappers (`defaultSecurityRunAnalysis` / `defaultOverlapRunAnalysis`) check if model is set and tool has `ModelArgs`, then swap `Args` for `ModelArgs` at runtime. This minimizes changes to internal packages and keeps the analysis function signatures stable.
+- **Empty model = empty string throughout** (Phase 6 plan 06-02). When no model is available (tool doesn't expose models, no `--model` flag, no default), `""` is passed through — same pattern as empty tool ID. The `telemetry status` display translates `""` to `(none)` for user-facing output.
+- **`QueryToolModels` promoted to swappable var `QueryToolModelsFunc`** (Phase 6 plan 06-02). Follows the existing `ChooseAgentToolFunc` test-injection pattern so tests can stub model query without running subprocesses.
 - **`KnownModels` uses `yaml:"-"` tag (runtime-only, not persisted)** (Phase 6 plan 06-01). The must-haves require `KnownModels []string` on `AgentSelectionConfig` populated by last query but never persisted. The `yaml:"-"` tag ensures it never appears in the config file.
 - **AgentSelectionConfig tests live in `agent_selection_test.go`, not `config_test.go`** (Phase 6 plan 06-01). The existing test file for agent selection logic is `agent_selection_test.go`; the new `DefaultModel` round-trip test follows that convention rather than creating a new file.
 - **Model query tests use `printf` for newline-separated output** (Phase 6 plan 06-01). `echo` concatenates arguments with spaces; `printf` interprets `\n` as newlines, which is required to simulate `opencode models` output that has one model per line.
