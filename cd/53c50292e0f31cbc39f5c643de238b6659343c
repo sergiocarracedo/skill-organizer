@@ -1,0 +1,28 @@
+packages/cli/cmd/skill_overlap_test.go
+  s_3d1531d017a36e::t_484bdeb4d5aedb 317,484,586,681
+  s_3d1531d017a36e::t_d5c27b58e034ee 733-756
+packages/cli/cmd/skill_overlap.go
+  s_3d1531d017a36e::t_682f8c6ba1bcfc 116
+  s_3d1531d017a36e::t_716f49b2714bb1 151
+  s_3d1531d017a36e::t_62d7ce323a0e2a 221
+  s_3d1531d017a36e::t_f24d2c3624a4d0 4
+  s_3d1531d017a36e::t_288848fccdf1fd 44
+  s_3d1531d017a36e::t_b141a20dc9175d 23
+  s_3d1531d017a36e::t_ffa1a36e31ab08 56-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cd53c50292e0f31cbc39f5c643de238b6659343c",
+  "prompts": {},
+  "sessions": {
+    "s_3d1531d017a36e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef41521ffeMnQ1x2BKmFodQh",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
