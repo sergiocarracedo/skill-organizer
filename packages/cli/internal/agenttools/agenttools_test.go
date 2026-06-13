@@ -2,6 +2,8 @@ package agenttools
 
 import (
 	"fmt"
+	"os/exec"
+	"strings"
 	"testing"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
@@ -130,6 +132,104 @@ func TestSelectInstalledToolPrompts(t *testing.T) {
 	}
 	if tool.Tool.ID != "codex" {
 		t.Fatalf("SelectInstalledTool().Tool.ID = %q, want %q", tool.Tool.ID, "codex")
+	}
+}
+
+func TestQueryToolModels_ReturnsNilWhenListModelsNil(t *testing.T) {
+	tool := InstalledTool{
+		Tool: Tool{
+			ID:         "test-tool",
+			ListModels: nil,
+		},
+		Binary: "/usr/bin/test-tool",
+	}
+
+	models, err := QueryToolModels(tool)
+	if err != nil {
+		t.Fatalf("QueryToolModels() error = %v, want nil", err)
+	}
+	if models != nil {
+		t.Fatalf("QueryToolModels() models = %v, want nil", models)
+	}
+}
+
+func TestQueryToolModels_ReturnsModelsForOpenCode(t *testing.T) {
+	// Swap execCommand with a fake that returns known model names, one per line.
+	origExec := execCommand
+	execCommand = func(name string, args ...string) *exec.Cmd {
+		return exec.Command("printf", "anthropic/claude-sonnet-4\nopenai/gpt-4o\ngoogle/gemini-2.0-flash\n")
+	}
+	t.Cleanup(func() {
+		execCommand = origExec
+	})
+
+	tool := InstalledTool{
+		Tool: Tool{
+			ID: "opencode",
+			ListModels: func(binary string) ([]string, error) {
+				out, err := execCommand(binary, "models").Output()
+				if err != nil {
+					return nil, fmt.Errorf("query opencode models: %w", err)
+				}
+				lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+				models := make([]string, 0, len(lines))
+				for _, line := range lines {
+					if trimmed := strings.TrimSpace(line); trimmed != "" {
+						models = append(models, trimmed)
+					}
+				}
+				return models, nil
+			},
+		},
+		Binary: "/usr/bin/opencode",
+	}
+
+	models, err := QueryToolModels(tool)
+	if err != nil {
+		t.Fatalf("QueryToolModels() error = %v", err)
+	}
+
+	if len(models) != 3 {
+		t.Fatalf("QueryToolModels() len = %d, want 3: %v", len(models), models)
+	}
+	if models[0] != "anthropic/claude-sonnet-4" {
+		t.Fatalf("QueryToolModels()[0] = %q, want %q", models[0], "anthropic/claude-sonnet-4")
+	}
+	if models[1] != "openai/gpt-4o" {
+		t.Fatalf("QueryToolModels()[1] = %q, want %q", models[1], "openai/gpt-4o")
+	}
+	if models[2] != "google/gemini-2.0-flash" {
+		t.Fatalf("QueryToolModels()[2] = %q, want %q", models[2], "google/gemini-2.0-flash")
+	}
+}
+
+func TestQueryToolModels_ReturnsErrorOnFailedCommand(t *testing.T) {
+	origExec := execCommand
+	execCommand = func(name string, args ...string) *exec.Cmd {
+		return exec.Command("false")
+	}
+	t.Cleanup(func() {
+		execCommand = origExec
+	})
+
+	tool := InstalledTool{
+		Tool: Tool{
+			ID: "opencode",
+			ListModels: func(binary string) ([]string, error) {
+				out, err := execCommand(binary, "models").Output()
+				if err != nil {
+					return nil, fmt.Errorf("query opencode models: %w", err)
+				}
+				_ = out
+				return nil, nil
+			},
+		},
+		Binary: "/usr/bin/opencode",
+	}
+
+	_, err := QueryToolModels(tool)
+	if err == nil {
+		t.Fatalf("QueryToolModels() error = nil, want error for failed command")
 	}
 }
 
