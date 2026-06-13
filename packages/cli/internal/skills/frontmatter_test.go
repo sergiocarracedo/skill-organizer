@@ -302,6 +302,42 @@ func TestUpdateManagedMetadataRoundTrip(t *testing.T) {
 	}
 }
 
+func TestManagedMetadata_RiskSourceHashRoundTrip(t *testing.T) {
+	content := []byte("---\nname: test-skill\ndescription: test\nmetadata:\n  skill-organizer:\n    risk-source-hash: \"abc123def456\"\n---\n\n# Body\n")
+
+	doc, err := ParseDocument(content)
+	if err != nil {
+		t.Fatalf("ParseDocument() error = %v", err)
+	}
+
+	parsed := doc.ManagedMetadata()
+	if parsed.RiskSourceHash != "abc123def456" {
+		t.Fatalf("ManagedMetadata().RiskSourceHash = %q, want %q", parsed.RiskSourceHash, "abc123def456")
+	}
+
+	parsed.RiskSourceHash = "newhash789"
+	doc.SetManagedFields("test--test-skill", parsed, false)
+
+	marshaled, err := doc.Marshal()
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
+
+	output := string(marshaled)
+	if !strings.Contains(output, "risk-source-hash") || !strings.Contains(output, "newhash789") {
+		t.Fatalf("Marshal() output missing risk-source-hash\n%s", output)
+	}
+
+	reparsed, err := ParseDocument(marshaled)
+	if err != nil {
+		t.Fatalf("ParseDocument() after round-trip error = %v", err)
+	}
+	reparsedMeta := reparsed.ManagedMetadata()
+	if reparsedMeta.RiskSourceHash != "newhash789" {
+		t.Fatalf("After round-trip RiskSourceHash = %q, want %q", reparsedMeta.RiskSourceHash, "newhash789")
+	}
+}
+
 func TestManagedMetadataDefaultRiskScoreIsZero(t *testing.T) {
 	content := []byte("---\nname: allium\ndescription: test\nmetadata:\n  skill-organizer:\n    source: terrylica/cc-skills\n---\n\n# Body\n")
 

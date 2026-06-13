@@ -26,6 +26,7 @@ type ManagedMetadata struct {
 	RiskEvaluatedAt    string
 	RiskEvaluator      string
 	RiskReason         string
+	RiskSourceHash     string
 }
 
 type Document struct {
@@ -170,6 +171,9 @@ func (d *Document) ManagedMetadata() ManagedMetadata {
 	if node := mappingValue(organizerNode, "risk-reason"); node != nil {
 		metadata.RiskReason = node.Value
 	}
+	if node := mappingValue(organizerNode, "risk-source-hash"); node != nil {
+		metadata.RiskSourceHash = node.Value
+	}
 
 	return metadata
 }
@@ -208,6 +212,7 @@ func (d *Document) SetManagedFields(flattenedName string, metadata ManagedMetada
 	setScalar(organizerNode, "risk-evaluated-at", metadata.RiskEvaluatedAt)
 	setScalar(organizerNode, "risk-evaluator", metadata.RiskEvaluator)
 	setScalar(organizerNode, "risk-reason", metadata.RiskReason)
+	setScalar(organizerNode, "risk-source-hash", metadata.RiskSourceHash)
 }
 
 func (d Document) WriteTo(path string) error {
@@ -427,6 +432,9 @@ func mergeManagedMetadata(target *ManagedMetadata, updates ManagedMetadata) {
 	}
 	if strings.TrimSpace(updates.RiskReason) != "" {
 		target.RiskReason = updates.RiskReason
+	}
+	if strings.TrimSpace(updates.RiskSourceHash) != "" {
+		target.RiskSourceHash = updates.RiskSourceHash
 	}
 }
 
