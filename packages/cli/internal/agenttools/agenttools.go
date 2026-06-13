@@ -61,6 +61,24 @@ var supportedTools = []Tool{
 			return []string{"run", prompt}
 		},
 		PlanArgs: nil,
+		ListModels: func(binary string) ([]string, error) {
+			out, err := execCommand(binary, "models").Output()
+			if err != nil {
+				return nil, fmt.Errorf("query opencode models: %w", err)
+			}
+			lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+			models := make([]string, 0, len(lines))
+			for _, line := range lines {
+				if trimmed := strings.TrimSpace(line); trimmed != "" {
+					models = append(models, trimmed)
+				}
+			}
+			return models, nil
+		},
+		ModelArgs: func(model string, prompt string) []string {
+			return []string{"run", "--model", model, prompt}
+		},
+		VersionArgs: []string{"--version"},
 	},
 	{
 		ID:          "cursor",
