@@ -19,6 +19,9 @@ type Tool struct {
 	Description string
 	Args        func(prompt string) []string
 	PlanArgs    func(prompt string) []string
+	ListModels  func(binary string) ([]string, error)       // optional; nil means not supported
+	ModelArgs   func(model string, prompt string) []string  // optional; nil means not supported
+	VersionArgs []string                                    // optional; nil means not supported
 }
 
 type InstalledTool struct {
@@ -82,6 +85,7 @@ var supportedTools = []Tool{
 }
 
 var lookPath = exec.LookPath
+var execCommand = exec.Command
 
 func Supported() []Tool {
 	tools := make([]Tool, len(supportedTools))
@@ -159,6 +163,19 @@ func detectToolBinary(tool Tool) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+// QueryToolModels runs the tool's model-query command if ListModels is set.
+// Returns nil, nil when ListModels is nil (graceful skip).
+func QueryToolModels(tool InstalledTool) ([]string, error) {
+	if tool.Tool.ListModels == nil {
+		return nil, nil
+	}
+	models, err := tool.Tool.ListModels(tool.Binary)
+	if err != nil {
+		return nil, fmt.Errorf("query %s models: %w", tool.Tool.ID, err)
+	}
+	return models, nil
 }
 
 func SupportsInteractivePlan(tool InstalledTool) bool {
