@@ -12,6 +12,12 @@
 
 All v0.x phases (1-5, REQ-3/4/8/9/10) remain ✓ complete.
 
+Plan progress:
+- 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
+
+Plan progress:
+- 06-01: Tool model query infrastructure + config extension + dangerous fixture skills (Wave 1, no deps) ✓ complete
+
 Phase 5 summary:
 - Recorder API: 2 implementations (Noop + NewRelic), HTTPRecorder dropped.
 - NewRelic endpoint + token are build-time vars (-ldflags); user never configures.
@@ -90,6 +96,18 @@ Phase 2 discuss-phase completed 2026-06-10:
 - "Refactor" deliverable from original P2 scope is moot — P1 plan 02 already shipped it
 
 ## Last completed
+
+- **Phase 6 — AI model visibility and security — plan 06-01 ✓** (2026-06-13)
+  - 5 atomic commits; SUMMARY at
+    `.planning/phases/06-ai-model-visibility-security/06-01-PLAN-SUMMARY.md`
+  - Tool struct extended with `ListModels`, `ModelArgs`, `VersionArgs` fields
+  - `QueryToolModels(InstalledTool)` helper returns parsed models or nil/nil for unsupported tools
+  - OpenCode tool definition has `ListModels` (runs `opencode models`, parses provider/model lines)
+  - All other tools (`claude`, `codex`, `cursor`, `antigravity`) have `ListModels: nil`
+  - `AgentSelectionConfig` gains `DefaultModel` (YAML, `omitempty`) and `KnownModels` (runtime-only, `yaml:"-"`)
+  - 4 dangerous fixture SKILL.md files created in `security/testdata/dangerous/`
+  - 3 new agenttools tests, 2 new config tests (9 + 25 = +5 tests)
+  - Build, vet, full test suite (235 passing in 19 packages), and lefthook pre-commit all green
 
 - **Phase 5 — Local-only anonymous telemetry (REQ-10) — plan 05-01 ✓** (2026-06-12)
   - 4 atomic refactor commits + 1 atomic test commit; SUMMARY at
@@ -495,6 +513,10 @@ Phase 2 discuss-phase completed 2026-06-10:
     passes
 
 ## Recent decisions
+
+- **`KnownModels` uses `yaml:"-"` tag (runtime-only, not persisted)** (Phase 6 plan 06-01). The must-haves require `KnownModels []string` on `AgentSelectionConfig` populated by last query but never persisted. The `yaml:"-"` tag ensures it never appears in the config file.
+- **AgentSelectionConfig tests live in `agent_selection_test.go`, not `config_test.go`** (Phase 6 plan 06-01). The existing test file for agent selection logic is `agent_selection_test.go`; the new `DefaultModel` round-trip test follows that convention rather than creating a new file.
+- **Model query tests use `printf` for newline-separated output** (Phase 6 plan 06-01). `echo` concatenates arguments with spaces; `printf` interprets `\n` as newlines, which is required to simulate `opencode models` output that has one model per line.
 
 - **NewRelicRecorder constructor body is stubbed in the first
   commit and real in the second** (Phase 4 plan 04-01,
