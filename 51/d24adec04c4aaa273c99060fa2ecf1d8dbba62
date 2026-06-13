@@ -1,0 +1,19 @@
+.planning/phases/06-ai-model-visibility-security/06-03-PLAN-SUMMARY.md
+  s_6ad89969e95830::t_f51a10c92550ff 1-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "51d24adec04c4aaa273c99060fa2ecf1d8dbba62",
+  "prompts": {},
+  "sessions": {
+    "s_6ad89969e95830": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef4082fffee0Zvxv0g2j6p4n",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
