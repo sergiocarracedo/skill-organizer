@@ -99,6 +99,51 @@ func TestSaveWritesAgentSelectionKey(t *testing.T) {
 	}
 }
 
+func TestAgentSelectionConfigDefaultModelRoundTrip(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "skill-organizer.yml")
+
+	as := AgentSelectionConfig{
+		DefaultAgentTool: "opencode",
+		DefaultModel:     "anthropic/claude-sonnet-4",
+	}
+
+	if err := SaveAgentSelectionConfig(path, as); err != nil {
+		t.Fatalf("SaveAgentSelectionConfig() error = %v", err)
+	}
+
+	loaded, err := LoadAgentSelectionConfig(path)
+	if err != nil {
+		t.Fatalf("LoadAgentSelectionConfig() error = %v", err)
+	}
+
+	if loaded.DefaultModel != "anthropic/claude-sonnet-4" {
+		t.Fatalf("LoadAgentSelectionConfig().DefaultModel = %q, want %q", loaded.DefaultModel, "anthropic/claude-sonnet-4")
+	}
+}
+
+func TestAgentSelectionConfigKnownModelsNotPersisted(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "skill-organizer.yml")
+
+	as := AgentSelectionConfig{
+		DefaultAgentTool: "opencode",
+		DefaultModel:     "anthropic/claude-sonnet-4",
+		KnownModels:      []string{"model1", "model2"},
+	}
+
+	if err := SaveAgentSelectionConfig(path, as); err != nil {
+		t.Fatalf("SaveAgentSelectionConfig() error = %v", err)
+	}
+
+	loaded, err := LoadAgentSelectionConfig(path)
+	if err != nil {
+		t.Fatalf("LoadAgentSelectionConfig() error = %v", err)
+	}
+
+	if len(loaded.KnownModels) != 0 {
+		t.Fatalf("LoadAgentSelectionConfig().KnownModels = %v, want empty (not persisted)", loaded.KnownModels)
+	}
+}
+
 func containsLine(s, substr string) bool {
 	for _, line := range strings.Split(s, "\n") {
 		if strings.TrimSpace(line) == substr {

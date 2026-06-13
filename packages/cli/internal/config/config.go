@@ -34,8 +34,10 @@ type ServiceConfig struct {
 }
 
 type AgentSelectionConfig struct {
-	DefaultAgentTool              string `yaml:"default-agent-tool,omitempty"`
-	AcknowledgedExternalToolCosts bool   `yaml:"acknowledged-external-tool-costs,omitempty"`
+	DefaultAgentTool              string   `yaml:"default-agent-tool,omitempty"`
+	AcknowledgedExternalToolCosts bool     `yaml:"acknowledged-external-tool-costs,omitempty"`
+	DefaultModel                  string   `yaml:"default-model,omitempty"`
+	KnownModels                   []string `yaml:"-"` // populated by last model query, not persisted
 }
 
 type OverlapConfig = AgentSelectionConfig
