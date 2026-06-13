@@ -1,0 +1,19 @@
+packages/cli/internal/agenttools/agenttools.go
+  s_6602c8dcf172c8::t_2847acaba2e93f 64-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "92c59e45b6d32280f657021887dc461c3dc106c2",
+  "prompts": {},
+  "sessions": {
+    "s_6602c8dcf172c8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef88a1effe2UyGt3pgxFeiyI",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
