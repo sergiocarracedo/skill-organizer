@@ -1,0 +1,29 @@
+packages/cli/cmd/skill_security_test.go
+  s_6ad89969e95830::t_0a99d269984db4 6-7
+  s_6ad89969e95830::t_a8fbd971862617 396
+  s_6ad89969e95830::t_a730c765976ed4 355-395,397-440
+packages/cli/internal/skills/hash.go
+  s_6ad89969e95830::t_4755183941283b 1-56
+packages/cli/internal/skills/hash_test.go
+  s_6ad89969e95830::t_a6231ca3b14b83 1-114
+packages/cli/cmd/skill_security.go
+  s_6ad89969e95830::t_231976f8cd988c 157-162,164-175
+  s_6ad89969e95830::t_a54be689da98e2 282
+  s_6ad89969e95830::t_764583d701f955 277-281,283-284
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3806d48381f9700484c09cf9701b7b61417ad68e",
+  "prompts": {},
+  "sessions": {
+    "s_6ad89969e95830": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef4082fffee0Zvxv0g2j6p4n",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
