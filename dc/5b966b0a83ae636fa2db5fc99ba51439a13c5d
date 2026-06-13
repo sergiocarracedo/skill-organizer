@@ -1,0 +1,25 @@
+packages/cli/internal/skills/frontmatter_test.go
+  s_6ad89969e95830::t_0e61682f541e4e 305-326,328-340
+  s_6ad89969e95830::t_e763faaf5be882 327
+packages/cli/internal/skills/frontmatter.go
+  s_6ad89969e95830::t_2eef2011a7d275 174-176
+  s_6ad89969e95830::t_8687117e8eb636 436-438
+  s_6ad89969e95830::t_5816f25ab72c0f 215
+  s_6ad89969e95830::t_1b0433c9e704de 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "dc5b966b0a83ae636fa2db5fc99ba51439a13c5d",
+  "prompts": {},
+  "sessions": {
+    "s_6ad89969e95830": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef4082fffee0Zvxv0g2j6p4n",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
