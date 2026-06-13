@@ -1,0 +1,25 @@
+packages/cli/internal/security/testdata/dangerous/shell_exec/SKILL.md
+  s_6602c8dcf172c8::t_a90b074ecd4c38 1-19
+packages/cli/internal/security/testdata/dangerous/env_exfil/SKILL.md
+  s_6602c8dcf172c8::t_41d07f4c191cd2 1-22
+packages/cli/internal/security/testdata/dangerous/obfuscated/SKILL.md
+  s_6602c8dcf172c8::t_0c62d8b1411dba 1-27
+packages/cli/internal/security/testdata/dangerous/download/SKILL.md
+  s_6602c8dcf172c8::t_d09d242ee156d0 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f1b9f1d57da18d535a4ce3669af049ae6a256790",
+  "prompts": {},
+  "sessions": {
+    "s_6602c8dcf172c8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef88a1effe2UyGt3pgxFeiyI",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
