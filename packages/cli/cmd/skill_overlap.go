@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	overlapChooseTool   bool
+	overlapSelectTooling   bool
 	overlapToolID       string
 	overlapModelID      string
 	overlapAllSkills    bool
@@ -113,7 +113,7 @@ func newCheckOverlapCommand() *cobra.Command {
 				return err
 			}
 
-			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapChooseTool, selectToolOption, overlapModelID)
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, overlapToolID, overlapSelectTooling, selectToolOption, overlapModelID)
 			if err != nil {
 				return err
 			}
@@ -139,7 +139,7 @@ func newCheckOverlapCommand() *cobra.Command {
 			}
 
 			printInfoMessage("Using tool: %s (%s)", tool.Tool.Name, tool.Binary)
-			printInfoMessage("Reconfigure later with: skill-organizer skill check-overlap --choose-tool")
+			printInfoMessage("Reconfigure later with: skill-organizer skill check-overlap --select-ai-tooling")
 			printInfoMessage("Showing overlap types: %s and stronger", minOverlapLabel)
 
 			spinner, err := agenttools.StartSpinner("Analyzing skills")
@@ -216,7 +216,7 @@ func newCheckOverlapCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&overlapChooseTool, "choose-tool", false, "Prompt to choose the agent tool again")
+	cmd.Flags().BoolVar(&overlapSelectTooling, "select-ai-tooling", false, "Prompt to select AI tool and model again")
 	cmd.Flags().StringVar(&overlapToolID, "tool", "", "Use a specific installed tool id (claude, codex, opencode, cursor, antigravity)")
 	cmd.Flags().StringVar(&overlapModelID, "model", "", "AI model to use (format: provider/model)")
 	cmd.Flags().BoolVar(&overlapAllSkills, "include-disabled", false, "Include disabled skills in the overlap analysis")

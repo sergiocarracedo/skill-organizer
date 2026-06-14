@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -120,28 +121,62 @@ func newTelemetryStatusCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			// Load the agent selection config to read the default model.
 			agentCfg, err := telemetryLoadAgentCfg(registryPath)
 			if err != nil {
 				return err
 			}
-			// Set the factory so the resolved recorder type matches
-			// what a real command invocation would pick. The build
-			// time vars (NewRelicEndpoint, NewRelicAPIKey) are read
-			// by the factory directly; this status command never
-			// touches the network (it lives in the skip set).
 			telemetrypkg.SetDefaultFactory(telemetrypkg.RecorderConfig{Enabled: cfg.Enabled})
-			recType := recorderTypeName(telemetrypkg.NewRecorder())
+			rec := telemetrypkg.NewRecorder()
+			recType := recorderTypeName(rec)
+
 			modelValue := agentCfg.DefaultModel
 			if modelValue == "" {
 				modelValue = "(none)"
 			}
-			telemetryInfo("Enabled:       %v", cfg.Enabled)
-			telemetryInfo("Recorder:      %s", recType)
-			telemetryInfo("Default model: %s", modelValue)
+
+			telemetryInfo("Enabled:        %v", cfg.Enabled)
+			telemetryInfo("Recorder:       %s", recType)
+
+			if nr, ok := rec.(*telemetrypkg.NewRelicRecorder); ok {
+				telemetryInfo("Endpoint:       %s", nr.Endpoint)
+				credStatus := "yes"
+				if nr.InsertKey == "" {
+					credStatus = "no"
+				}
+				telemetryInfo("Credentials:    %s", credStatus)
+			}
+			telemetryInfo("Default model:  %s", modelValue)
+
+			appDir, err := telemetryAppDir()
+			if err == nil && appDir != "" {
+				bufPath := filepath.Join(appDir, telemetrypkg.BufferFileName)
+				info, statErr := os.Stat(bufPath)
+				if statErr == nil {
+					eventCount, _ := countBufferLines(bufPath)
+					telemetryInfo("Buffer:         %s (%d bytes, %d events)", bufPath, info.Size(), eventCount)
+				}
+			}
 			return nil
 		},
 	}
+}
+
+// countBufferLines returns the number of non-empty lines in the file,
+// which for a JSONL buffer equals the number of buffered events.
+func countBufferLines(path string) (int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	count := 0
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if len(scanner.Bytes()) > 0 {
+			count++
+		}
+	}
+	return count, scanner.Err()
 }
 
 // newTelemetryWipeCommand is the Phase 5 REQ-10 GDPR right-to-erasure

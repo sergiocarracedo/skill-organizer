@@ -20,9 +20,11 @@ const highRiskThreshold = 70
 var (
 	securityPrintPrompt bool
 	securityToolID      string
-	securityChooseTool  bool
+	securitySelectTooling  bool
 	securityAllSkills   bool
 	securityModelID     string
+	securityForceRecheck bool
+	securitySourceDir   string
 )
 
 var (
@@ -67,6 +69,14 @@ func newCheckSecurityCommand() *cobra.Command {
 				return err
 			}
 
+			if securitySourceDir != "" {
+				abs, err := filepath.Abs(securitySourceDir)
+				if err != nil {
+					return fmt.Errorf("resolve --source path: %w", err)
+				}
+				location.Source = abs
+			}
+
 			items, err := securityCollectSkills(location, securityAllSkills)
 			if err != nil {
 				return err
@@ -103,7 +113,7 @@ func newCheckSecurityCommand() *cobra.Command {
 				return err
 			}
 
-			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, securityToolID, securityChooseTool, selectOption, securityModelID)
+			tool, agentCfg, err := agenttools.ChooseAgentTool(installed, agentCfg, securityToolID, securitySelectTooling, selectOption, securityModelID)
 			if err != nil {
 				return err
 			}
@@ -123,80 +133,212 @@ func newCheckSecurityCommand() *cobra.Command {
 				return err
 			}
 
-			securityPrintInfo("Using tool: %s (%s)", tool.Tool.Name, tool.Binary)
-			securityPrintInfo("Reconfigure later with: skill-organizer skill check-security --choose-tool")
+			securityPrintInfo("Using tool: %s (%s) model: %s", tool.Tool.Name, tool.Binary, agentCfg.DefaultModel)
+			securityPrintInfo("Reconfigure later with: skill-organizer skill check-security --select-ai-tooling")
 
-			spinner, err := agenttools.StartSpinner("Analyzing skills for security risks")
+			spinner, err := agenttools.StartSpinner("")
 			if err != nil {
 				return err
 			}
 			defer agenttools.ShowCursor()
 
-			report, err := securityRunAnalysis(cmd.Context(), tool, prompt, agentCfg.DefaultModel, func(status string) {
-				spinner.UpdateText(limitSpinnerText("Analyzing skills: "+status, 80))
-			})
-			if err != nil {
-				spinner.Fail("Security analysis failed")
-				return err
+			type securityResult struct {
+				name     string
+				result   securitypkg.SkillResult
+				skill    skills.Skill
+				cached   bool
 			}
-			spinner.Success("Security analysis completed")
+
+			hashCache, err := securitypkg.LoadHashCache(location.Source)
+			if err != nil {
+				securityPrintWarning("Failed to load hash cache: %v. Starting fresh.", err)
+				hashCache = make(securitypkg.HashCache)
+			}
+			if securityForceRecheck {
+				securityPrintInfo("Force flag set: re-analyzing all skills regardless of cache")
+			}
+
+			total := len(items)
+			var results []securityResult
+			safeCount, warningCount, dangerousCount, skippedCount := 0, 0, 0, 0
+
+			fmt.Println()
+			progressTmpl := pterm.Green("Safe: %d")+pterm.Yellow("  |  ")+pterm.Magenta("Warning: %d")+pterm.Yellow("  |  ")+pterm.Red("Dangerous: %d")+pterm.Yellow("  |  Skipped: %d")+"\n"
+			fmt.Printf(progressTmpl, 0, 0, 0, 0)
+			fmt.Println()
+
+			for i, item := range items {
+				concrete := toSkill(item, location)
+
+				currentHash, hashErr := skills.ComputeSkillHash(concrete.Dir)
+				if hashErr != nil {
+					securityPrintWarning("Failed to compute hash for %q: %v", item.Name, hashErr)
+				}
+
+				var r securitypkg.SkillResult
+				cached := false
+
+				if !securityForceRecheck && hashErr == nil {
+					if cachedResult, found := securitypkg.GetCachedResult(hashCache, item.FlattenedName); found {
+						if cachedResult.Hash == currentHash && cachedResult.Model == agentCfg.DefaultModel {
+							r = securitypkg.SkillResult{
+								Name:       item.FlattenedName,
+								RiskScore:  cachedResult.RiskScore,
+								RiskReason: cachedResult.RiskReason,
+							}
+							cached = true
+						}
+					}
+				}
+
+				if !cached {
+					spinner.UpdateText(limitSpinnerText(
+						fmt.Sprintf("[%d/%d] Analyzing %q...", i+1, total, item.Name), 80))
+
+					skillPrompt := securityBuildPrompt([]securitypkg.SkillInfo{item})
+
+					report, analysisErr := securityRunAnalysis(
+						cmd.Context(), tool, skillPrompt, agentCfg.DefaultModel,
+						func(status string) {
+							spinner.UpdateText(limitSpinnerText(
+								fmt.Sprintf("[%d/%d] Analyzing %q: %s", i+1, total, item.Name, status), 80))
+						})
+					if analysisErr != nil {
+						securityPrintWarning("Analysis failed for %q: %v", item.Name, analysisErr)
+						continue
+					}
+
+					for _, res := range report.Results {
+						if res.Name == item.FlattenedName {
+							r = res
+							break
+						}
+					}
+				}
+
+				if r.Name == "" {
+					r.Name = item.FlattenedName
+					r.RiskScore = 0
+					r.RiskReason = "No result returned"
+				}
+
+				results = append(results, securityResult{
+					name:   item.Name,
+					result: r,
+					skill:  concrete,
+					cached: cached,
+				})
+
+				if cached {
+					skippedCount++
+				}
+
+				switch {
+				case r.RiskScore >= highRiskThreshold:
+					dangerousCount++
+				case r.RiskScore >= 30:
+					warningCount++
+				default:
+					safeCount++
+				}
+
+				var scoreStyled string
+				switch {
+				case r.RiskScore >= highRiskThreshold:
+					scoreStyled = pterm.Red(fmt.Sprintf("%d", r.RiskScore))
+				case r.RiskScore >= 30:
+					scoreStyled = pterm.Magenta(fmt.Sprintf("%d", r.RiskScore))
+				default:
+					scoreStyled = pterm.Green(fmt.Sprintf("%d", r.RiskScore))
+				}
+
+				reason := r.RiskReason
+				if len(reason) > 20 {
+					reason = reason[:17] + "..."
+				}
+				batch := ""
+				if cached {
+					batch = " [cached]"
+				}
+
+				fmt.Printf("• %s - Score: %s │ %s%s\n", item.FlattenedName, scoreStyled, reason, batch)
+
+				if !cached && hashErr == nil {
+					securitypkg.SetCachedResult(hashCache, item.FlattenedName, securitypkg.CachedSkillResult{
+						Hash:       currentHash,
+						RiskScore:  r.RiskScore,
+						RiskReason: r.RiskReason,
+						Model:      agentCfg.DefaultModel,
+						CheckedAt:  time.Now().UTC().Format(time.RFC3339),
+					})
+					if err := securitypkg.SaveHashCache(location.Source, hashCache); err != nil {
+						securityPrintWarning("Failed to save hash cache: %v", err)
+					}
+				}
+			}
+
+			fmt.Println()
+			spinner.Success(fmt.Sprintf(pterm.Green("Safe: %d")+pterm.Yellow("  |  ")+pterm.Magenta("WARNING: %d")+pterm.Yellow("  |  ")+pterm.Red("DANGER: %d")+pterm.Yellow("  |  Skipped: %d"),
+				safeCount, warningCount, dangerousCount, skippedCount))
 
 			now := time.Now().UTC().Format(time.RFC3339)
 			highRiskCount := 0
 			disabledCount := 0
-			missingCount := 0
 
-			for _, result := range report.Results {
-				skill, ok := skillByFlattenedName(items, result.Name)
-				if !ok {
-					missingCount++
-					securityPrintWarning("Skill %q from agent report not found in scanned list", result.Name)
-					continue
+			for _, sr := range results {
+				updates := skills.ManagedMetadata{
+					RiskScore:       sr.result.RiskScore,
+					RiskEvaluatedAt: now,
+					RiskEvaluator:   tool.Tool.ID,
+					RiskReason:      sr.result.RiskReason,
 				}
 
-			updates := skills.ManagedMetadata{
-				RiskScore:       result.RiskScore,
-				RiskEvaluatedAt: now,
-				RiskEvaluator:   tool.Tool.ID,
-				RiskReason:      result.RiskReason,
+				hash, hashErr := skills.ComputeSkillHash(sr.skill.Dir)
+				if hashErr == nil {
+					updates.RiskSourceHash = hash
+				} else {
+					securityPrintWarning("Failed to compute content hash for %q: %v", sr.name, hashErr)
+				}
+
+				if err := securityUpdateMetadata(sr.skill, updates); err != nil {
+					return fmt.Errorf("write risk score for %s: %w", sr.name, err)
+				}
+
+				if sr.result.RiskScore >= highRiskThreshold {
+					highRiskCount++
+					fmt.Printf(" - %s%s%s %s %s %s\n",
+						pterm.White("["), pterm.Red("Danger"), pterm.White("]"),
+						sr.name,
+						pterm.White("Scored"),
+						pterm.Red(fmt.Sprintf("%d/100", sr.result.RiskScore)))
+					fmt.Printf("   %s\n\n", sr.result.RiskReason)
+				} else if sr.result.RiskScore >= 30 {
+					fmt.Printf(" - %s%s%s %s %s %s\n",
+						pterm.White("["), pterm.Magenta("Warning"), pterm.White("]"),
+						sr.name,
+						pterm.White("Scored"),
+						pterm.Magenta(fmt.Sprintf("%d/100", sr.result.RiskScore)))
+					fmt.Printf("   %s\n\n", sr.result.RiskReason)
+				}
 			}
 
-			concrete := toSkill(skill, location)
-
-			hash, hashErr := skills.ComputeSkillHash(concrete.Dir)
-			if hashErr == nil {
-				updates.RiskSourceHash = hash
-			} else {
-				securityPrintWarning("Failed to compute content hash for %q: %v", skill.Name, hashErr)
-			}
-
-			if err := securityUpdateMetadata(concrete, updates); err != nil {
-				return fmt.Errorf("write risk score for %s: %w", skill.FlattenedName, err)
-			}
-
-				if result.RiskScore < highRiskThreshold {
+			for _, sr := range results {
+				if sr.result.RiskScore < highRiskThreshold {
 					continue
 				}
-				highRiskCount++
-
-				securityPrintWarning("Skill %q scored %d/100: %s", skill.Name, result.RiskScore, result.RiskReason)
-
-				accept, err := securityConfirm(fmt.Sprintf("Disable skill %q due to high risk?", skill.Name), true)
+				accept, err := securityConfirm(fmt.Sprintf("Disable skill %q due to high risk?", sr.name), true)
 				if err != nil {
 					return err
 				}
 				if accept {
-					if err := securityWriteDisabled(concrete, false, true); err != nil {
-						return fmt.Errorf("disable %s: %w", skill.FlattenedName, err)
+					if err := securityWriteDisabled(sr.skill, false, true); err != nil {
+						return fmt.Errorf("disable %s: %w", sr.name, err)
 					}
 					disabledCount++
 				}
 			}
 
-			securityPrintSuccess("Checked %d skills, %d high-risk, %d disabled", len(items), highRiskCount, disabledCount)
-			if missingCount > 0 {
-				securityPrintWarning("%d skills reported by agent were not found in the scanned source", missingCount)
-			}
+			securityPrintSuccess("Checked %d skills, %d high-risk, %d disabled", total, highRiskCount, disabledCount)
 
 			return nil
 		},
@@ -205,8 +347,10 @@ func newCheckSecurityCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&securityPrintPrompt, "print-prompt", false, "Print the generated security prompt without invoking an external tool")
 	cmd.Flags().StringVar(&securityToolID, "tool", "", "Use a specific installed tool id (claude, codex, opencode, cursor, antigravity)")
 	cmd.Flags().StringVar(&securityModelID, "model", "", "AI model to use (format: provider/model)")
-	cmd.Flags().BoolVar(&securityChooseTool, "choose-tool", false, "Prompt to choose the agent tool again")
+	cmd.Flags().BoolVar(&securitySelectTooling, "select-ai-tooling", false, "Prompt to select AI tool and model again")
 	cmd.Flags().BoolVar(&securityAllSkills, "include-disabled", false, "Include disabled skills in the analysis")
+	cmd.Flags().BoolVarP(&securityForceRecheck, "force", "f", false, "Force re-analysis of all skills, ignoring cached results")
+	cmd.Flags().StringVar(&securitySourceDir, "source", "", "Override the source directory for skill scanning (useful with test fixtures)")
 
 	return cmd
 }

@@ -235,13 +235,13 @@ func chooseAgentToolImpl(installed []InstalledTool, cfg configpkg.AgentSelection
 			return InstalledTool{}, cfg, fmt.Errorf("requested tool %q is not installed. Installed tools: %s", explicitID, FormatInstalledNames(installed))
 		}
 		cfg.DefaultAgentTool = tool.Tool.ID
-		cfg = selectModelForTool(tool, cfg, explicitModel, selector)
+		cfg = selectModelForTool(tool, cfg, explicitModel, choose, selector)
 		return tool, cfg, nil
 	}
 
 	if !choose && cfg.DefaultAgentTool != "" {
 		if tool, ok := FindInstalled(cfg.DefaultAgentTool, installed); ok {
-			cfg = selectModelForTool(tool, cfg, explicitModel, selector)
+			cfg = selectModelForTool(tool, cfg, explicitModel, false, selector)
 			return tool, cfg, nil
 		}
 	}
@@ -252,14 +252,15 @@ func chooseAgentToolImpl(installed []InstalledTool, cfg configpkg.AgentSelection
 	}
 
 	cfg.DefaultAgentTool = selection.Tool.ID
-	cfg = selectModelForTool(selection, cfg, explicitModel, selector)
+	cfg = selectModelForTool(selection, cfg, explicitModel, choose, selector)
 	return selection, cfg, nil
 }
 
 // selectModelForTool handles model selection after a tool is chosen.
 // If explicitModel is set, uses it directly. Otherwise queries the tool's
 // available models and prompts the user to pick one if needed.
-func selectModelForTool(tool InstalledTool, cfg configpkg.AgentSelectionConfig, explicitModel string, selector ToolSelector) configpkg.AgentSelectionConfig {
+// When force is true, always prompts even if DefaultModel is already set.
+func selectModelForTool(tool InstalledTool, cfg configpkg.AgentSelectionConfig, explicitModel string, force bool, selector ToolSelector) configpkg.AgentSelectionConfig {
 	if explicitModel != "" {
 		cfg.DefaultModel = explicitModel
 		return cfg
@@ -269,7 +270,21 @@ func selectModelForTool(tool InstalledTool, cfg configpkg.AgentSelectionConfig, 
 		return cfg
 	}
 
+	spinner, spinErr := StartSpinner(fmt.Sprintf("Querying models from %s", tool.Tool.Name))
+	if spinErr == nil {
+		defer ShowCursor()
+	}
+
 	models, err := QueryToolModelsFunc(tool)
+
+	if spinErr == nil {
+		if err != nil {
+			spinner.Fail("Model query failed")
+		} else {
+			spinner.Success()
+		}
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: failed to query models for %s: %v\n", tool.Tool.Name, err)
 		return cfg
@@ -279,7 +294,7 @@ func selectModelForTool(tool InstalledTool, cfg configpkg.AgentSelectionConfig, 
 		return cfg
 	}
 
-	if cfg.DefaultModel != "" && containsModel(models, cfg.DefaultModel) {
+	if !force && cfg.DefaultModel != "" && containsModel(models, cfg.DefaultModel) {
 		return cfg
 	}
 

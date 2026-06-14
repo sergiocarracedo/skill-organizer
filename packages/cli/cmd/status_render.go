@@ -78,6 +78,9 @@ func printStatusSummary(report statuspkg.Report) {
 		{label: "Missing target", count: summary.MissingTarget, color: statusColor(statuspkg.StateMissingTarget)},
 		{label: "Broken link", count: summary.BrokenLink, color: statusColor(statuspkg.StateBrokenLink)},
 		{label: "Drifted", count: summary.Drifted, color: statusColor(statuspkg.StateDrifted)},
+		{label: "Safe", count: summary.Safe, color: pterm.FgGreen},
+		{label: "Warning", count: summary.Warning, color: pterm.FgYellow},
+		{label: "Danger", count: summary.Danger, color: pterm.FgRed},
 	}
 	pterm.DefaultSection.Println("Summary")
 	parts := make([]string, 0, len(rows))

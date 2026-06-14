@@ -50,6 +50,9 @@ type Summary struct {
 	MissingTarget   int
 	BrokenLink      int
 	Drifted         int
+	Safe            int
+	Warning         int
+	Danger          int
 }
 
 func (r Report) Summary() Summary {
@@ -70,6 +73,18 @@ func (r Report) Summary() Summary {
 			summary.BrokenLink++
 		case StateDrifted:
 			summary.Drifted++
+		}
+
+		if entry.RiskEvaluator == "" {
+			continue
+		}
+		switch {
+		case entry.RiskScore >= 70:
+			summary.Danger++
+		case entry.RiskScore >= 30:
+			summary.Warning++
+		default:
+			summary.Safe++
 		}
 	}
 

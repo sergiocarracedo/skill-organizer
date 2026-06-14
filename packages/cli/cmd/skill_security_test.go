@@ -55,8 +55,8 @@ func TestCheckSecurityPrintPromptBypassesToolDetection(t *testing.T) {
 	if printed == "" {
 		t.Fatalf("RunE() output is empty")
 	}
-	if !strings.Contains(printed, "risk-score") {
-		t.Fatalf("RunE() output missing risk-score: %q", printed)
+	if !strings.Contains(printed, "obfuscation_evasion") {
+		t.Fatalf("RunE() output missing obfuscation_evasion: %q", printed)
 	}
 }
 

@@ -13,6 +13,7 @@ import (
 	selfupdatepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/selfupdate"
 	servicepkg "github.com/sergiocarracedo/skill-organizer/cli/internal/service"
 	telemetrypkg "github.com/sergiocarracedo/skill-organizer/cli/internal/telemetry"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -60,6 +61,9 @@ func shouldPrintCommandHelp(err error) bool {
 }
 
 func init() {
+	if v := os.Getenv("PTERM_DEBUG"); v == "true" || v == "1" {
+		pterm.EnableDebugMessages()
+	}
 	maintenancepkg.IsServiceRunningFunc = func() (bool, error) {
 		registryPath, err := configpkg.RegistryPath()
 		if err != nil {

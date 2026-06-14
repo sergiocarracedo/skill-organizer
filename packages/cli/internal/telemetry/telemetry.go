@@ -6,10 +6,13 @@ package telemetry
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/pterm/pterm"
 
 	configpkg "github.com/sergiocarracedo/skill-organizer/cli/internal/config"
 )
@@ -84,10 +87,20 @@ func (s *Service) RecordEvent(ctx context.Context, command string, exitStatus in
 	if err := event.Validate(); err != nil {
 		return fmt.Errorf("invalid event: %w", err)
 	}
+
+	recType := "NoopRecorder"
+	if _, ok := s.Recorder.(*NewRelicRecorder); ok {
+		recType = "NewRelicRecorder"
+	}
+	eventJSON, _ := json.Marshal(event)
+	pterm.Debug.Printfln("telemetry: recording event via %s: %s", recType, string(eventJSON))
+
 	recErr := s.Recorder.Record(ctx, event)
 	if recErr == nil {
 		return nil
 	}
+	pterm.Debug.Printfln("telemetry: recorder failed (%v), buffering event", recErr)
+
 	// Recorder failed: append to buffer for later drain.
 	if bufErr := s.Buffer.Append(event); bufErr != nil {
 		return fmt.Errorf("record failed (%v) and buffer write failed (%w)", recErr, bufErr)
@@ -99,9 +112,18 @@ func (s *Service) RecordEvent(ctx context.Context, command string, exitStatus in
 // Recorder. On success, the buffer is truncated. On any send failure,
 // the drain stops and the unsent events are preserved.
 func (s *Service) DrainBuffer(ctx context.Context) error {
-	return s.Buffer.Drain(func(e Event) error {
+	pterm.Debug.Printfln("telemetry: starting buffer drain from %s", s.Buffer.Path)
+	err := s.Buffer.Drain(func(e Event) error {
+		eventJSON, _ := json.Marshal(e)
+		pterm.Debug.Printfln("telemetry: draining buffered event: %s", string(eventJSON))
 		return s.Recorder.Record(ctx, e)
 	})
+	if err != nil {
+		pterm.Debug.Printfln("telemetry: buffer drain error: %v", err)
+	} else {
+		pterm.Debug.Printfln("telemetry: buffer drain complete")
+	}
+	return err
 }
 
 // MaybeRunFirstRunPrompt shows the first-run prompt if and only if:

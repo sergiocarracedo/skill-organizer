@@ -96,7 +96,7 @@ func TestChooseOverlapToolPromptsWhenRequested(t *testing.T) {
 }
 
 func TestOverlapPrintPromptBypassesToolDetection(t *testing.T) {
-	originalChooseTool := overlapChooseTool
+	originalChooseTool := overlapSelectTooling
 	originalToolID := overlapToolID
 	originalAllSkills := overlapAllSkills
 	originalPrintPrompt := overlapPrintPrompt
@@ -105,7 +105,7 @@ func TestOverlapPrintPromptBypassesToolDetection(t *testing.T) {
 	originalCollectSkills := collectOverlapSkills
 	originalPrintPromptFunc := printOverlapPromptFunc
 
-	overlapChooseTool = false
+	overlapSelectTooling = false
 	overlapToolID = ""
 	overlapAllSkills = false
 	overlapPrintPrompt = false
@@ -128,7 +128,7 @@ func TestOverlapPrintPromptBypassesToolDetection(t *testing.T) {
 		printed = prompt
 	}
 	t.Cleanup(func() {
-		overlapChooseTool = originalChooseTool
+		overlapSelectTooling = originalChooseTool
 		overlapToolID = originalToolID
 		overlapAllSkills = originalAllSkills
 		overlapPrintPrompt = originalPrintPrompt
@@ -272,7 +272,7 @@ func TestCompletionCommandIncludesSupportedShells(t *testing.T) {
 }
 
 func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *testing.T) {
-	originalChooseTool := overlapChooseTool
+	originalChooseTool := overlapSelectTooling
 	originalToolID := overlapToolID
 	originalAllSkills := overlapAllSkills
 	originalPrintPrompt := overlapPrintPrompt
@@ -293,14 +293,14 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	originalSpinner := agenttools.StartSpinnerFunc
 	originalLaunch := agenttools.LaunchSessionFunc
 
-	overlapChooseTool = false
+	overlapSelectTooling = false
 	overlapToolID = ""
 	overlapAllSkills = false
 	overlapPrintPrompt = false
 	overlapNoAskToApply = false
 	overlapAllowOverlap = true
 	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
-		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+		return []agenttools.InstalledTool{mockInstalledTool("codex", "codex")}, nil
 	}
 	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
 		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
@@ -309,7 +309,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
 	}
 	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
-		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
@@ -349,7 +349,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 		return stubSpinner{}, nil
 	}
 	t.Cleanup(func() {
-		overlapChooseTool = originalChooseTool
+		overlapSelectTooling = originalChooseTool
 		overlapToolID = originalToolID
 		overlapAllSkills = originalAllSkills
 		overlapPrintPrompt = originalPrintPrompt
@@ -390,7 +390,7 @@ func TestCheckOverlapUnsupportedToolSavesPromptInsteadOfLaunchingPlanMode(t *tes
 	if savedPath == "" {
 		t.Fatalf("saveApplyPlanPrompt() path is empty")
 	}
-	if !containsLine(debugs, "OpenCode has no verified interactive plan mode.") {
+	if !containsLine(debugs, "Codex has no verified interactive plan mode.") {
 		t.Fatalf("debug messages = %#v", debugs)
 	}
 	if !containsLine(infos, "Saved apply-plan prompt: "+savedPath) {
@@ -439,7 +439,7 @@ func TestWriteApplyPlanPromptCreatesTimestampedFile(t *testing.T) {
 }
 
 func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
-	originalChooseTool := overlapChooseTool
+	originalChooseTool := overlapSelectTooling
 	originalToolID := overlapToolID
 	originalAllSkills := overlapAllSkills
 	originalPrintPrompt := overlapPrintPrompt
@@ -460,14 +460,14 @@ func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
 	originalSpinner := agenttools.StartSpinnerFunc
 	originalLaunch := agenttools.LaunchSessionFunc
 
-	overlapChooseTool = false
+	overlapSelectTooling = false
 	overlapToolID = ""
 	overlapAllSkills = false
 	overlapPrintPrompt = false
 	overlapNoAskToApply = true
 	overlapAllowOverlap = false
 	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
-		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+		return []agenttools.InstalledTool{mockInstalledTool("codex", "codex")}, nil
 	}
 	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
 		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
@@ -476,7 +476,7 @@ func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
 		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
 	}
 	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
-		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
@@ -503,7 +503,7 @@ func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
 		return stubSpinner{}, nil
 	}
 	t.Cleanup(func() {
-		overlapChooseTool = originalChooseTool
+		overlapSelectTooling = originalChooseTool
 		overlapToolID = originalToolID
 		overlapAllSkills = originalAllSkills
 		overlapPrintPrompt = originalPrintPrompt
@@ -541,7 +541,7 @@ func TestCheckOverlapExitsNonZeroOnOverlap(t *testing.T) {
 }
 
 func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
-	originalChooseTool := overlapChooseTool
+	originalChooseTool := overlapSelectTooling
 	originalToolID := overlapToolID
 	originalAllSkills := overlapAllSkills
 	originalPrintPrompt := overlapPrintPrompt
@@ -562,14 +562,14 @@ func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
 	originalSpinner := agenttools.StartSpinnerFunc
 	originalLaunch := agenttools.LaunchSessionFunc
 
-	overlapChooseTool = false
+	overlapSelectTooling = false
 	overlapToolID = ""
 	overlapAllSkills = false
 	overlapPrintPrompt = false
 	overlapNoAskToApply = true
 	overlapAllowOverlap = true
 	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
-		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+		return []agenttools.InstalledTool{mockInstalledTool("codex", "codex")}, nil
 	}
 	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
 		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
@@ -578,7 +578,7 @@ func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
 		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
 	}
 	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
-		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
@@ -605,7 +605,7 @@ func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
 		return stubSpinner{}, nil
 	}
 	t.Cleanup(func() {
-		overlapChooseTool = originalChooseTool
+		overlapSelectTooling = originalChooseTool
 		overlapToolID = originalToolID
 		overlapAllSkills = originalAllSkills
 		overlapPrintPrompt = originalPrintPrompt
@@ -636,7 +636,7 @@ func TestCheckOverlapAllowOverlapExitsZero(t *testing.T) {
 }
 
 func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
-	originalChooseTool := overlapChooseTool
+	originalChooseTool := overlapSelectTooling
 	originalToolID := overlapToolID
 	originalAllSkills := overlapAllSkills
 	originalPrintPrompt := overlapPrintPrompt
@@ -657,14 +657,14 @@ func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
 	originalSpinner := agenttools.StartSpinnerFunc
 	originalLaunch := agenttools.LaunchSessionFunc
 
-	overlapChooseTool = false
+	overlapSelectTooling = false
 	overlapToolID = ""
 	overlapAllSkills = false
 	overlapPrintPrompt = false
 	overlapNoAskToApply = true
 	overlapAllowOverlap = false
 	detectInstalledTools = func() ([]agenttools.InstalledTool, error) {
-		return []agenttools.InstalledTool{mockInstalledTool("opencode", "opencode")}, nil
+		return []agenttools.InstalledTool{mockInstalledTool("codex", "codex")}, nil
 	}
 	loadResolvedLocationFunc = func() (string, configpkg.Location, error) {
 		return "/tmp/.skill-organizer.yml", configpkg.Location{Source: "/tmp/source", Target: "/tmp/target"}, nil
@@ -673,7 +673,7 @@ func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
 		return []overlap.SkillInfo{{Name: "alpha", RelativePath: "personal/alpha", FlattenedName: "personal--alpha", Description: "Alpha description"}}, nil
 	}
 	loadAgentSelectionConfigFunc = func(path string) (configpkg.AgentSelectionConfig, error) {
-		return configpkg.AgentSelectionConfig{DefaultAgentTool: "opencode", AcknowledgedExternalToolCosts: true}, nil
+		return configpkg.AgentSelectionConfig{DefaultAgentTool: "codex", AcknowledgedExternalToolCosts: true}, nil
 	}
 	saveAgentSelectionConfigFunc = func(path string, cfg configpkg.AgentSelectionConfig) error {
 		return nil
@@ -700,7 +700,7 @@ func TestCheckOverlapExitsZeroOnEmptyReport(t *testing.T) {
 		return stubSpinner{}, nil
 	}
 	t.Cleanup(func() {
-		overlapChooseTool = originalChooseTool
+		overlapSelectTooling = originalChooseTool
 		overlapToolID = originalToolID
 		overlapAllSkills = originalAllSkills
 		overlapPrintPrompt = originalPrintPrompt

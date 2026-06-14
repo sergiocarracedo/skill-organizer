@@ -30,6 +30,42 @@ func TestParseSecurityReport(t *testing.T) {
 	}
 }
 
+func TestParseSecurityReportNewSchema(t *testing.T) {
+	input := `{"results":[{"name":"test--skill","analysis":"Downloads and executes remote code with environment variable exfiltration.","scores":{"obfuscation_evasion":20,"system_impact":85,"network_exfiltration":90,"prompt_hijacking":10,"deception_index":40},"overall_risk_level":"CRITICAL"}]}`
+
+	report, err := ParseReport(input)
+	if err != nil {
+		t.Fatalf("ParseReport() error = %v", err)
+	}
+
+	if len(report.Results) != 1 {
+		t.Fatalf("ParseReport() Results len = %d, want 1", len(report.Results))
+	}
+
+	r := report.Results[0]
+	if r.Name != "test--skill" {
+		t.Fatalf("Name = %q, want %q", r.Name, "test--skill")
+	}
+	if r.Analysis == "" {
+		t.Fatal("Analysis should not be empty")
+	}
+	if r.OverallRiskLevel != "CRITICAL" {
+		t.Fatalf("OverallRiskLevel = %q, want %q", r.OverallRiskLevel, "CRITICAL")
+	}
+	if r.RiskScore != 90 {
+		t.Fatalf("RiskScore (computed) = %d, want 90 (max of scores)", r.RiskScore)
+	}
+	if !strings.Contains(r.RiskReason, "Downloads and executes") {
+		t.Fatalf("RiskReason = %q, should contain analysis text", r.RiskReason)
+	}
+	if len(r.Scores) != 5 {
+		t.Fatalf("Scores map length = %d, want 5", len(r.Scores))
+	}
+	if r.Scores["system_impact"] != 85 {
+		t.Fatalf("Scores[system_impact] = %d, want 85", r.Scores["system_impact"])
+	}
+}
+
 func TestParseSecurityReportWithCodeFences(t *testing.T) {
 	input := "```json\n" + `{"results":[{"name":"test--skill","risk-score":50,"risk-reason":"Reads env vars"}]}` + "\n```"
 
@@ -53,6 +89,7 @@ func TestBuildPromptIncludesSkills(t *testing.T) {
 			FlattenedName: "thirdparty--demo",
 			RelativePath:  "thirdparty/demo",
 			Description:   "A demo skill",
+			Content:       "# Demo\n\nThis is the body.",
 		},
 	}
 
@@ -60,11 +97,14 @@ func TestBuildPromptIncludesSkills(t *testing.T) {
 	if !strings.Contains(prompt, "thirdparty--demo") {
 		t.Fatalf("BuildPrompt() output missing flattened name\n%s", prompt)
 	}
-	if !strings.Contains(prompt, "risk-score") {
-		t.Fatalf("BuildPrompt() output missing risk-score keyword\n%s", prompt)
+	if !strings.Contains(prompt, "obfuscation_evasion") {
+		t.Fatalf("BuildPrompt() output missing obfuscation_evasion keyword\n%s", prompt)
 	}
 	if !strings.Contains(prompt, "security") {
 		t.Fatalf("BuildPrompt() output missing security keyword\n%s", prompt)
+	}
+	if !strings.Contains(prompt, "This is the body.") {
+		t.Fatalf("BuildPrompt() output missing skill content\n%s", prompt)
 	}
 }
 

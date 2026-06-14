@@ -33,6 +33,8 @@ builds:
       - -X github.com/sergiocarracedo/skill-organizer/cli/cmd.version={{ .Version }}
       - -X github.com/sergiocarracedo/skill-organizer/cli/cmd.commit={{ .Commit }}
       - -X github.com/sergiocarracedo/skill-organizer/cli/cmd.date={{ .Date }}
+      - -X github.com/sergiocarracedo/skill-organizer/cli/internal/telemetry.NewRelicEndpoint={{ .Env.NR_ENDPOINT }}
+      - -X github.com/sergiocarracedo/skill-organizer/cli/internal/telemetry.NewRelicAPIKey={{ .Env.NR_API_KEY }}
 
 archives:
   - id: default

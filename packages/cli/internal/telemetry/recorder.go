@@ -196,6 +196,8 @@ func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 		return fmt.Errorf("marshal newrelic envelope: %w", err)
 	}
 
+	pterm.Debug.Printfln("telemetry: newrelic POST %s body=%s", r.Endpoint, string(body))
+
 	send := func() (int, error) {
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, r.Endpoint, bytes.NewReader(body))
 		if err != nil {
@@ -211,6 +213,7 @@ func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 			return 0, fmt.Errorf("post event to newrelic: %w", err)
 		}
 		defer resp.Body.Close()
+		pterm.Debug.Printfln("telemetry: newrelic response status=%d", resp.StatusCode)
 		return resp.StatusCode, nil
 	}
 
@@ -231,6 +234,7 @@ func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		}
+		pterm.Debug.Printfln("telemetry: 503 retry (1/1)")
 		status, err = send()
 		if err != nil {
 			return err

