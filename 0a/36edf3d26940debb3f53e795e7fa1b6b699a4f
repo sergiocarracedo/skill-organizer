@@ -1,0 +1,123 @@
+packages/cli/internal/security/testdata/.skill-hash-cache.json
+  s_d6f7bc9d78e1e0::t_717ee7f3642b00 2
+packages/cli/internal/telemetry/telemetry.go
+  s_b8dddeaeeaed53::t_8c561e0641e61a 90-97,102-103
+  s_b8dddeaeeaed53::t_af7e1882225496 9,15
+  s_b8dddeaeeaed53::t_08211b8b334ac5 115-118,121-126
+packages/cli/internal/telemetry/recorder.go
+  s_b8dddeaeeaed53::t_6c1e928e51ee4d 199-200,216,237
+.planning/phases/06-ai-model-visibility-security/06-01-PLAN-SUMMARY.md
+  s_3d1531d017a36e::t_622ced8cef5689 1-35
+packages/cli/.goreleaser.yaml
+  s_b8dddeaeeaed53::t_1516bfb625a2d3 36-37
+packages/cli/cmd/skill_overlap_test.go
+  s_e595791b137881::t_c195b50af85ce8 303,470,572,667
+  s_e595791b137881::t_ca61fff64b31b5 312,479,581,676
+  s_e595791b137881::t_fdcaa7aa9df8e0 99,108,131,275,296,352,442,463,506,544,565,608,639,660,703
+  s_e595791b137881::t_660a28ea27fcf8 393
+packages/cli/cmd/skill_overlap.go
+  s_e595791b137881::t_aef578b7c65526 21
+  s_e595791b137881::t_99fc3fa8b757e7 116
+  s_e595791b137881::t_4f486a586aa38d 142
+  s_e595791b137881::t_1678c4d5cc991e 219
+packages/cli/internal/security/security_test.go
+  s_d6f7bc9d78e1e0::t_238e848aec1624 92,100-101,106-107
+  s_d6f7bc9d78e1e0::t_cabe7f0deb6cf8 33-68
+packages/cli/cmd/skill_security.go
+  s_d6f7bc9d78e1e0::t_84253eadbc39fe 183
+  s_b8dddeaeeaed53::t_36681af749edb5 255-258,264-265
+  s_b8dddeaeeaed53::t_aca7a13b927d45 27
+  s_b8dddeaeeaed53::t_7467979d721e6a 149-152,154-160,163,173-182,184-207,210-215,217,219-244
+  s_b8dddeaeeaed53::t_53aaa20058a675 309-310,316-317
+  s_b8dddeaeeaed53::t_071a52df54c8ae 352
+  s_b8dddeaeeaed53::t_de09183ba63e74 166-167,281-282
+  s_b8dddeaeeaed53::t_b16f308fe39857 245-253,259-260,262-263,266-270,273-277
+  s_b8dddeaeeaed53::t_63c11154ad0e7d 322,325-326,329,334-335
+  s_e595791b137881::t_5aa73e22f5ffb3 116
+  s_b8dddeaeeaed53::t_831597b7997b84 261
+  s_b8dddeaeeaed53::t_48d7a14d2469a1 353
+  s_b8dddeaeeaed53::t_ce3ed942776296 73-77
+  s_e595791b137881::t_b1c10f3a1ef643 139,145-148,161-162,164,170-172,208-209,216,288-293,296-301,303-305,341
+  s_e595791b137881::t_e017548b1b1d6e 23
+  s_b8dddeaeeaed53::t_2be848aca97347 165,168,254,280
+  s_d6f7bc9d78e1e0::t_e58733b0d2a80e 271
+  s_b8dddeaeeaed53::t_9898efe6d68ad1 272
+  s_e595791b137881::t_52b4708459af5b 350
+  s_b8dddeaeeaed53::t_c7aadd37b6f22f 136
+  s_e595791b137881::t_7bd3a37778ce21 137
+  s_b8dddeaeeaed53::t_c55e885a5aae81 307-308,311-315,318-321
+  s_b8dddeaeeaed53::t_2a4b5b3e9ae033 169,218
+  s_b8dddeaeeaed53::t_951a0e960fc78e 72,78-79
+  s_b8dddeaeeaed53::t_6758f00d489158 26
+packages/cli/internal/security/hash_cache.go
+  s_b8dddeaeeaed53::t_0fc49d8e98b447 1-19,22-59,61-105
+  s_d6f7bc9d78e1e0::t_01a27df08f4dcd 20
+  s_d6f7bc9d78e1e0::t_7567f95bc7a365 60
+  s_b8dddeaeeaed53::t_084a57055ff243 21
+packages/cli/internal/status/status.go
+  s_b8dddeaeeaed53::t_317f2ab3f1365e 77-88
+  s_b8dddeaeeaed53::t_22363f201843b6 53-55
+packages/cli/cmd/root.go
+  s_b8dddeaeeaed53::t_3f725dcd169b03 16
+  s_b8dddeaeeaed53::t_e1acd5665b686a 64-66
+packages/cli/internal/security/security.go
+  s_d6f7bc9d78e1e0::t_21cc99d5983825 34-39
+  s_d6f7bc9d78e1e0::t_30b38a78696352 78
+  s_d6f7bc9d78e1e0::t_47ce4137e79c35 92-104,109-117,121-124,133-134,138-139
+  s_d6f7bc9d78e1e0::t_e042994da2953f 196-205,211-224,226-230,232
+  s_d6f7bc9d78e1e0::t_91d06c2aefb403 25
+  s_d6f7bc9d78e1e0::t_1b6ab988e80ef3 206-209
+packages/cli/internal/agenttools/agenttools.go
+  s_e595791b137881::t_1d1b0ccae7efc4 238,244,255
+  s_e595791b137881::t_52c033413f19c6 262-263,297
+  s_e595791b137881::t_e69859390cf8cd 273-277,279-287
+packages/cli/cmd/skill_security_test.go
+  s_d6f7bc9d78e1e0::t_9bb7cb1d6ea058 58-59
+packages/cli/cmd/status_render.go
+  s_b8dddeaeeaed53::t_4c38c2161de73c 81-83
+.github/workflows/release.yml
+  s_b8dddeaeeaed53::t_292374bcae608d 37-38
+packages/cli/cmd/telemetry.go
+  s_b8dddeaeeaed53::t_125aeb4c5538ec 129-131,136-158,164-179
+  s_b8dddeaeeaed53::t_e6649770da7ec2 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0a36edf3d26940debb3f53e795e7fa1b6b699a4f",
+  "prompts": {},
+  "sessions": {
+    "s_3d1531d017a36e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13ef41521ffeMnQ1x2BKmFodQh",
+        "model": "deepseek-v4-flash-free"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_d6f7bc9d78e1e0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_143125a7bffeSlFnRLi0fmqfFc",
+        "model": "big-pickle"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    },
+    "s_e595791b137881": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_14f955354ffeZ0p37YETkUH6AZ",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
