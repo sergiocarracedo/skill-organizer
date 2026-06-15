@@ -1,0 +1,48 @@
+{
+  "name": "videos",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio",
+    "dev": "remotion studio",
+    "render": "remotion render security-check-promo out/security-check-promo.mp4",
+    "render:security": "remotion render security-check-promo out/security-check-promo.mp4",
+    "build": "remotion compositions src/Root.tsx",
+    "lint": "oxlint .",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "smoke": "remotion still security-check-promo --scale=0.25 --frame=30",
+    "prepare": "lefthook install"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "^4.0.382",
+    "@remotion/media": "^4.0.382",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.382"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.2",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@remotion/cli": "^4.0.382",
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "lefthook": "^2.1.6",
+    "oxc-parser": "^0.128.0",
+    "oxlint": "^1.62.0",
+    "postcss": "^8.4.49",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.7",
+    "vitest": "^4.1.5"
+  }
+}

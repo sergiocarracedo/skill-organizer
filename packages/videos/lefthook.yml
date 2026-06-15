@@ -1,0 +1,17 @@
+pre-commit:
+  commands:
+    lint:
+      glob: '*.{ts,tsx}'
+      run: pnpm lint
+    format:
+      glob: '*.{ts,tsx,json,md}'
+      run: pnpm format:check
+    type-check:
+      run: pnpm type-check
+    test:
+      run: pnpm test
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}

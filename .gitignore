@@ -10,6 +10,12 @@ dist/
 packages/*/dist/
 packages/*/node_modules/
 packages/*/coverage/
+packages/videos/out/
+packages/videos/renders/
+packages/videos/.remotion-cache/
+packages/videos/*.mp4
+packages/videos/*.webm
+packages/videos/*.mkv
 packages/web/test-results/
 node_modules/
 

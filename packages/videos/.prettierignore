@@ -1,0 +1,9 @@
+node_modules/
+out/
+dist/
+build/
+.remotion-cache/
+renders/
+coverage/
+*.tsbuildinfo
+public/

@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #020611;
+  --color-panel: rgba(9, 16, 33, 0.74);
+  --color-panel-strong: rgba(14, 22, 42, 0.94);
+  --color-border: rgba(154, 188, 255, 0.16);
+  --color-text: #edf5ff;
+  --color-muted: rgba(237, 245, 255, 0.72);
+  --color-cyan: #43eeff;
+  --color-violet: #9d61ff;
+  --color-amber: #ffb549;
+  --color-red: #ff5a5a;
+  --color-green: #7aef9a;
+  --color-rose: #ff6a8a;
+
+  --font-display: 'Oxanium', 'Segoe UI', sans-serif;
+  --font-body: 'Source Serif 4', Georgia, serif;
+  --font-code: 'JetBrains Mono', monospace;
+}

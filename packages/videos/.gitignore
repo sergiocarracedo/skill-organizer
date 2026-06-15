@@ -1,0 +1,10 @@
+node_modules/
+out/
+renders/
+.remotion-cache/
+*.mp4
+*.webm
+*.mkv
+dist/
+coverage/
+.DS_Store
