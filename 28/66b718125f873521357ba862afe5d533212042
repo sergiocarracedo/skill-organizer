@@ -1,0 +1,19 @@
+packages/web/src/data/home.ts
+  s_b8dddeaeeaed53::t_578038737cbf6d 733-739
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "2866b718125f873521357ba862afe5d533212042",
+  "prompts": {},
+  "sessions": {
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
