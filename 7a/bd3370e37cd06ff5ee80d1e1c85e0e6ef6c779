@@ -1,0 +1,19 @@
+.github/workflows/release.yml
+  s_e138cf5517f318::t_f161fbd68a9fb2 27-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "7abd3370e37cd06ff5ee80d1e1c85e0e6ef6c779",
+  "prompts": {},
+  "sessions": {
+    "s_e138cf5517f318": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1353ae2b0ffe33Y93DNewBkRKn",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
