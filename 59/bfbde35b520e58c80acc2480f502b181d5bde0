@@ -1,0 +1,27 @@
+packages/web/src/views/home/overlap/OverlapSection.astro
+  s_b8dddeaeeaed53::t_73ea78dd03bc02 7
+  s_b8dddeaeeaed53::t_1d4cc128df3784 9,11,14-15,93
+packages/web/src/views/home/check-security/CheckSecuritySection.astro
+  s_b8dddeaeeaed53::t_3473df3d4d02f4 8-9
+  s_b8dddeaeeaed53::t_8a3d44595648a6 10,12,15-16,21,42
+packages/web/src/pages/index.astro
+  s_b8dddeaeeaed53::t_f7bfef59525bb0 13,23-26
+packages/web/src/views/home/smart-features/SmartFeaturesSection.astro
+  s_b8dddeaeeaed53::t_e48d5690685e86 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "59bfbde35b520e58c80acc2480f502b181d5bde0",
+  "prompts": {},
+  "sessions": {
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
