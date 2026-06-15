@@ -1,0 +1,19 @@
+---
+import SectionHeader from '@/components/SectionHeader.astro'
+import SectionShell from '@/components/SectionShell.astro'
+---
+
+<SectionShell id="smart-features" className="flex flex-col gap-12">
+  <SectionHeader
+    eyebrow="Smart features"
+    title="Let an installed agent review your library."
+    copy="Use the same agent CLI you already trust to surface risky instructions and overlapping skills — no separate model or service required."
+    titleClassName="max-w-[20ch] text-[clamp(2.2rem,5vw,3.7rem)]"
+    copyClassName="max-w-[58rem] text-[1.08rem] leading-[1.9]"
+    reveal
+  />
+
+  <div class="flex flex-col gap-16">
+    <slot />
+  </div>
+</SectionShell>

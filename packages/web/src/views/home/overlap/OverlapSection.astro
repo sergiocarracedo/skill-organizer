@@ -1,18 +1,18 @@
 ---
 import SectionHeader from '@/components/SectionHeader.astro'
-import SectionShell from '@/components/SectionShell.astro'
 import TerminalFrame from '@/components/TerminalFrame.astro'
 import { overlapDemoGroups } from '@/data/home'
 ---
 
-<SectionShell className="flex flex-col gap-8">
+<a id="check-overlap" class="block scroll-mt-24"></a>
+
+<section class="flex flex-col gap-6">
   <SectionHeader
-    eyebrow="Skill overlap check"
+    eyebrow="Overlap check"
     title="Find overlapping skills before routing gets messy."
     copy="`skill-organizer skill check-overlap` uses an installed agent to review your managed skills for duplicate or partial overlap, then groups the findings with explanations and cleanup guidance."
-    titleClassName="max-w-[15ch] text-[clamp(2.2rem,5vw,3.7rem)]"
-    copyClassName="max-w-[58rem] text-[1.08rem] leading-[1.9]"
-    reveal
+    titleClassName="max-w-[20ch] text-[clamp(1.4rem,2.6vw,2rem)]"
+    copyClassName="max-w-[58rem] text-[0.98rem] leading-[1.85]"
   />
 
   <div class="overflow-x-auto" data-reveal>
@@ -90,4 +90,4 @@ import { overlapDemoGroups } from '@/data/home'
       </TerminalFrame>
     </div>
   </div>
-</SectionShell>
+</section>

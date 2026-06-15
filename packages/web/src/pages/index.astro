@@ -10,6 +10,7 @@ import HeroSection from '@/views/home/hero/HeroSection.astro'
 import OverlapSection from '@/views/home/overlap/OverlapSection.astro'
 import ServiceSection from '@/views/home/service/ServiceSection.astro'
 import SkillUpdatesSection from '@/views/home/skill-updates/SkillUpdatesSection.astro'
+import SmartFeaturesSection from '@/views/home/smart-features/SmartFeaturesSection.astro'
 import TerminalDemoSection from '@/views/home/terminal-demo/TerminalDemoSection.astro'
 ---
 
@@ -19,13 +20,15 @@ import TerminalDemoSection from '@/views/home/terminal-demo/TerminalDemoSection.
 >
   <HeroSection />
   <FeaturesSection />
-  <CheckSecuritySection />
+  <SmartFeaturesSection>
+    <CheckSecuritySection />
+    <OverlapSection />
+  </SmartFeaturesSection>
   <CompatibilitySection />
   <AdvantagesSection />
   <TerminalDemoSection />
   <SkillUpdatesSection />
   <ServiceSection />
-  <OverlapSection />
   <FaqSection />
   <DocsCtaSection />
 </SiteLayout>
