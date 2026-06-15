@@ -24,6 +24,16 @@ jobs:
           go-version-file: packages/cli/go.mod
           cache-dependency-path: packages/cli/go.sum
 
+      - name: Preflight — verify New Relic vars are set
+        env:
+          NR_ENDPOINT: ${{ vars.NR_ENDPOINT }}
+          NR_API_KEY: ${{ vars.NR_API_KEY }}
+        run: |
+          if [[ -z "$NR_ENDPOINT" || -z "$NR_API_KEY" ]]; then
+            echo "::error::NR_ENDPOINT and NR_API_KEY must be set as repository variables (not secrets) at Settings → Secrets and variables → Actions → Variables. See RELEASING.md."
+            exit 1
+          fi
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
