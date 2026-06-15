@@ -1,0 +1,21 @@
+packages/videos/package.json
+  s_b8dddeaeeaed53::t_6467b7c9265eac 9-10
+packages/videos/src/Root.tsx
+  s_b8dddeaeeaed53::t_e898c28378ef60 1,6-13,16-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "ec23eae123c46090f71ab379e6b676d09a749c22",
+  "prompts": {},
+  "sessions": {
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
