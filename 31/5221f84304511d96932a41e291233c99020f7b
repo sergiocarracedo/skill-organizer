@@ -1,0 +1,21 @@
+packages/cli/internal/telemetry/recorder.go
+  s_b8dddeaeeaed53::t_fc6dd1af072d56 8
+  s_b8dddeaeeaed53::t_3c2ea838194fad 226-230,232-233,235
+  s_b8dddeaeeaed53::t_b746dd0d364287 202-209,225,231,234,267-269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "315221f84304511d96932a41e291233c99020f7b",
+  "prompts": {},
+  "sessions": {
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
