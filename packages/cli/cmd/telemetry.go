@@ -23,6 +23,7 @@ var (
 	telemetryAppDir          = configpkg.AppDir
 	telemetryInfo            = func(format string, args ...any) { pterm.Info.Printfln(format, args...) }
 	telemetrySuccess         = func(format string, args ...any) { pterm.Success.Printfln(format, args...) }
+	telemetryWarning         = func(format string, args ...any) { pterm.Warning.Printfln(format, args...) }
 )
 
 // newTelemetryCommand is the parent `telemetry` cobra subcommand. It
@@ -136,6 +137,11 @@ func newTelemetryStatusCommand() *cobra.Command {
 
 			telemetryInfo("Enabled:        %v", cfg.Enabled)
 			telemetryInfo("Recorder:       %s", recType)
+
+			if cfg.Enabled && recType == "NoopRecorder" &&
+				(telemetrypkg.NewRelicEndpoint == "" || telemetrypkg.NewRelicAPIKey == "") {
+				telemetryWarning("Misconfiguration: telemetry is enabled but this binary was built without New Relic credentials. Events are being dropped. See RELEASING.md for the fix.")
+			}
 
 			if nr, ok := rec.(*telemetrypkg.NewRelicRecorder); ok {
 				telemetryInfo("Endpoint:       %s", nr.Endpoint)

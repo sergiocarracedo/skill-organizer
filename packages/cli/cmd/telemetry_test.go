@@ -119,6 +119,7 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 	originalFactory := telemetrypkg.RecorderFactoryFunc
 	originalInfo := telemetryInfo
 	originalSuccess := telemetrySuccess
+	originalWarning := telemetryWarning
 	originalEndpoint := telemetrypkg.NewRelicEndpoint
 	originalKey := telemetrypkg.NewRelicAPIKey
 	t.Cleanup(func() {
@@ -128,6 +129,7 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 		telemetrypkg.RecorderFactoryFunc = originalFactory
 		telemetryInfo = originalInfo
 		telemetrySuccess = originalSuccess
+		telemetryWarning = originalWarning
 		telemetrypkg.NewRelicEndpoint = originalEndpoint
 		telemetrypkg.NewRelicAPIKey = originalKey
 	})
@@ -151,6 +153,7 @@ func TestTelemetryStatusSubcommand(t *testing.T) {
 		buf.WriteString("\n")
 	}
 	telemetrySuccess = func(_ string, _ ...any) {}
+	telemetryWarning = func(_ string, _ ...any) {}
 
 	cmd := newTelemetryStatusCommand()
 	cmd.SetOut(io.Discard)
@@ -264,6 +267,7 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 	originalFactory := telemetrypkg.RecorderFactoryFunc
 	originalInfo := telemetryInfo
 	originalSuccess := telemetrySuccess
+	originalWarning := telemetryWarning
 	originalEndpoint := telemetrypkg.NewRelicEndpoint
 	originalKey := telemetrypkg.NewRelicAPIKey
 	t.Cleanup(func() {
@@ -273,6 +277,7 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 		telemetrypkg.RecorderFactoryFunc = originalFactory
 		telemetryInfo = originalInfo
 		telemetrySuccess = originalSuccess
+		telemetryWarning = originalWarning
 		telemetrypkg.NewRelicEndpoint = originalEndpoint
 		telemetrypkg.NewRelicAPIKey = originalKey
 	})
@@ -290,12 +295,17 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 	}
 	telemetryAppDir = func() (string, error) { return appDir, nil }
 
-	var buf bytes.Buffer
+	var infoBuf bytes.Buffer
+	var warnBuf bytes.Buffer
 	telemetryInfo = func(format string, args ...any) {
-		fmt.Fprintf(&buf, format, args...)
-		buf.WriteString("\n")
+		fmt.Fprintf(&infoBuf, format, args...)
+		infoBuf.WriteString("\n")
 	}
 	telemetrySuccess = func(_ string, _ ...any) {}
+	telemetryWarning = func(format string, args ...any) {
+		fmt.Fprintf(&warnBuf, format, args...)
+		warnBuf.WriteString("\n")
+	}
 
 	cmd := newTelemetryStatusCommand()
 	cmd.SetOut(io.Discard)
@@ -304,12 +314,76 @@ func TestTelemetryStatusSubcommand_NoBuildVars(t *testing.T) {
 		t.Fatalf("RunE() = %v", err)
 	}
 
-	got := buf.String()
+	got := infoBuf.String()
 	if !strings.Contains(got, "NoopRecorder") {
 		t.Fatalf("status output missing NoopRecorder (build vars empty)\noutput:\n%s", got)
 	}
 	if !strings.Contains(got, "(none)") {
 		t.Fatalf("status output should show (none) for empty DefaultModel\noutput:\n%s", got)
+	}
+	warn := warnBuf.String()
+	if !strings.Contains(warn, "Misconfiguration") {
+		t.Fatalf("expected misconfiguration warning when Enabled=true and build vars empty; got: %q", warn)
+	}
+	if !strings.Contains(warn, "RELEASING.md") {
+		t.Fatalf("misconfiguration warning should point at RELEASING.md; got: %q", warn)
+	}
+}
+
+// TestTelemetryStatusSubcommand_DisabledNoWarning asserts that the
+// misconfiguration warning is NOT emitted when telemetry is
+// disabled, even if the build-time vars are empty (the dev-build
+// escape hatch is the correct path in that case).
+func TestTelemetryStatusSubcommand_DisabledNoWarning(t *testing.T) {
+	originalLoad := telemetryLoadConfig
+	originalAppDir := telemetryAppDir
+	originalLoadAgentCfg := telemetryLoadAgentCfg
+	originalFactory := telemetrypkg.RecorderFactoryFunc
+	originalInfo := telemetryInfo
+	originalSuccess := telemetrySuccess
+	originalWarning := telemetryWarning
+	originalEndpoint := telemetrypkg.NewRelicEndpoint
+	originalKey := telemetrypkg.NewRelicAPIKey
+	t.Cleanup(func() {
+		telemetryLoadConfig = originalLoad
+		telemetryAppDir = originalAppDir
+		telemetryLoadAgentCfg = originalLoadAgentCfg
+		telemetrypkg.RecorderFactoryFunc = originalFactory
+		telemetryInfo = originalInfo
+		telemetrySuccess = originalSuccess
+		telemetryWarning = originalWarning
+		telemetrypkg.NewRelicEndpoint = originalEndpoint
+		telemetrypkg.NewRelicAPIKey = originalKey
+	})
+
+	appDir := t.TempDir()
+	telemetrypkg.NewRelicEndpoint = ""
+	telemetrypkg.NewRelicAPIKey = ""
+
+	telemetryLoadConfig = func(_ string) (telemetrypkg.TelemetryConfig, error) {
+		return telemetrypkg.TelemetryConfig{Enabled: false}, nil
+	}
+	telemetryLoadAgentCfg = func(_ string) (configpkg.AgentSelectionConfig, error) {
+		return configpkg.AgentSelectionConfig{}, nil
+	}
+	telemetryAppDir = func() (string, error) { return appDir, nil }
+
+	var warnBuf bytes.Buffer
+	telemetryInfo = func(_ string, _ ...any) {}
+	telemetrySuccess = func(_ string, _ ...any) {}
+	telemetryWarning = func(format string, args ...any) {
+		fmt.Fprintf(&warnBuf, format, args...)
+		warnBuf.WriteString("\n")
+	}
+
+	cmd := newTelemetryStatusCommand()
+	cmd.SetOut(io.Discard)
+	cmd.SetErr(io.Discard)
+	if err := cmd.RunE(cmd, nil); err != nil {
+		t.Fatalf("RunE() = %v", err)
+	}
+	if warnBuf.Len() != 0 {
+		t.Fatalf("expected no misconfiguration warning when telemetry is disabled; got: %q", warnBuf.String())
 	}
 }
 
