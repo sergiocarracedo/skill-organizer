@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.3.0...v1.4.0) (2026-06-15)
+
+
+### Features
+
+* **web:** add anchors to landing sections and link feature cards to detail sections ([61a54a7](https://github.com/sergiocarracedo/skill-organizer/commit/61a54a74cfe06f69345621d50c2ffce3ca1dea3b))
+
 ## [1.3.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.2.0...v1.3.0) (2026-06-15)
 
 
