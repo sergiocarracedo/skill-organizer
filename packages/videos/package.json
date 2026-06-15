@@ -6,8 +6,8 @@
   "scripts": {
     "studio": "remotion studio",
     "dev": "remotion studio",
-    "render": "remotion render security-check-promo out/security-check-promo.mp4",
-    "render:security": "remotion render security-check-promo out/security-check-promo.mp4",
+    "render": "remotion render src/Root.tsx security-check-promo out/security-check-promo.mp4",
+    "render:security": "remotion render src/Root.tsx security-check-promo out/security-check-promo.mp4",
     "build": "remotion compositions src/Root.tsx",
     "lint": "oxlint .",
     "format": "prettier . --write",
