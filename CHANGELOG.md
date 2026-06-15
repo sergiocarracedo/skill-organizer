@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.2.0...v1.3.0) (2026-06-15)
+
+
+### Features
+
+* **release:** preflight-check New Relic vars before goreleaser ([7abd337](https://github.com/sergiocarracedo/skill-organizer/commit/7abd3370e37cd06ff5ee80d1e1c85e0e6ef6c779))
+* **telemetry:** warn in status when binary is missing New Relic credentials ([967989e](https://github.com/sergiocarracedo/skill-organizer/commit/967989e4e6d743ac85f27609f7d3fe8ec01a5017))
+
+
+### Bug Fixes
+
+* **release:** read New Relic credentials from vars, not secrets ([1d217c0](https://github.com/sergiocarracedo/skill-organizer/commit/1d217c0c001eb43c851f00612414ab4cd7434749))
+
 ## [1.2.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.1.0...v1.2.0) (2026-06-15)
 
 
