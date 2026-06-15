@@ -34,8 +34,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-          NR_ENDPOINT: ${{ secrets.NR_ENDPOINT }}
-          NR_API_KEY: ${{ secrets.NR_API_KEY }}
+          NR_ENDPOINT: ${{ vars.NR_ENDPOINT }}
+          NR_API_KEY: ${{ vars.NR_API_KEY }}
 
   publish-npm:
     needs: goreleaser
