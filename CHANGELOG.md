@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.4.0...v1.4.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **telemetry:** include newrelic response body in debug log and unexpected-status error ([5a92a20](https://github.com/sergiocarracedo/skill-organizer/commit/5a92a20df91275625b36160643e602dba9f6a439))
+
 ## [1.4.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.3.0...v1.4.0) (2026-06-15)
 
 
