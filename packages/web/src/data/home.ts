@@ -730,6 +730,13 @@ export const featureCards: FeatureCard[] = [
     rotation: -1.4,
     speed: 0.13,
   },
+  {
+    title: "Security check",
+    copy: "Score every managed skill with an installed agent to surface dangerous instructions and stale reviews before they reach your tools.",
+    shape: "bevel",
+    rotation: 1.6,
+    speed: 0.12,
+  },
 ];
 
 export const advantageItems = [
