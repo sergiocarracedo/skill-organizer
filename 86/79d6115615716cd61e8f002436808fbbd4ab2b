@@ -1,0 +1,19 @@
+RELEASING.md
+  s_e138cf5517f318::t_5cdbb7b69495d9 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "8679d6115615716cd61e8f002436808fbbd4ab2b",
+  "prompts": {},
+  "sessions": {
+    "s_e138cf5517f318": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1353ae2b0ffe33Y93DNewBkRKn",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
