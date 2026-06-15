@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.3...v1.1.0) (2026-06-15)
+
+
+### Features
+
+* **02-01:** add --allow-overlap flag and non-zero exit to check-overlap ([12b4b70](https://github.com/sergiocarracedo/skill-organizer/commit/12b4b70a3afa0815d2356f73a6da6ea04ba335ae))
+* **03-01:** add oklog/ulid/v2 dependency for telemetry event IDs ([8cd079e](https://github.com/sergiocarracedo/skill-organizer/commit/8cd079e012e65157ddf5d8876f6ad73d873f31af))
+* **03-01:** add telemetry Event struct with schema validation ([e94f861](https://github.com/sergiocarracedo/skill-organizer/commit/e94f8618035c651f16ee341592e336c3596bd699))
+* **03-01:** add telemetry Identity type with LoadOrCreate and RotateHostID ([2f13ed8](https://github.com/sergiocarracedo/skill-organizer/commit/2f13ed832965d17c86316ae41d9c938a88b565b8))
+* **03-01:** add telemetry Recorder interface, NoopRecorder, and factory ([1410f50](https://github.com/sergiocarracedo/skill-organizer/commit/1410f502cb57e0972681942be8d87cf4f19cb458))
+* **03-02:** add Buffer JSONL spool with O_APPEND writes and 1MB FIFO eviction ([5cfd992](https://github.com/sergiocarracedo/skill-organizer/commit/5cfd992e5f5a2089fece5cd4241e7656dc4bbdf1))
+* **03-02:** add cmd/telemetry.go with enable|disable|status|rotate-host-id ([365af29](https://github.com/sergiocarracedo/skill-organizer/commit/365af29911751ab0ea92b5a04f2c6c4e28d13cc0))
+* **03-02:** add HTTPRecorder, RecorderConfig, SetDefaultFactory to recorder.go ([49a6721](https://github.com/sergiocarracedo/skill-organizer/commit/49a67213f0aab0ce5364151fd496fc50bba9f833))
+* **03-02:** add prompt.go with TTY-gated FirstRunPrompt and func-var seam ([a270f45](https://github.com/sergiocarracedo/skill-organizer/commit/a270f45a9a81de4d593fc8aef19d2a1c9e985167))
+* **03-02:** add telemetry.go with Service, RecordEvent, DrainBuffer, and alias normalization ([1481e5d](https://github.com/sergiocarracedo/skill-organizer/commit/1481e5d2d47868296e60ed4117472c63cf7304ee))
+* **03-02:** add TelemetryConfig struct and Load/Save helpers ([36822e2](https://github.com/sergiocarracedo/skill-organizer/commit/36822e2bebd8f274d49e28074c4a1bba01eb5b3f))
+* **03-02:** register telemetry subcommand in root.go + add cmd/telemetry_test.go ([52f2c4c](https://github.com/sergiocarracedo/skill-organizer/commit/52f2c4c54c7913b6b5e852aae3647b95890bab99))
+* **03-02:** wire root.go PersistentPreRun/PostRun + --telemetry-endpoint flag ([4638ca9](https://github.com/sergiocarracedo/skill-organizer/commit/4638ca9ce8e1867ca4092fe09db5ccc9b6105dc6))
+* **05-02:** append telemetry disable off-ramp to first-run prompt copy ([faf0286](https://github.com/sergiocarracedo/skill-organizer/commit/faf0286acf1a2cb1654c360b79cc99d3cd9dd1a1))
+* **06-02:** add --model flag to check-overlap command ([304a296](https://github.com/sergiocarracedo/skill-organizer/commit/304a29618a118dddf6b4c446163e77608dfa390f))
+* **06-02:** add --model flag to check-security command ([3b3e090](https://github.com/sergiocarracedo/skill-organizer/commit/3b3e090543fddbef4f758644f0db911155cd8d02))
+* **06-02:** add model selection to chooseAgentToolImpl ([0d70142](https://github.com/sergiocarracedo/skill-organizer/commit/0d701423760a178f40090e70270a2c8cbaf28095))
+* **06-02:** show default model in telemetry status output ([a02daac](https://github.com/sergiocarracedo/skill-organizer/commit/a02daac16c6add66fb54e541817daee9a5e6b2f1))
+* **cli:** add check-security cobra command ([137783b](https://github.com/sergiocarracedo/skill-organizer/commit/137783b39bbac1561d991b66bf3b9e6eef711239))
+* **cli:** add internal/security package with prompt builder and report types ([2158be1](https://github.com/sergiocarracedo/skill-organizer/commit/2158be15d1e880caebbe13c2889bf4d40b537bbd))
+* **cli:** add post-install check-security hook to skill add ([ef71b34](https://github.com/sergiocarracedo/skill-organizer/commit/ef71b34aabba59dcd0be83871bf7fbaf59acbe80))
+* **cli:** add re-enable risk gate ([395dd3a](https://github.com/sergiocarracedo/skill-organizer/commit/395dd3ac8dab65f4ec892ec7db3c37f0792d80b8))
+* **cli:** add risk-score fields to ManagedMetadata schema ([e92f857](https://github.com/sergiocarracedo/skill-organizer/commit/e92f857425fa58cb55a453dafc9847892e77086a))
+* **cmd:** extend telemetry status with recorder type, account id, and insert key ([ce24622](https://github.com/sergiocarracedo/skill-organizer/commit/ce2462227f6d02a3aa2d251b8ab2c14a7b2f2aa1))
+* **cmd:** wire SKILL_ORGANIZER_NEWRELIC_* env vars and RecorderVersion ([226aa00](https://github.com/sergiocarracedo/skill-organizer/commit/226aa0036cd83217433ac6ef9e5ee6819754f5c8))
+* **p6-03:** add ComputeSkillHash helper and store hash during check-security ([812e875](https://github.com/sergiocarracedo/skill-organizer/commit/812e87558dd9351c289d47e501aa7f3876b29dec))
+* **p6-03:** add risk fields to SkillStatus and populate from metadata ([8ae8382](https://github.com/sergiocarracedo/skill-organizer/commit/8ae8382201bef02be047329eb4bd1dfac6116386))
+* **p6-03:** add RiskSourceHash field to ManagedMetadata with YAML round-trip ([142fabd](https://github.com/sergiocarracedo/skill-organizer/commit/142fabdc59d21a0e755d9b60fe5c20d596706b4d))
+* **p6-03:** render risk tags in status tree with color-coded scores and stale detection ([da6a48b](https://github.com/sergiocarracedo/skill-organizer/commit/da6a48b020a8c8c5b3d07331e758eab2b5fb158b))
+* **p6-06-01:** add DefaultModel/KnownModels to AgentSelectionConfig + round-trip tests ([9d508b9](https://github.com/sergiocarracedo/skill-organizer/commit/9d508b95ce45fe6f3ed2c548622edb58027e6a00))
+* **p6-06-01:** add ListModels/ModelArgs/VersionArgs to Tool struct + QueryToolModels helper ([1613c64](https://github.com/sergiocarracedo/skill-organizer/commit/1613c64d81d2a04f83a8c70ca8727572dca54d73))
+* **p6-06-01:** create dangerous fixture skills for security evaluator tests ([1967b01](https://github.com/sergiocarracedo/skill-organizer/commit/1967b01e92dcb4b33f77d88b9eb862a1aae8e1d9))
+* **p6-06-01:** define per-tool ListModels/ModelArgs/VersionArgs for OpenCode ([597312e](https://github.com/sergiocarracedo/skill-organizer/commit/597312e437676e4b852e9b6ef2ad818f7de8dedc))
+* Phase 6 AI model visibility and security tooling ([b92c55a](https://github.com/sergiocarracedo/skill-organizer/commit/b92c55a15e33f1cd8db7afb2a55ee4be1dbbbbe2))
+* **telemetry:** add NewRelicRecorder struct, Record method, and WarningFunc ([b910f31](https://github.com/sergiocarracedo/skill-organizer/commit/b910f31a52b2bb80d664ce585ba696c4e8516086))
+* **telemetry:** extend RecorderConfig and SetDefaultFactory for NewRelicRecorder ([221fcee](https://github.com/sergiocarracedo/skill-organizer/commit/221fcee8aafc809541dff2bb1839f7fbb6d0d1cf))
+
 ## [1.0.3](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.2...v1.0.3) (2026-05-11)
 
 
