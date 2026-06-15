@@ -77,6 +77,7 @@ export type FeatureCard = {
   shape: "bevel" | "arc" | "slant" | "ticket" | "hex" | "shield";
   rotation: number;
   speed: number;
+  href?: string;
 };
 
 export type OverlapGroupDemo = {
@@ -687,6 +688,7 @@ export const featureCards: FeatureCard[] = [
     shape: "bevel",
     rotation: -3.2,
     speed: 0.16,
+    href: "#compatibility",
   },
   {
     title: "Multiple skill projects",
@@ -708,6 +710,7 @@ export const featureCards: FeatureCard[] = [
     shape: "slant",
     rotation: -1.8,
     speed: 0.2,
+    href: "#service",
   },
   {
     title: "Overlap analysis",
@@ -715,6 +718,7 @@ export const featureCards: FeatureCard[] = [
     shape: "ticket",
     rotation: 3.1,
     speed: 0.11,
+    href: "#check-overlap",
   },
   {
     title: "Adopt unmanaged entries",
@@ -729,6 +733,7 @@ export const featureCards: FeatureCard[] = [
     shape: "ticket",
     rotation: -1.4,
     speed: 0.13,
+    href: "#skill-updates",
   },
   {
     title: "Security check",
@@ -736,6 +741,7 @@ export const featureCards: FeatureCard[] = [
     shape: "bevel",
     rotation: 1.6,
     speed: 0.12,
+    href: "#check-security",
   },
 ];
 

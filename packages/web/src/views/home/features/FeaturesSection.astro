@@ -52,6 +52,15 @@ const featureShapeClasses = {
             {card.title}
           </h3>
           <p class="max-w-[28rem] leading-[1.82]">{card.copy}</p>
+          {card.href && (
+            <a
+              href={card.href}
+              class="mt-auto inline-flex items-center gap-1 font-display text-[0.74rem] uppercase tracking-[0.22em] text-cyan-200/82 transition-colors duration-150 hover:text-white"
+            >
+              <span>Learn more</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          )}
         </article>
       ))
     }
