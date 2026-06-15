@@ -1,0 +1,32 @@
+packages/web/src/views/home/compatibility/CompatibilitySection.astro
+  s_b8dddeaeeaed53::t_8651e89415001d 8
+packages/web/src/views/home/faq/FaqSection.astro
+  s_b8dddeaeeaed53::t_73813bec34977c 7
+packages/web/src/views/home/service/ServiceSection.astro
+  s_b8dddeaeeaed53::t_c9df8bc6d36cba 8
+packages/web/src/views/home/docs-cta/DocsCtaSection.astro
+  s_b8dddeaeeaed53::t_8b9e460dc788be 8
+packages/web/src/data/home.ts
+  s_b8dddeaeeaed53::t_8f1b62f4e548e4 80
+  s_b8dddeaeeaed53::t_df7267c73d8f4c 691,713,721,736,744
+packages/web/src/views/home/features/FeaturesSection.astro
+  s_b8dddeaeeaed53::t_215f77ad8cdbe6 55-63
+packages/web/src/views/home/advantages/AdvantagesSection.astro
+  s_b8dddeaeeaed53::t_d03a37c76a8cc2 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "f0a037352cf36c73a3be24d2466adfbbc1a39347",
+  "prompts": {},
+  "sessions": {
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
