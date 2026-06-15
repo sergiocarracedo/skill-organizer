@@ -1,0 +1,54 @@
+---
+title: check-security
+description: Evaluate skills for security risks using an installed agent tool.
+section: reference
+order: 7
+commandSlug: skill check-security
+summary: Score each skill for risk and offer to disable the high-risk ones.
+---
+
+## Synopsis
+
+```bash
+skill-organizer skill check-security
+skill-organizer skill check-security --include-disabled
+skill-organizer skill check-security --force
+skill-organizer skill check-security --tool claude --model anthropic/claude-3-7-sonnet
+skill-organizer skill check-security --print-prompt
+```
+
+## What it does
+
+`check-security` asks an installed agent CLI to score every managed skill from 0 to 100 for security risk. The score and a short reason are written back into each skill's `SKILL.md` metadata so the `status` tree can show a `Safe | Warning | Danger` chip per skill.
+
+Risk thresholds:
+
+- **Safe** — score below 30
+- **Warning** — score 30 to 69
+- **Danger** — score 70 or higher
+
+Skills at `Danger` prompt to be disabled in the same run, and the resulting `risk-source-hash` is stored so the next run can skip re-scoring unchanged skills. Use `--force` to invalidate the cache and re-analyze everything.
+
+## Tool and model selection
+
+`check-security` reuses the agent-selection flow: it detects installed agent CLIs, lets you pick one (or uses the previously chosen tool), and can take an explicit `--model` override in `provider/model` format. The first run prompts to acknowledge that the external tool may incur usage costs; the acknowledgment is sticky in the registry YAML.
+
+To reconfigure the tool or model later, run with `--select-ai-tooling`.
+
+## Flags
+
+```text
+--print-prompt         Print the generated security prompt without invoking an external tool
+--tool                 Use a specific installed tool id (claude, codex, opencode, cursor, antigravity)
+--model                AI model to use (format: provider/model)
+--select-ai-tooling    Prompt to select AI tool and model again
+--include-disabled     Include disabled skills in the analysis
+--force, -f            Force re-analysis of all skills, ignoring cached results
+--source               Override the source directory for skill scanning
+```
+
+## Notes
+
+`skill add` and `check-updates` can invoke the same scoring path on a single skill after import or update, so newly added skills get a risk score without a separate run.
+
+The `risk-source-hash` cache key is computed from the skill's directory contents, so any change to the skill triggers a re-score on the next run.

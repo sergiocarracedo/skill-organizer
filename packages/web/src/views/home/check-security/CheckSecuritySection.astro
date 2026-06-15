@@ -1,0 +1,41 @@
+---
+import SectionHeader from '@/components/SectionHeader.astro'
+import SectionShell from '@/components/SectionShell.astro'
+import { checkSecurityNotes, checkSecurityScenarios } from '@/data/home'
+
+import TerminalScene from '../terminal-demo/TerminalScene.astro'
+---
+
+<SectionShell id="check-security" className="flex flex-col gap-8">
+  <SectionHeader
+    eyebrow="Skill security check"
+    title="Score every skill for risk before it runs."
+    copy="`skill-organizer skill check-security` uses an installed agent to score each managed skill from 0 to 100, color-codes the result in the `status` tree, and offers to disable anything that crosses the danger threshold."
+    titleClassName="max-w-[19ch] text-[clamp(2.2rem,5vw,3.75rem)]"
+    copyClassName="max-w-[58rem] text-[1.08rem] leading-[1.9]"
+    reveal
+  />
+
+  <div
+    class="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.8fr)]"
+  >
+    <TerminalScene scenarios={checkSecurityScenarios} />
+
+    <div class="grid gap-4">
+      {
+        checkSecurityNotes.map((note) => (
+          <article
+            class="flex flex-col gap-3 rounded-[1.6rem] border border-white/8 bg-white/4 px-5 py-[1.2rem]"
+            data-reveal
+          >
+            <p class="font-display text-[0.74rem] uppercase tracking-[0.28em] text-violet-300/74">
+              {note.step}
+            </p>
+            <h3 class="text-[1.28rem] text-white">{note.title}</h3>
+            <p class="leading-[1.82]">{note.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</SectionShell>

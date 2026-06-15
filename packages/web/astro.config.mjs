@@ -5,7 +5,10 @@ import icon from "astro-icon";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const cliVersion = readFileSync(resolve(import.meta.dirname, "../../VERSION"), "utf8").trim();
+const cliVersion = readFileSync(
+  resolve(import.meta.dirname, "../../VERSION"),
+  "utf8",
+).trim();
 
 export default defineConfig({
   site: "https://skill-organizer.sergiocarracedo.es",

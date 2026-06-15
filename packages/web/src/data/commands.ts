@@ -151,7 +151,7 @@ export const commandGroups: CommandGroup[] = [
       "skill-organizer service start",
       "skill-organizer service log-level set debug",
       "skill-organizer service status",
-      ],
+    ],
   },
   {
     slug: "self-update",
@@ -174,6 +174,59 @@ export const commandGroups: CommandGroup[] = [
     whyItMatters:
       "Useful for confirming the installed build, checking provenance, and linking users back to the repository.",
     examples: ["skill-organizer about"],
+  },
+  {
+    slug: "telemetry",
+    title: "Telemetry",
+    command: "skill-organizer telemetry <subcommand>",
+    summary: "Manage opt-in anonymous command telemetry.",
+    whyItMatters:
+      "Inspect, enable, disable, or wipe the on-disk telemetry buffer, and use `PTERM_DEBUG=true` to verify the recorder and HTTP request before any data leaves the device.",
+    examples: [
+      "skill-organizer telemetry enable",
+      "skill-organizer telemetry disable",
+      "skill-organizer telemetry status",
+      "skill-organizer telemetry wipe",
+    ],
+  },
+  {
+    slug: "skill check-security",
+    title: "Skill Check Security",
+    command: "skill-organizer skill check-security",
+    summary: "Score every managed skill for security risk.",
+    whyItMatters:
+      "Run a security analysis on each managed skill with an installed agent CLI, persist the score in the skill metadata, and offer to disable anything that crosses the danger threshold.",
+    flags: [
+      {
+        flag: "--print-prompt",
+        description:
+          "Print the generated security prompt without invoking an external tool.",
+      },
+      {
+        flag: "--tool",
+        description:
+          "Use a specific installed tool id (claude, codex, opencode, cursor, antigravity).",
+      },
+      {
+        flag: "--model",
+        description: "AI model to use (format: provider/model).",
+      },
+      {
+        flag: "--include-disabled",
+        description: "Include disabled skills in the analysis.",
+      },
+      {
+        flag: "--force, -f",
+        description:
+          "Force re-analysis of all skills, ignoring cached results.",
+      },
+    ],
+    examples: [
+      "skill-organizer skill check-security",
+      "skill-organizer skill check-security --include-disabled",
+      "skill-organizer skill check-security --force",
+      "skill-organizer skill check-security --tool claude --model anthropic/claude-3-7-sonnet",
+    ],
   },
 ];
 

@@ -5,7 +5,10 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.stubEnv(
   "PUBLIC_CLI_VERSION",
-  readFileSync(fileURLToPath(new URL("../../../VERSION", import.meta.url)), "utf8").trim(),
+  readFileSync(
+    fileURLToPath(new URL("../../../VERSION", import.meta.url)),
+    "utf8",
+  ).trim(),
 );
 
 import { getCliVersion } from "@/lib/cli-version";
@@ -17,7 +20,9 @@ const cliVersionFilePath = fileURLToPath(
 
 describe("docs helpers", () => {
   it("keeps the displayed CLI version in sync with the repo VERSION", () => {
-    expect(getCliVersion()).toBe(readFileSync(cliVersionFilePath, "utf8").trim());
+    expect(getCliVersion()).toBe(
+      readFileSync(cliVersionFilePath, "utf8").trim(),
+    );
   });
 
   it("returns the correct command metadata", () => {

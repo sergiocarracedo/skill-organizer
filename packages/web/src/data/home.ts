@@ -1,599 +1,599 @@
 export type InstallMethod = {
-  id: string
-  label: string
-  command?: string
-  secondaryText?: string
-  note: string
-  href: string
-  hrefLabel: string
-  linkOnly?: boolean
-}
+  id: string;
+  label: string;
+  command?: string;
+  secondaryText?: string;
+  note: string;
+  href: string;
+  hrefLabel: string;
+  linkOnly?: boolean;
+};
 
 export type LogoItem = {
   id:
-    | 'claude'
-    | 'opencode'
-    | 'codex'
-    | 'cursor'
-    | 'antigravity'
-    | 'agents'
-    | 'macos'
-    | 'linux'
-  name: string
-}
+    | "claude"
+    | "opencode"
+    | "codex"
+    | "cursor"
+    | "antigravity"
+    | "agents"
+    | "macos"
+    | "linux";
+  name: string;
+};
 
 export type TerminalColor =
-  | 'default'
-  | 'muted'
-  | 'cyan'
-  | 'violet'
-  | 'amber'
-  | 'green'
-  | 'red'
-  | 'white'
+  | "default"
+  | "muted"
+  | "cyan"
+  | "violet"
+  | "amber"
+  | "green"
+  | "red"
+  | "white";
 
 export type TerminalChunk = {
-  text: string
-  color?: TerminalColor
-  bold?: boolean
-}
+  text: string;
+  color?: TerminalColor;
+  bold?: boolean;
+};
 
-export type TerminalLine = string | TerminalChunk[]
+export type TerminalLine = string | TerminalChunk[];
 
 export type TerminalEvent =
   | {
-      type: 'prompt'
-      content: string
-      prompt?: string
-      delay?: number
+      type: "prompt";
+      content: string;
+      prompt?: string;
+      delay?: number;
     }
   | {
-      type: 'output'
-      content: TerminalLine[]
-      delay?: number
+      type: "output";
+      content: TerminalLine[];
+      delay?: number;
     }
   | {
-      type: 'progress'
-      label: string
-      delay: number
-      color?: TerminalColor
+      type: "progress";
+      label: string;
+      delay: number;
+      color?: TerminalColor;
     }
   | {
-      type: 'wait'
-      delay: number
-    }
+      type: "wait";
+      delay: number;
+    };
 
 export type TerminalScenario = {
-  id: string
-  label: string
-  description: string
-  accent: 'cyan' | 'violet' | 'amber'
-  events: TerminalEvent[]
-}
+  id: string;
+  label: string;
+  description: string;
+  accent: "cyan" | "violet" | "amber";
+  events: TerminalEvent[];
+};
 
 export type FeatureCard = {
-  title: string
-  copy: string
-  shape: 'bevel' | 'arc' | 'slant' | 'ticket' | 'hex' | 'shield'
-  rotation: number
-  speed: number
-}
+  title: string;
+  copy: string;
+  shape: "bevel" | "arc" | "slant" | "ticket" | "hex" | "shield";
+  rotation: number;
+  speed: number;
+};
 
 export type OverlapGroupDemo = {
-  title: string
-  skills: string[]
-  overlapType: 'Duplicate' | 'Partial'
-  score: number
-  why: string
-  recommendation: string
-}
+  title: string;
+  skills: string[];
+  overlapType: "Duplicate" | "Partial";
+  score: number;
+  why: string;
+  recommendation: string;
+};
 
 export const heroInstallMethods: InstallMethod[] = [
   {
-    id: 'npm',
-    label: 'npm',
-    command: 'npm i -g skill-organizer',
-    secondaryText: 'Then run skill-organizer --version',
-    note: 'Installs the CLI through npm and fetches the matching prebuilt binary for your platform.',
-    href: 'https://www.npmjs.com/package/skill-organizer',
-    hrefLabel: 'View npm package',
+    id: "npm",
+    label: "npm",
+    command: "npm i -g skill-organizer",
+    secondaryText: "Then run skill-organizer --version",
+    note: "Installs the CLI through npm and fetches the matching prebuilt binary for your platform.",
+    href: "https://www.npmjs.com/package/skill-organizer",
+    hrefLabel: "View npm package",
   },
   {
-    id: 'pnpm',
-    label: 'pnpm',
-    command: 'pnpm add -g skill-organizer',
-    secondaryText: 'Then run skill-organizer --version',
-    note: 'Best fit when you already use pnpm for your global CLI tooling.',
-    href: 'https://www.npmjs.com/package/skill-organizer',
-    hrefLabel: 'View npm package',
+    id: "pnpm",
+    label: "pnpm",
+    command: "pnpm add -g skill-organizer",
+    secondaryText: "Then run skill-organizer --version",
+    note: "Best fit when you already use pnpm for your global CLI tooling.",
+    href: "https://www.npmjs.com/package/skill-organizer",
+    hrefLabel: "View npm package",
   },
   {
-    id: 'brew',
-    label: 'brew',
-    command: 'brew install sergiocarracedo/tap/skill-organizer',
-    secondaryText: 'Homebrew tap available if needed',
-    note: 'Best fit when your dev tooling already lives in Homebrew.',
-    href: 'https://github.com/sergiocarracedo/homebrew-tap',
-    hrefLabel: 'Open tap',
+    id: "brew",
+    label: "brew",
+    command: "brew install sergiocarracedo/tap/skill-organizer",
+    secondaryText: "Homebrew tap available if needed",
+    note: "Best fit when your dev tooling already lives in Homebrew.",
+    href: "https://github.com/sergiocarracedo/homebrew-tap",
+    hrefLabel: "Open tap",
   },
   {
-    id: 'binary',
-    label: 'binary',
+    id: "binary",
+    label: "binary",
     linkOnly: true,
-    note: 'Use the release page when you want a direct archive instead of a package manager.',
-    href: 'https://github.com/sergiocarracedo/skill-organizer/releases',
-    hrefLabel: 'GitHub Releases',
+    note: "Use the release page when you want a direct archive instead of a package manager.",
+    href: "https://github.com/sergiocarracedo/skill-organizer/releases",
+    hrefLabel: "GitHub Releases",
   },
-]
+];
 
 export const heroLogoItems: LogoItem[] = [
-  { id: 'macos', name: 'macOS' },
-  { id: 'linux', name: 'Linux' },
-]
+  { id: "macos", name: "macOS" },
+  { id: "linux", name: "Linux" },
+];
 
 export const compatibilityItems: LogoItem[] = [
-  { id: 'claude', name: 'Claude Code' },
-  { id: 'opencode', name: 'OpenCode' },
-  { id: 'codex', name: 'Codex' },
-  { id: 'cursor', name: 'Cursor' },
-  { id: 'antigravity', name: 'Antigravity' },
-]
+  { id: "claude", name: "Claude Code" },
+  { id: "opencode", name: "OpenCode" },
+  { id: "codex", name: "Codex" },
+  { id: "cursor", name: "Cursor" },
+  { id: "antigravity", name: "Antigravity" },
+];
 
 export const terminalScenarios: TerminalScenario[] = [
   {
-    id: 'install',
-    label: 'Install',
+    id: "install",
+    label: "Install",
     description:
-      'Install the CLI, then verify the exact binary you will use before touching a project.',
-    accent: 'cyan',
+      "Install the CLI, then verify the exact binary you will use before touching a project.",
+    accent: "cyan",
     events: [
-      { type: 'prompt', content: 'npm i -g skill-organizer' },
+      { type: "prompt", content: "npm i -g skill-organizer" },
       {
-        type: 'progress',
-        label: 'Resolving package and platform binary',
+        type: "progress",
+        label: "Resolving package and platform binary",
         delay: 920,
-        color: 'cyan',
+        color: "cyan",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
-          [{ text: '+ skill-organizer@latest', color: 'green', bold: true }],
-          [{ text: 'installed package and platform binary', color: 'muted' }],
+          [{ text: "+ skill-organizer@latest", color: "green", bold: true }],
+          [{ text: "installed package and platform binary", color: "muted" }],
         ],
       },
-      { type: 'wait', delay: 260 },
-      { type: 'prompt', content: 'skill-organizer --version' },
+      { type: "wait", delay: 260 },
+      { type: "prompt", content: "skill-organizer --version" },
       {
-        type: 'output',
-        content: [[{ text: '0.0.5', color: 'white', bold: true }]],
+        type: "output",
+        content: [[{ text: "0.0.5", color: "white", bold: true }]],
       },
     ],
   },
   {
-    id: 'onboard',
-    label: 'Onboard',
+    id: "onboard",
+    label: "Onboard",
     description:
-      'Guide a target into a managed source tree without giving up the flat layout your tool expects.',
-    accent: 'violet',
+      "Guide a target into a managed source tree without giving up the flat layout your tool expects.",
+    accent: "violet",
     events: [
-      { type: 'prompt', content: 'skill-organizer onboard' },
+      { type: "prompt", content: "skill-organizer onboard" },
       {
-        type: 'output',
+        type: "output",
         content: [
           [
-            { text: '?', color: 'amber', bold: true },
+            { text: "?", color: "amber", bold: true },
             {
-              text: ' Select the tool to onboard  Generic (.agents) -> ~/.agents/skills',
-              color: 'white',
+              text: " Select the tool to onboard  Generic (.agents) -> ~/.agents/skills",
+              color: "white",
             },
           ],
           [
-            { text: '?', color: 'amber', bold: true },
+            { text: "?", color: "amber", bold: true },
             {
-              text: ' Select the source skills-organized folder for your .agents setup  ~/.agents/skills-organized',
-              color: 'white',
+              text: " Select the source skills-organized folder for your .agents setup  ~/.agents/skills-organized",
+              color: "white",
             },
           ],
         ],
       },
       {
-        type: 'progress',
-        label: 'Writing project config and syncing links',
+        type: "progress",
+        label: "Writing project config and syncing links",
         delay: 1180,
-        color: 'violet',
+        color: "violet",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
           [
             {
-              text: 'Configured Generic (.agents) project at: ~/.agents/.skill-organizer.yml',
-              color: 'green',
+              text: "Configured Generic (.agents) project at: ~/.agents/.skill-organizer.yml",
+              color: "green",
               bold: true,
             },
           ],
-          [{ text: 'Source: ~/.agents/skills-organized', color: 'muted' }],
-          [{ text: 'Target: ~/.agents/skills', color: 'muted' }],
+          [{ text: "Source: ~/.agents/skills-organized", color: "muted" }],
+          [{ text: "Target: ~/.agents/skills", color: "muted" }],
         ],
       },
     ],
   },
   {
-    id: 'status',
-    label: 'Status',
+    id: "status",
+    label: "Status",
     description:
-      'Confirm managed, disabled, and synced skills before you start shaping the library.',
-    accent: 'amber',
+      "Confirm managed, disabled, and synced skills before you start shaping the library.",
+    accent: "amber",
     events: [
       {
-        type: 'prompt',
-        content: 'skill-organizer status',
+        type: "prompt",
+        content: "skill-organizer status",
       },
       {
-        type: 'progress',
-        label: 'Reading source and target state',
+        type: "progress",
+        label: "Reading source and target state",
         delay: 860,
-        color: 'amber',
+        color: "amber",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
-          [{ text: '# Project', color: 'amber', bold: true }],
+          [{ text: "# Project", color: "amber", bold: true }],
           [
             {
-              text: 'Config: /works/test/agents-test/.skill-organizer.yml',
-              color: 'muted',
+              text: "Config: /works/test/agents-test/.skill-organizer.yml",
+              color: "muted",
             },
           ],
           [
             {
-              text: 'Source: /works/test/agents-test/skills-organized',
-              color: 'muted',
+              text: "Source: /works/test/agents-test/skills-organized",
+              color: "muted",
             },
           ],
-          [{ text: 'Target: /works/test/agents-test/skills', color: 'muted' }],
-          [{ text: '', color: 'default' }],
-          [{ text: '# Skills', color: 'amber', bold: true }],
-          [{ text: '├─ 3rdparty', color: 'cyan', bold: true }],
-          [{ text: '│  ├─ agent-tools', color: 'cyan', bold: true }],
+          [{ text: "Target: /works/test/agents-test/skills", color: "muted" }],
+          [{ text: "", color: "default" }],
+          [{ text: "# Skills", color: "amber", bold: true }],
+          [{ text: "├─ 3rdparty", color: "cyan", bold: true }],
+          [{ text: "│  ├─ agent-tools", color: "cyan", bold: true }],
           [
             {
-              text: '│  │  ├─ agent-browser -> 3rdparty--agent-tools--agent-browser [synced]',
-              color: 'green',
-            },
-          ],
-          [
-            {
-              text: '│  │  └─ skill-judge -> 3rdparty--agent-tools--skill-judge [synced]',
-              color: 'green',
-            },
-          ],
-          [{ text: '│  └─ mattpocock', color: 'cyan', bold: true }],
-          [
-            {
-              text: '│     ├─ tdd -> 3rdparty--mattpocock--tdd [disabled]',
-              color: 'white',
+              text: "│  │  ├─ agent-browser -> 3rdparty--agent-tools--agent-browser [synced]",
+              color: "green",
             },
           ],
           [
             {
-              text: '│     └─ write-a-prd -> 3rdparty--mattpocock--write-a-prd [synced]',
-              color: 'green',
+              text: "│  │  └─ skill-judge -> 3rdparty--agent-tools--skill-judge [synced]",
+              color: "green",
             },
           ],
-          [{ text: '├─ personal', color: 'cyan', bold: true }],
+          [{ text: "│  └─ mattpocock", color: "cyan", bold: true }],
           [
             {
-              text: '│  ├─ agent-tasks -> personal--agent-tasks [disabled]',
-              color: 'white',
+              text: "│     ├─ tdd -> 3rdparty--mattpocock--tdd [disabled]",
+              color: "white",
             },
           ],
-          [{ text: '│  └─ coding', color: 'cyan', bold: true }],
           [
             {
-              text: '│     └─ frontend-project-bootstrap -> personal--coding--frontend-project-bootstrap [synced]',
-              color: 'green',
+              text: "│     └─ write-a-prd -> 3rdparty--mattpocock--write-a-prd [synced]",
+              color: "green",
             },
           ],
-          [{ text: '└─ test -> test [synced]', color: 'green' }],
-          [{ text: '', color: 'default' }],
-          [{ text: '# Unmanaged target entries', color: 'amber', bold: true }],
-          [{ text: '3rdparty--mattpocock--tdd', color: 'white' }],
-          [{ text: '', color: 'default' }],
-          [{ text: '# Summary', color: 'amber', bold: true }],
+          [{ text: "├─ personal", color: "cyan", bold: true }],
           [
-            { text: 'Total skills:', color: 'white', bold: true },
-            { text: ' 33', color: 'white', bold: true },
+            {
+              text: "│  ├─ agent-tasks -> personal--agent-tasks [disabled]",
+              color: "white",
+            },
+          ],
+          [{ text: "│  └─ coding", color: "cyan", bold: true }],
+          [
+            {
+              text: "│     └─ frontend-project-bootstrap -> personal--coding--frontend-project-bootstrap [synced]",
+              color: "green",
+            },
+          ],
+          [{ text: "└─ test -> test [synced]", color: "green" }],
+          [{ text: "", color: "default" }],
+          [{ text: "# Unmanaged target entries", color: "amber", bold: true }],
+          [{ text: "3rdparty--mattpocock--tdd", color: "white" }],
+          [{ text: "", color: "default" }],
+          [{ text: "# Summary", color: "amber", bold: true }],
+          [
+            { text: "Total skills:", color: "white", bold: true },
+            { text: " 33", color: "white", bold: true },
           ],
           [
-            { text: 'Managed skills:', color: 'white', bold: true },
-            { text: ' 31', color: 'white', bold: true },
+            { text: "Managed skills:", color: "white", bold: true },
+            { text: " 31", color: "white", bold: true },
           ],
           [
-            { text: 'Unmanaged skills:', color: 'white', bold: true },
-            { text: ' 1', color: 'white', bold: true },
+            { text: "Unmanaged skills:", color: "white", bold: true },
+            { text: " 1", color: "white", bold: true },
           ],
           [
-            { text: 'Synced:', color: 'white', bold: true },
-            { text: ' 31', color: 'green', bold: true },
+            { text: "Synced:", color: "white", bold: true },
+            { text: " 31", color: "green", bold: true },
           ],
           [
-            { text: 'Disabled:', color: 'white', bold: true },
-            { text: ' 2', color: 'amber', bold: true },
+            { text: "Disabled:", color: "white", bold: true },
+            { text: " 2", color: "amber", bold: true },
           ],
           [
-            { text: 'Missing target:', color: 'white', bold: true },
-            { text: ' 0', color: 'muted' },
+            { text: "Missing target:", color: "white", bold: true },
+            { text: " 0", color: "muted" },
           ],
           [
-            { text: 'Broken link:', color: 'white', bold: true },
-            { text: ' 0', color: 'muted' },
+            { text: "Broken link:", color: "white", bold: true },
+            { text: " 0", color: "muted" },
           ],
           [
-            { text: 'Drifted:', color: 'white', bold: true },
-            { text: ' 0', color: 'muted' },
+            { text: "Drifted:", color: "white", bold: true },
+            { text: " 0", color: "muted" },
           ],
         ],
       },
     ],
   },
   {
-    id: 'service',
-    label: 'Service',
+    id: "service",
+    label: "Service",
     description:
-      'Check whether the background watcher service is actually running.',
-    accent: 'violet',
+      "Check whether the background watcher service is actually running.",
+    accent: "violet",
     events: [
-      { type: 'prompt', content: 'skill-organizer service status' },
+      { type: "prompt", content: "skill-organizer service status" },
       {
-        type: 'progress',
-        label: 'Querying background service',
+        type: "progress",
+        label: "Querying background service",
         delay: 760,
-        color: 'violet',
+        color: "violet",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Service status: running', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Service status: running", color: "cyan" },
           ],
         ],
       },
     ],
   },
   {
-    id: 'disable',
-    label: 'Disable',
+    id: "disable",
+    label: "Disable",
     description:
-      'Disable a source skill and let sync remove its generated target entry immediately.',
-    accent: 'amber',
+      "Disable a source skill and let sync remove its generated target entry immediately.",
+    accent: "amber",
     events: [
       {
-        type: 'prompt',
+        type: "prompt",
         content:
-          'skill-organizer skill disable personal/coding/frontend-project-bootstrap',
+          "skill-organizer skill disable personal/coding/frontend-project-bootstrap",
       },
       {
-        type: 'progress',
-        label: 'Updating source metadata and syncing target',
+        type: "progress",
+        label: "Updating source metadata and syncing target",
         delay: 980,
-        color: 'amber',
+        color: "amber",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
+            { text: "SUCCESS", color: "green", bold: true },
             {
-              text: ' Disabled skill: personal/coding/frontend-project-bootstrap',
-              color: 'green',
+              text: " Disabled skill: personal/coding/frontend-project-bootstrap",
+              color: "green",
             },
           ],
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
+            { text: "SUCCESS", color: "green", bold: true },
             {
-              text: ' Synchronized project config: /tmp/agents-test-disable-PAfKoI/.skill-organizer.yml',
-              color: 'green',
+              text: " Synchronized project config: /tmp/agents-test-disable-PAfKoI/.skill-organizer.yml",
+              color: "green",
             },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Enabled skills: 30', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Enabled skills: 30", color: "cyan" },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Disabled skills: 3', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Disabled skills: 3", color: "cyan" },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Created links: 0', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Created links: 0", color: "cyan" },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Updated links: 0', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Updated links: 0", color: "cyan" },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Removed stale links: 1', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Removed stale links: 1", color: "cyan" },
           ],
         ],
       },
     ],
   },
-]
+];
 
 export const installOnboardNotes = [
   {
-    step: '01',
-    title: 'Install once',
-    body: 'Install from npm, Homebrew, or a release binary, then verify the CLI before touching your skills folder.',
+    step: "01",
+    title: "Install once",
+    body: "Install from npm, Homebrew, or a release binary, then verify the CLI before touching your skills folder.",
   },
   {
-    step: '02',
-    title: 'Onboard the target',
-    body: 'Use the guided flow to create the project config, select the target, and set up the sibling skills-organized source tree.',
+    step: "02",
+    title: "Onboard the target",
+    body: "Use the guided flow to create the project config, select the target, and set up the sibling skills-organized source tree.",
   },
   {
-    step: '03',
-    title: 'Operate from source',
-    body: 'Once onboarded, edit the nested source tree and let sync, watch mode, or the background service keep the generated view current.',
+    step: "03",
+    title: "Operate from source",
+    body: "Once onboarded, edit the nested source tree and let sync, watch mode, or the background service keep the generated view current.",
   },
-]
+];
 
 export const skillUpdateScenarios: TerminalScenario[] = [
   {
-    id: 'import',
-    label: 'Add a skill',
+    id: "import",
+    label: "Add a skill",
     description:
-      'Add a managed skill from skills.sh so the CLI stores its upstream source and version metadata in your source tree.',
-    accent: 'cyan',
+      "Add a managed skill from skills.sh so the CLI stores its upstream source and version metadata in your source tree.",
+    accent: "cyan",
     events: [
       {
-        type: 'prompt',
+        type: "prompt",
         content:
-          'skill-organizer add https://github.com/terrylica/cc-skills --skill asciinema-recorder',
+          "skill-organizer add https://github.com/terrylica/cc-skills --skill asciinema-recorder",
       },
       {
-        type: 'progress',
-        label: 'Using skills.sh cli tool to add the skills',
+        type: "progress",
+        label: "Using skills.sh cli tool to add the skills",
         delay: 920,
-        color: 'cyan',
+        color: "cyan",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
-          [{ text: 'INFO Detected CLI: skills', color: 'cyan' }],
+          [{ text: "INFO Detected CLI: skills", color: "cyan" }],
           [
             {
-              text: 'INFO Returned to skill-organizer. Importing installed skills...',
-              color: 'cyan',
+              text: "INFO Returned to skill-organizer. Importing installed skills...",
+              color: "cyan",
             },
           ],
           [
             {
-              text: 'Set the target folders for the imported skills.',
-              color: 'white',
+              text: "Set the target folders for the imported skills.",
+              color: "white",
             },
           ],
           [
-            { text: '🡹/🡻', color: 'amber', bold: true },
-            { text: ': Move, ', color: 'muted' },
-            { text: '🡺', color: 'amber', bold: true },
-            { text: ': Edit folder, ', color: 'muted' },
-            { text: 'Enter', color: 'amber', bold: true },
-            { text: ': Continue', color: 'muted' },
+            { text: "🡹/🡻", color: "amber", bold: true },
+            { text: ": Move, ", color: "muted" },
+            { text: "🡺", color: "amber", bold: true },
+            { text: ": Edit folder, ", color: "muted" },
+            { text: "Enter", color: "amber", bold: true },
+            { text: ": Continue", color: "muted" },
           ],
           [
-            { text: '🡺 ', color: 'white' },
-            { text: 'demo-skill', color: 'violet', bold: true },
-            { text: ' -> skills-organized/', color: 'muted' },
-            { text: 'demo-skill/', color: 'white' },
+            { text: "🡺 ", color: "white" },
+            { text: "demo-skill", color: "violet", bold: true },
+            { text: " -> skills-organized/", color: "muted" },
+            { text: "demo-skill/", color: "white" },
           ],
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
+            { text: "SUCCESS", color: "green", bold: true },
             {
-              text: ' Imported skill: demo-skill -> demo-skill',
-              color: 'green',
+              text: " Imported skill: demo-skill -> demo-skill",
+              color: "green",
             },
           ],
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
+            { text: "SUCCESS", color: "green", bold: true },
             {
-              text: ' Synchronized project config: ~/.agents/.skill-organizer.yml',
-              color: 'green',
+              text: " Synchronized project config: ~/.agents/.skill-organizer.yml",
+              color: "green",
             },
           ],
-          [{ text: 'INFO Enabled skills: 1', color: 'cyan' }],
-          [{ text: 'INFO Disabled skills: 0', color: 'cyan' }],
-          [{ text: 'INFO Created links: 1', color: 'cyan' }],
-          [{ text: 'INFO Updated links: 0', color: 'cyan' }],
-          [{ text: 'INFO Removed stale links: 0', color: 'cyan' }],
+          [{ text: "INFO Enabled skills: 1", color: "cyan" }],
+          [{ text: "INFO Disabled skills: 0", color: "cyan" }],
+          [{ text: "INFO Created links: 1", color: "cyan" }],
+          [{ text: "INFO Updated links: 0", color: "cyan" }],
+          [{ text: "INFO Removed stale links: 0", color: "cyan" }],
         ],
       },
     ],
   },
   {
-    id: 'check',
-    label: 'Check updates',
+    id: "check",
+    label: "Check updates",
     description:
-      'Scan imported managed skills for newer upstream versions, inspect the unified diff, and confirm the exact change before applying it.',
-    accent: 'violet',
+      "Scan imported managed skills for newer upstream versions, inspect the unified diff, and confirm the exact change before applying it.",
+    accent: "violet",
     events: [
-      { type: 'prompt', content: 'skill-organizer check-updates' },
+      { type: "prompt", content: "skill-organizer check-updates" },
       {
-        type: 'progress',
+        type: "progress",
         label:
-          'Checking for skill updates (checking 1/1). Found: 0 - demo-skill',
+          "Checking for skill updates (checking 1/1). Found: 0 - demo-skill",
         delay: 980,
-        color: 'violet',
+        color: "violet",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
-            { text: ' Checked 1 skills. Found: 1', color: 'green' },
+            { text: "SUCCESS", color: "green", bold: true },
+            { text: " Checked 1 skills. Found: 1", color: "green" },
           ],
           [
             {
-              text: 'Select skills to update. Press d to inspect the diff for the highlighted skill.',
-              color: 'white',
+              text: "Select skills to update. Press d to inspect the diff for the highlighted skill.",
+              color: "white",
             },
           ],
           [
-            { text: 'Space', color: 'amber', bold: true },
-            { text: ': Toggle, ', color: 'muted' },
-            { text: '🡹/🡻', color: 'amber', bold: true },
-            { text: ': Move, ', color: 'muted' },
-            { text: 'd', color: 'amber', bold: true },
-            { text: ': Diff, ', color: 'muted' },
-            { text: 'Enter', color: 'amber', bold: true },
-            { text: ': Continue, ', color: 'muted' },
-            { text: 'Ctrl+C', color: 'amber', bold: true },
-            { text: ': Abort', color: 'muted' },
+            { text: "Space", color: "amber", bold: true },
+            { text: ": Toggle, ", color: "muted" },
+            { text: "🡹/🡻", color: "amber", bold: true },
+            { text: ": Move, ", color: "muted" },
+            { text: "d", color: "amber", bold: true },
+            { text: ": Diff, ", color: "muted" },
+            { text: "Enter", color: "amber", bold: true },
+            { text: ": Continue, ", color: "muted" },
+            { text: "Ctrl+C", color: "amber", bold: true },
+            { text: ": Abort", color: "muted" },
           ],
           [
-            { text: '🡺', color: 'white' },
-            { text: '[x]', color: 'green', bold: true },
+            { text: "🡺", color: "white" },
+            { text: "[x]", color: "green", bold: true },
             {
-              text: ' demo-skill [1.0.0] -> [1.1.0] [owner/repo]',
-              color: 'white',
+              text: " demo-skill [1.0.0] -> [1.1.0] [owner/repo]",
+              color: "white",
             },
           ],
-          [{ text: '', color: 'default' }],
+          [{ text: "", color: "default" }],
           [
             {
-              text: 'Diff: demo-skill [1.0.0 -> 1.1.0]',
-              color: 'white',
+              text: "Diff: demo-skill [1.0.0 -> 1.1.0]",
+              color: "white",
               bold: true,
             },
           ],
-          [{ text: '--- a/SKILL.md', color: 'cyan', bold: true }],
-          [{ text: '+++ b/SKILL.md', color: 'cyan', bold: true }],
-          [{ text: '@@ -1,8 +1,8 @@', color: 'amber', bold: true }],
-          [{ text: ' name: demo-skill', color: 'white' }],
-          [{ text: ' description: test skill', color: 'white' }],
-          [{ text: ' metadata:', color: 'white' }],
-          [{ text: '-  version: 1.0.0', color: 'red' }],
-          [{ text: '+  version: 1.1.0', color: 'green' }],
-          [{ text: '@@ -10,3 +10,3 @@', color: 'amber', bold: true }],
-          [{ text: '-# Demo v1', color: 'red' }],
-          [{ text: '+# Demo v2', color: 'green' }],
+          [{ text: "--- a/SKILL.md", color: "cyan", bold: true }],
+          [{ text: "+++ b/SKILL.md", color: "cyan", bold: true }],
+          [{ text: "@@ -1,8 +1,8 @@", color: "amber", bold: true }],
+          [{ text: " name: demo-skill", color: "white" }],
+          [{ text: " description: test skill", color: "white" }],
+          [{ text: " metadata:", color: "white" }],
+          [{ text: "-  version: 1.0.0", color: "red" }],
+          [{ text: "+  version: 1.1.0", color: "green" }],
+          [{ text: "@@ -10,3 +10,3 @@", color: "amber", bold: true }],
+          [{ text: "-# Demo v1", color: "red" }],
+          [{ text: "+# Demo v2", color: "green" }],
           [
-            { text: 'Esc', color: 'amber', bold: true },
-            { text: ': Back, ', color: 'muted' },
-            { text: '🡹/🡻', color: 'amber', bold: true },
-            { text: ': Scroll, ', color: 'muted' },
-            { text: 'PgUp/PgDown', color: 'amber', bold: true },
-            { text: ': Page, ', color: 'muted' },
-            { text: 'Ctrl+C', color: 'amber', bold: true },
-            { text: ': Abort', color: 'muted' },
+            { text: "Esc", color: "amber", bold: true },
+            { text: ": Back, ", color: "muted" },
+            { text: "🡹/🡻", color: "amber", bold: true },
+            { text: ": Scroll, ", color: "muted" },
+            { text: "PgUp/PgDown", color: "amber", bold: true },
+            { text: ": Page, ", color: "muted" },
+            { text: "Ctrl+C", color: "amber", bold: true },
+            { text: ": Abort", color: "muted" },
           ],
           [
             {
-              text: 'Press d in interactive mode to inspect the full folder diff before selecting updates.',
-              color: 'muted',
+              text: "Press d in interactive mode to inspect the full folder diff before selecting updates.",
+              color: "muted",
             },
           ],
         ],
@@ -601,245 +601,395 @@ export const skillUpdateScenarios: TerminalScenario[] = [
     ],
   },
   {
-    id: 'apply',
-    label: 'Update now',
+    id: "apply",
+    label: "Update now",
     description:
-      'Apply the selected update, back up the previous managed copy, rewrite the source files, and resync the generated tool-facing view.',
-    accent: 'amber',
+      "Apply the selected update, back up the previous managed copy, rewrite the source files, and resync the generated tool-facing view.",
+    accent: "amber",
     events: [
-      { type: 'prompt', content: 'skill-organizer check-updates --yes' },
+      { type: "prompt", content: "skill-organizer check-updates --yes" },
       {
-        type: 'progress',
+        type: "progress",
         label:
-          'Checking for skill updates (checking 1/1). Found: 0 - demo-skill',
+          "Checking for skill updates (checking 1/1). Found: 0 - demo-skill",
         delay: 1120,
-        color: 'amber',
+        color: "amber",
       },
       {
-        type: 'output',
+        type: "output",
         content: [
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
-            { text: ' Checked 1 skills. Found: 1', color: 'green' },
+            { text: "SUCCESS", color: "green", bold: true },
+            { text: " Checked 1 skills. Found: 1", color: "green" },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Updating demo-skill', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Updating demo-skill", color: "cyan" },
           ],
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
+            { text: "SUCCESS", color: "green", bold: true },
             {
-              text: ' Updated skill: demo-skill (1.0.0 -> 1.1.0)',
-              color: 'green',
+              text: " Updated skill: demo-skill (1.0.0 -> 1.1.0)",
+              color: "green",
             },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
+            { text: "INFO", color: "cyan", bold: true },
             {
-              text: ' Backup: ~/.config/skill-organizer/.old/20260511T075902Z-demo-skill',
-              color: 'cyan',
+              text: " Backup: ~/.config/skill-organizer/.old/20260511T075902Z-demo-skill",
+              color: "cyan",
             },
           ],
           [
-            { text: 'INFO', color: 'cyan', bold: true },
-            { text: ' Updated skills: 1', color: 'cyan' },
+            { text: "INFO", color: "cyan", bold: true },
+            { text: " Updated skills: 1", color: "cyan" },
           ],
           [
-            { text: 'SUCCESS', color: 'green', bold: true },
+            { text: "SUCCESS", color: "green", bold: true },
             {
-              text: ' Synchronized project config: ~/.agents/.skill-organizer.yml',
-              color: 'green',
+              text: " Synchronized project config: ~/.agents/.skill-organizer.yml",
+              color: "green",
             },
           ],
-          [{ text: 'INFO Enabled skills: 1', color: 'cyan' }],
-          [{ text: 'INFO Disabled skills: 0', color: 'cyan' }],
-          [{ text: 'INFO Created links: 0', color: 'cyan' }],
-          [{ text: 'INFO Updated links: 0', color: 'cyan' }],
-          [{ text: 'INFO Removed stale links: 0', color: 'cyan' }],
+          [{ text: "INFO Enabled skills: 1", color: "cyan" }],
+          [{ text: "INFO Disabled skills: 0", color: "cyan" }],
+          [{ text: "INFO Created links: 0", color: "cyan" }],
+          [{ text: "INFO Updated links: 0", color: "cyan" }],
+          [{ text: "INFO Removed stale links: 0", color: "cyan" }],
         ],
       },
     ],
   },
-]
+];
 
 export const skillUpdateNotes = [
   {
-    step: '01',
-    title: 'Add with provenance',
-    body: 'Managed imports keep source and version metadata so later update checks know exactly which upstream release to compare against.',
+    step: "01",
+    title: "Add with provenance",
+    body: "Managed imports keep source and version metadata so later update checks know exactly which upstream release to compare against.",
   },
   {
-    step: '02',
-    title: 'Review what changed',
-    body: '`skill-organizer check-updates` surfaces managed skills with newer upstream versions, reports skipped skills that are missing tracked import metadata, and supports diff inspection before you choose what to update.',
+    step: "02",
+    title: "Review what changed",
+    body: "`skill-organizer check-updates` surfaces managed skills with newer upstream versions, reports skipped skills that are missing tracked import metadata, and supports diff inspection before you choose what to update.",
   },
   {
-    step: '03',
-    title: 'Update without losing structure',
-    body: 'Selected skills are backed up into `.old/`, refreshed in the source tree, and synchronized back into the generated tool-facing target automatically.',
+    step: "03",
+    title: "Update without losing structure",
+    body: "Selected skills are backed up into `.old/`, refreshed in the source tree, and synchronized back into the generated tool-facing target automatically.",
   },
-]
+];
 
 export const featureCards: FeatureCard[] = [
   {
-    title: 'Organized source, compatible output',
-    copy: 'Use a real folder hierarchy for humans while exposing the generated compatibility layer agent tools already know how to read.',
-    shape: 'bevel',
+    title: "Organized source, compatible output",
+    copy: "Use a real folder hierarchy for humans while exposing the generated compatibility layer agent tools already know how to read.",
+    shape: "bevel",
     rotation: -3.2,
     speed: 0.16,
   },
   {
-    title: 'Multiple skill projects',
-    copy: 'Manage global skills and per-project targets from the same CLI instead of treating every setup as a one-off.',
-    shape: 'shield',
+    title: "Multiple skill projects",
+    copy: "Manage global skills and per-project targets from the same CLI instead of treating every setup as a one-off.",
+    shape: "shield",
     rotation: 2.2,
     speed: 0.09,
   },
   {
-    title: 'Disable without deleting',
-    copy: 'Hide a skill from the generated output without deleting the source folder, metadata, or the curation work behind it.',
-    shape: 'arc',
+    title: "Disable without deleting",
+    copy: "Hide a skill from the generated output without deleting the source folder, metadata, or the curation work behind it.",
+    shape: "arc",
     rotation: 2.4,
     speed: 0.08,
   },
   {
-    title: 'Background sync',
-    copy: 'Run watch mode in the foreground or install the service so the generated view stays fresh while you work elsewhere.',
-    shape: 'slant',
+    title: "Background sync",
+    copy: "Run watch mode in the foreground or install the service so the generated view stays fresh while you work elsewhere.",
+    shape: "slant",
     rotation: -1.8,
     speed: 0.2,
   },
   {
-    title: 'Overlap analysis',
-    copy: 'Use an installed agent to flag duplicate or ambiguous skills before your library turns into guesswork.',
-    shape: 'ticket',
+    title: "Overlap analysis",
+    copy: "Use an installed agent to flag duplicate or ambiguous skills before your library turns into guesswork.",
+    shape: "ticket",
     rotation: 3.1,
     speed: 0.11,
   },
   {
-    title: 'Adopt unmanaged entries',
-    copy: 'Move loose target folders into a real source tree instead of renaming, copying, or cleaning up generated output by hand.',
-    shape: 'hex',
+    title: "Adopt unmanaged entries",
+    copy: "Move loose target folders into a real source tree instead of renaming, copying, or cleaning up generated output by hand.",
+    shape: "hex",
     rotation: -2.7,
     speed: 0.18,
   },
   {
-    title: 'Import and track updates',
-    copy: 'Bring in skills from skills.sh, store their source metadata, recover missing metadata when needed, inspect diffs, and update them later without losing your managed structure.',
-    shape: 'ticket',
+    title: "Import and track updates",
+    copy: "Bring in skills from skills.sh, store their source metadata, recover missing metadata when needed, inspect diffs, and update them later without losing your managed structure.",
+    shape: "ticket",
     rotation: -1.4,
     speed: 0.13,
   },
-]
+];
 
 export const advantageItems = [
-  'One organized source of truth for human editing',
-  'Tool-readable output that existing agent tools already understand',
-  'Manage multiple skill targets with one consistent workflow',
-  'Disable or re-enable skills without deleting your curation work',
-  'Non-destructive sync that leaves unrelated target entries alone',
-  'Import skills from skills.sh and keep their upstream provenance',
-]
+  "One organized source of truth for human editing",
+  "Tool-readable output that existing agent tools already understand",
+  "Manage multiple skill targets with one consistent workflow",
+  "Disable or re-enable skills without deleting your curation work",
+  "Non-destructive sync that leaves unrelated target entries alone",
+  "Import skills from skills.sh and keep their upstream provenance",
+];
 
 export const overlapDemoGroups: OverlapGroupDemo[] = [
   {
-    title: 'Group 1',
+    title: "Group 1",
     skills: [
-      'personal/coding/frontend-project-bootstrap',
-      'personal/react/react-project-bootstrap',
+      "personal/coding/frontend-project-bootstrap",
+      "personal/react/react-project-bootstrap",
     ],
-    overlapType: 'Duplicate',
+    overlapType: "Duplicate",
     score: 92,
-    why: 'Both bootstrap modern TypeScript projects with the same tooling stack and validation workflow. The React version is effectively a specialization of the frontend version, but the descriptions are close enough that routing could be ambiguous.',
+    why: "Both bootstrap modern TypeScript projects with the same tooling stack and validation workflow. The React version is effectively a specialization of the frontend version, but the descriptions are close enough that routing could be ambiguous.",
     recommendation:
-      'Merge them or make the separation explicit: reserve the frontend skill for framework-agnostic SPA or library bootstraps and the React skill only for repos that require React-specific files, conventions, and examples.',
+      "Merge them or make the separation explicit: reserve the frontend skill for framework-agnostic SPA or library bootstraps and the React skill only for repos that require React-specific files, conventions, and examples.",
   },
   {
-    title: 'Group 2',
+    title: "Group 2",
     skills: [
-      '3rdparty/mattpocock/write-a-prd',
-      '3rdparty/mattpocock/prd-to-plan',
-      '3rdparty/mattpocock/prd-to-issues',
-      '3rdparty/mattpocock/request-refactor-plan',
+      "3rdparty/mattpocock/write-a-prd",
+      "3rdparty/mattpocock/prd-to-plan",
+      "3rdparty/mattpocock/prd-to-issues",
+      "3rdparty/mattpocock/request-refactor-plan",
     ],
-    overlapType: 'Partial',
+    overlapType: "Partial",
     score: 76,
-    why: 'These all sit in the planning-artifact pipeline: turning ideas or refactors into structured docs, phased plans, or GitHub issues. They are not duplicates, but their entry points and output boundaries are close enough that a user asking to plan work could plausibly match several.',
+    why: "These all sit in the planning-artifact pipeline: turning ideas or refactors into structured docs, phased plans, or GitHub issues. They are not duplicates, but their entry points and output boundaries are close enough that a user asking to plan work could plausibly match several.",
     recommendation:
-      'Define a strict workflow boundary: write-a-prd creates requirements, prd-to-plan converts an approved PRD into an implementation plan, prd-to-issues converts a finalized PRD into tickets, and request-refactor-plan is reserved for codebase refactors.',
+      "Define a strict workflow boundary: write-a-prd creates requirements, prd-to-plan converts an approved PRD into an implementation plan, prd-to-issues converts a finalized PRD into tickets, and request-refactor-plan is reserved for codebase refactors.",
   },
-]
+];
 
 export const docsEntryCards = [
   {
-    title: 'Install guide',
-    copy: 'Install from npm, Homebrew, or direct binaries and verify the CLI before your first project.',
-    href: '/docs/guides/install-and-verify',
+    title: "Install guide",
+    copy: "Install from npm, Homebrew, or direct binaries and verify the CLI before your first project.",
+    href: "/docs/guides/install-and-verify",
   },
   {
-    title: 'Onboard a tool',
-    copy: 'Follow the guided flow for generic .agents locations or tool-specific layouts like Claude Code and Codex.',
-    href: '/docs/guides/onboard-a-tool',
+    title: "Onboard a tool",
+    copy: "Follow the guided flow for generic .agents locations or tool-specific layouts like Claude Code and Codex.",
+    href: "/docs/guides/onboard-a-tool",
   },
   {
-    title: 'Command reference',
-    copy: 'Jump to the exact syntax for sync, service, overlap analysis, watch mode, and completion output.',
-    href: '/docs/reference/onboard',
+    title: "Command reference",
+    copy: "Jump to the exact syntax for sync, service, overlap analysis, watch mode, and completion output.",
+    href: "/docs/reference/onboard",
   },
-]
+];
 
 export const faqItems = [
   {
-    question: 'Why not edit the flat target folder directly?',
+    question: "Why not edit the flat target folder directly?",
     answer:
-      'Because that view is generated. Editing the source tree keeps structure, naming, and metadata consistent while sync rebuilds the tool-facing layout safely.',
+      "Because that view is generated. Editing the source tree keeps structure, naming, and metadata consistent while sync rebuilds the tool-facing layout safely.",
   },
   {
-    question: 'Which agent tools work with skill-organizer?',
+    question: "Which agent tools work with skill-organizer?",
     answer:
-      'Use the generic .agents target for tools that read ~/.agents/skills, or onboard directly for Claude Code, Codex, and Antigravity. The overlap checker can also invoke installed agent CLIs such as Claude Code, OpenCode, Codex, Cursor, and Antigravity.',
+      "Use the generic .agents target for tools that read ~/.agents/skills, or onboard directly for Claude Code, Codex, and Antigravity. The overlap checker can also invoke installed agent CLIs such as Claude Code, OpenCode, Codex, Cursor, and Antigravity.",
   },
   {
-    question: 'Can I hide a skill without deleting it?',
+    question: "Can I hide a skill without deleting it?",
     answer:
-      'Yes. skill-organizer skill disable marks the source skill as disabled and removes it from the generated view on the next sync.',
+      "Yes. skill-organizer skill disable marks the source skill as disabled and removes it from the generated view on the next sync.",
   },
   {
-    question: 'Do I have to run sync manually every time?',
+    question: "Do I have to run sync manually every time?",
     answer:
-      'No. You can run sync on demand, use the foreground watcher, or install the background service to keep everything fresh automatically.',
+      "No. You can run sync on demand, use the foreground watcher, or install the background service to keep everything fresh automatically.",
   },
   {
-    question: 'What does the overlap check do?',
+    question: "What does the overlap check do?",
     answer:
-      'It asks an installed coding agent to analyze your managed skills for duplication or overlap, renders grouped reports, and can open a plan-only flow or save a remediation prompt under plans/ for tools without verified interactive plan mode.',
+      "It asks an installed coding agent to analyze your managed skills for duplication or overlap, renders grouped reports, and can open a plan-only flow or save a remediation prompt under plans/ for tools without verified interactive plan mode.",
   },
   {
-    question: 'Can I import skills from skills.sh and update them later?',
+    question: "Can I import skills from skills.sh and update them later?",
     answer:
-      'Yes. skill-organizer skill add imports skills from skills.sh into the managed source tree, stores source and version metadata, skill-organizer skill check-updates lets you review diffs and apply updates later with automatic backups, and skill-organizer skill try-find-metadata can help recover missing metadata for older imports.',
+      "Yes. skill-organizer skill add imports skills from skills.sh into the managed source tree, stores source and version metadata, skill-organizer skill check-updates lets you review diffs and apply updates later with automatic backups, and skill-organizer skill try-find-metadata can help recover missing metadata for older imports.",
   },
-]
+];
 
 export const servicePanels = [
   {
-    eyebrow: 'Registry',
-    title: 'Feed the watcher with project configs',
+    eyebrow: "Registry",
+    title: "Feed the watcher with project configs",
     commands: [
-      'skill-organizer watched add ~/.agents/.skill-organizer.yml',
-      'skill-organizer watched list',
+      "skill-organizer watched add ~/.agents/.skill-organizer.yml",
+      "skill-organizer watched list",
     ],
-    note: 'The watched registry is the handoff between one-off setup and continuous sync.',
+    note: "The watched registry is the handoff between one-off setup and continuous sync.",
   },
   {
-    eyebrow: 'Background sync',
-    title: 'Install, start, and inspect the service',
+    eyebrow: "Background sync",
+    title: "Install, start, and inspect the service",
     commands: [
-      'skill-organizer service install',
-      'skill-organizer service start',
-      'skill-organizer service status',
-      'skill-organizer service log-level set debug',
+      "skill-organizer service install",
+      "skill-organizer service start",
+      "skill-organizer service status",
+      "skill-organizer service log-level set debug",
     ],
-    note: 'Once enabled, the source tree becomes the real editing surface while the generated view stays fresh automatically.',
+    note: "Once enabled, the source tree becomes the real editing surface while the generated view stays fresh automatically.",
   },
-]
+];
+
+export const checkSecurityScenarios: TerminalScenario[] = [
+  {
+    id: "analyze",
+    label: "Score every skill",
+    description:
+      "Ask an installed agent CLI to score each managed skill for security risk. Cached results are reused when the skill contents have not changed.",
+    accent: "violet",
+    events: [
+      {
+        type: "prompt",
+        content: "skill-organizer skill check-security",
+      },
+      {
+        type: "progress",
+        label: '[1/3] Analyzing "safe-formatter"...',
+        delay: 980,
+        color: "violet",
+      },
+      {
+        type: "progress",
+        label: '[2/3] Analyzing "package-installer"...',
+        delay: 980,
+        color: "violet",
+      },
+      {
+        type: "progress",
+        label: '[3/3] Analyzing "timebomb"...',
+        delay: 980,
+        color: "violet",
+      },
+      {
+        type: "output",
+        content: [
+          [
+            { text: "• ", color: "white" },
+            { text: "safe-formatter", color: "green", bold: true },
+            { text: " - Score: ", color: "white" },
+            { text: "5", color: "green" },
+            { text: " │ Reads stdin, writes", color: "muted" },
+          ],
+          [
+            { text: "• ", color: "white" },
+            { text: "package-installer", color: "violet", bold: true },
+            { text: " - Score: ", color: "white" },
+            { text: "62", color: "violet" },
+            { text: " │ Shells out to npm i", color: "muted" },
+          ],
+          [
+            { text: "• ", color: "white" },
+            { text: "timebomb", color: "red", bold: true },
+            { text: " - Score: ", color: "white" },
+            { text: "88", color: "red" },
+            { text: " │ Date-gated payload", color: "muted" },
+          ],
+          [
+            { text: "Safe: ", color: "green" },
+            { text: "1", color: "green", bold: true },
+            { text: "  |  ", color: "amber" },
+            { text: "WARNING: ", color: "violet" },
+            { text: "1", color: "violet", bold: true },
+            { text: "  |  ", color: "amber" },
+            { text: "DANGER: ", color: "red" },
+            { text: "1", color: "red", bold: true },
+            { text: "  |  Skipped: 0", color: "amber" },
+          ],
+        ],
+      },
+    ],
+  },
+  {
+    id: "disable",
+    label: "Confirm dangerous skills",
+    description:
+      "High-risk findings get a per-skill confirmation. Accepting marks the skill as disabled in source metadata so the next sync hides it from the generated view.",
+    accent: "amber",
+    events: [
+      {
+        type: "output",
+        content: [
+          [
+            { text: "[", color: "white" },
+            { text: "Danger", color: "red", bold: true },
+            { text: "] ", color: "white" },
+            { text: "timebomb", color: "red" },
+            { text: " Scored ", color: "white" },
+            { text: "88/100", color: "red", bold: true },
+          ],
+          [
+            {
+              text: "Date-gated payload: sleeps until 2027-01-01 then exfiltrates $HOME.",
+              color: "muted",
+            },
+          ],
+          [{ text: "", color: "default" }],
+          [
+            {
+              text: 'Disable skill "timebomb" due to high risk? ',
+              color: "white",
+            },
+            { text: "(Y/n)", color: "amber" },
+          ],
+        ],
+      },
+      {
+        type: "progress",
+        label: "Disabling timebomb in source...",
+        delay: 720,
+        color: "amber",
+      },
+      {
+        type: "output",
+        content: [
+          [
+            { text: "SUCCESS", color: "green", bold: true },
+            {
+              text: " Checked 3 skills, 1 high-risk, 1 disabled",
+              color: "green",
+            },
+          ],
+          [
+            { text: "SUCCESS", color: "green", bold: true },
+            {
+              text: " Synchronized project config: ~/.agents/.skill-organizer.yml",
+              color: "green",
+            },
+          ],
+        ],
+      },
+    ],
+  },
+];
+
+export const checkSecurityNotes = [
+  {
+    step: "01",
+    title: "Scored by an agent you control",
+    body: "`skill-organizer skill check-security` reuses the same tool-selection flow as `check-overlap`: pick a Claude, Codex, OpenCode, Cursor, or Antigravity CLI, plus a model, and the same agent answers every question.",
+  },
+  {
+    step: "02",
+    title: "Cached when skills are unchanged",
+    body: "Each skill gets a content hash. Unchanged skills are skipped on the next run; `--force` re-analyzes everything when you want a fresh opinion.",
+  },
+  {
+    step: "03",
+    title: "Visible in the status tree",
+    body: "The risk score and reason land in the skill metadata, and the `status` tree shows a Safe | Warning | Danger chip per skill so the risk surface is obvious at a glance.",
+  },
+];

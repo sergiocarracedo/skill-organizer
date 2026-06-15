@@ -1,0 +1,55 @@
+---
+title: telemetry
+description: Manage opt-in anonymous command telemetry.
+section: reference
+order: 12
+commandSlug: telemetry
+summary: Inspect, enable, disable, or wipe the on-disk telemetry buffer.
+---
+
+## Synopsis
+
+```bash
+skill-organizer telemetry enable
+skill-organizer telemetry disable
+skill-organizer telemetry status
+skill-organizer telemetry wipe
+```
+
+## What it does
+
+`telemetry` collects anonymous, opt-in usage events so the project can see which commands are actually run and where the friction is. No pseudonymous IDs, no hostnames, no payloads — only the command name, exit status, version, and a 26-character event ID per invocation. See [OBSERVABILITY.md](https://github.com/sergiocarracedo/skill-organizer/blob/main/OBSERVABILITY.md) for the full schema.
+
+The first time you run the CLI it asks whether to enable telemetry. The answer is sticky, and you can flip it at any time with these subcommands.
+
+## enable and disable
+
+`enable` writes `telemetry.enabled: true` to the registry YAML. `disable` writes `false` and best-effort removes the on-disk buffer so the next run cannot accidentally send any leftover events.
+
+## status
+
+`telemetry status` prints the current state:
+
+```text
+Enabled:        true
+Recorder:       NewRelicRecorder
+Endpoint:       https://insights-collector.newrelic.com/v1/accounts/.../events
+Credentials:    yes
+Default model:  sonnet
+Buffer:         /home/.../skill-organizer/telemetry-buffer.jsonl (412 bytes, 3 events)
+```
+
+`Recorder` is the implementation that would receive events on a real run (`NoopRecorder` in development builds without build-time credentials, `NewRelicRecorder` in release builds). `Buffer` only appears if the JSONL spool exists on disk.
+
+### Debug logging
+
+Set `PTERM_DEBUG=true` to print the event payload, recorder type, HTTP request, and response status to the CLI output. Useful for verifying that events are actually leaving the device.
+
+```bash
+PTERM_DEBUG=true skill-organizer telemetry status
+PTERM_DEBUG=true skill-organizer status
+```
+
+## wipe
+
+`wipe` deletes the on-disk telemetry buffer (the only persistent data the CLI writes). Idempotent: running on a clean app dir is a no-op. The right-to-erasure command for any user who wants to be sure no buffered events are still waiting to drain.
