@@ -1,0 +1,19 @@
+packages/videos/src/components/BrandMark.tsx
+  s_b8dddeaeeaed53::t_e50bf63c183641 1,6-9,11-15,17-20,22-31,33-36,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "5332ac4c354884bc0ccb9bbdde75df983991ed78",
+  "prompts": {},
+  "sessions": {
+    "s_b8dddeaeeaed53": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_13d3789b0ffeSqimJdGvGnpGY5",
+        "model": "minimax-m2.7"
+      },
+      "human_author": "Sergio Carracedo <hi@sergiocarracedo.es>"
+    }
+  }
+}
