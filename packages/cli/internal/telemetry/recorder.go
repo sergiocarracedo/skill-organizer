@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -198,6 +199,14 @@ func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 
 	pterm.Debug.Printfln("telemetry: newrelic POST %s body=%s", r.Endpoint, string(body))
 
+	// lastResponseBody holds the most recent non-empty response body
+	// captured by send(). It is included in the final "unexpected
+	// status" error so the buffer-fallback path and the post-event
+	// debug line both surface New Relic's reason (often a JSON
+	// {"error":"..."} for invalid keys, license mismatches, or
+	// account permission problems) instead of just the status code.
+	var lastResponseBody string
+
 	send := func() (int, error) {
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, r.Endpoint, bytes.NewReader(body))
 		if err != nil {
@@ -213,7 +222,17 @@ func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 			return 0, fmt.Errorf("post event to newrelic: %w", err)
 		}
 		defer resp.Body.Close()
-		pterm.Debug.Printfln("telemetry: newrelic response status=%d", resp.StatusCode)
+		// Bounded read so the response body is logged on non-2xx
+		// without leaking unbounded memory. NR error bodies are
+		// short JSON like {"error":"..."} or {"success":false,...}.
+		bodyBytes, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		if len(bodyBytes) > 0 {
+			pterm.Debug.Printfln("telemetry: newrelic response status=%d body=%s", resp.StatusCode, string(bodyBytes))
+			lastResponseBody = string(bodyBytes)
+		} else {
+			pterm.Debug.Printfln("telemetry: newrelic response status=%d", resp.StatusCode)
+			lastResponseBody = ""
+		}
 		return resp.StatusCode, nil
 	}
 
@@ -245,6 +264,9 @@ func (r NewRelicRecorder) Record(ctx context.Context, event Event) error {
 		}
 	}
 	if status < 200 || status >= 300 {
+		if lastResponseBody != "" {
+			return fmt.Errorf("post event to newrelic: status %d: %s", status, lastResponseBody)
+		}
 		return fmt.Errorf("post event to newrelic: unexpected status %d", status)
 	}
 	return nil
