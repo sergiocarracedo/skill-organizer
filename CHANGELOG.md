@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.1.0...v1.2.0) (2026-06-15)
+
+
+### Features
+
+* **web:** move check-security to Smart features, add malicious skill inspection tab ([d9c81d4](https://github.com/sergiocarracedo/skill-organizer/commit/d9c81d42e49f6685382aaa79cbe58b13926d0125))
+
 ## [1.1.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.0.3...v1.1.0) (2026-06-15)
 
 
