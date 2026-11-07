@@ -27,12 +27,15 @@ const socialImageAlt =
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script is:inline>try { const value = localStorage.getItem('color-scheme'); if (value === 'light' || value === 'dark') document.querySelector('meta[name="color-scheme"]').content = value } catch {}</script>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href={`${assetBase}favicon.svg`} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Skill Organizer" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={socialImageUrl} />
     <meta property="og:image:width" content="1200" />
@@ -44,6 +47,7 @@ const socialImageAlt =
     <meta name="twitter:image" content={socialImageUrl} />
     <meta name="twitter:image:alt" content={socialImageAlt} />
     <title>{title}</title>
+    <noscript><style>@media (max-width: 800px) { .site-menu-toggle { display: none; } .site-navigation { display: flex; position: static; flex-wrap: wrap; flex-direction: row; } .site-header__inner { flex-wrap: wrap; } }</style></noscript>
   </head>
 
   <body>
@@ -58,21 +62,23 @@ const socialImageAlt =
     <Footer />
 
     <script>
-      const observer = new IntersectionObserver(
+      const observer = 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches ? new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add('is-visible')
-              observer.unobserve(entry.target)
+              observer?.unobserve(entry.target)
             }
           })
         },
         { threshold: 0.14, rootMargin: '0px 0px -8% 0px' },
-      )
+      ) : null
+
+      if (observer) document.documentElement.classList.add('reveal-ready')
 
       document
         .querySelectorAll('[data-reveal]')
-        .forEach((node) => observer.observe(node))
+        .forEach((node) => observer?.observe(node))
 
       const updateScrollState = () => {
         const ratio = Math.min(
@@ -87,6 +93,31 @@ const socialImageAlt =
 
       updateScrollState()
       window.addEventListener('scroll', updateScrollState, { passive: true })
+
+      document.querySelectorAll<HTMLElement>('.docs-prose pre').forEach((pre) => {
+        const code = pre.querySelector('code')
+        if (!code) return
+        const button = document.createElement('button')
+        const status = document.createElement('span')
+        button.type = 'button'
+        button.className = 'docs-copy-button'
+        button.textContent = 'Copy'
+        button.setAttribute('aria-label', 'Copy code')
+        status.className = 'sr-only'
+        status.setAttribute('role', 'status')
+        pre.insertAdjacentElement('beforebegin', button)
+        button.insertAdjacentElement('afterend', status)
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent ?? '')
+            status.textContent = 'Code copied.'
+            button.textContent = 'Copied'
+          } catch {
+            status.textContent = 'Copy unavailable. Select the code to copy it.'
+            button.textContent = 'Copy unavailable'
+          }
+        })
+      })
     </script>
   </body>
 </html>

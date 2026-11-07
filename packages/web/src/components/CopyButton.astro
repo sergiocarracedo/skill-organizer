@@ -36,6 +36,7 @@ const { copyText, title, className } = Astro.props as Props
     <Icon name='outline/checkmark-circle-outline' class='h-[1.1rem] w-[1.1rem]' />
   </span>
 </button>
+<span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
 
 <script>
   const resetTimeouts = new WeakMap<HTMLButtonElement, number>()
@@ -50,10 +51,12 @@ const { copyText, title, className } = Astro.props as Props
 
     button.addEventListener('click', async () => {
       const copyText = button.dataset.copyText ?? ''
+      const status = button.nextElementSibling
 
       try {
         await navigator.clipboard.writeText(copyText)
         button.dataset.copied = 'true'
+        if (status) status.textContent = 'Copied to clipboard.'
         window.clearTimeout(resetTimeouts.get(button))
         resetTimeouts.set(
           button,
@@ -63,6 +66,7 @@ const { copyText, title, className } = Astro.props as Props
         )
       } catch {
         window.clearTimeout(resetTimeouts.get(button))
+        if (status) status.textContent = 'Copy unavailable. Select the command to copy it.'
       }
     })
   })

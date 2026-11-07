@@ -25,9 +25,15 @@ import HeroTransformPanel from './HeroTransformPanel/HeroTransformPanel.astro'
         Stop managing skills in a flat folder
       </p>
 
-      <h1 class="max-w-[16ch] text-[clamp(2.7rem,5.5vw,5.1rem)] text-white" data-reveal>
-        Organize skills. Keep tools compatible.
+      <h1 class="hero-title text-white" data-reveal>
+        Organize skills. <em class="hero-highlight">Keep tools compatible.</em>
       </h1>
+      <p class="hero-description">Organize skills by source, topic, or project, and keep your AI tools in sync.</p>
+      <div class="hero-primary-actions">
+        <a class="site-start" href={withBase('/docs/guides/install-and-verify')}>Get started →</a>
+        <a class="hero-secondary-action" href={withBase('/#features')}>Explore features ↓</a>
+      </div>
+      <GitHubStarButton />
     </div>
 
     <div class="flex w-full justify-center">
@@ -79,12 +85,11 @@ import HeroTransformPanel from './HeroTransformPanel/HeroTransformPanel.astro'
 
       <div class="mt-[0.2rem] flex flex-wrap justify-center gap-[0.85rem]" data-reveal>
         <a
-          class="inline-flex min-h-12 items-center justify-center rounded-full bg-[linear-gradient(120deg,rgba(38,232,255,0.95),rgba(164,95,255,0.88),rgba(255,182,73,0.95))] px-5 text-[0.95rem] text-[rgb(4,11,24)] no-underline shadow-[0_0_34px_rgba(74,211,255,0.24)]"
+          class="site-start min-h-12 px-5 text-[0.95rem]"
           href={withBase('/docs/guides/install-and-verify')}
         >
           Get started
         </a>
-        <GitHubStarButton />
         <a
           class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/14 bg-white/5 px-5 text-[0.95rem] text-slate-100/92 no-underline"
           href={withBase('/docs/guides/onboard-a-tool')}

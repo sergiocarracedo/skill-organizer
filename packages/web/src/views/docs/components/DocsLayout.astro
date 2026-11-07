@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content'
 
 import SectionHeader from '@/components/SectionHeader.astro'
 import SiteLayout from '@/layouts/SiteLayout.astro'
+import { withBase } from '@/lib/with-base'
 
 import DocsSidebar from './DocsSidebar.astro'
 import DocsToc from './DocsToc.astro'
@@ -21,6 +22,7 @@ const { title, description, entries, headings = [], currentPath, sectionLabel } 
 
 <SiteLayout title={`${title} | Skill Organizer`} description={description} currentPath={currentPath}>
   <section class='mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20'>
+    <nav class="docs-breadcrumb" aria-label="Breadcrumb"><a href={withBase('/docs')}>Documentation</a><span aria-hidden="true"> › </span><span>{title}</span></nav>
     <SectionHeader
       eyebrow={sectionLabel}
       title={title}

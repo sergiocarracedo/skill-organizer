@@ -29,11 +29,10 @@ const { entries, currentPath } = Astro.props as Props
               <li>
                 <a
                   href={withBase(href)}
+                  aria-current={currentPath.replace(/\/$/, '') === href ? 'page' : undefined}
                   class:list={[
                     'block rounded-full px-[0.95rem] py-[0.7rem] text-slate-100/70 transition',
-                    currentPath === href
-                      ? 'bg-[rgba(13,29,52,0.9)] text-white'
-                      : 'hover:bg-[rgba(13,29,52,0.9)] hover:text-white',
+                    'hover:bg-violet-500/10',
                   ]}
                 >
                   <span>{entry.data.title}</span>

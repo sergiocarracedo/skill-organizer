@@ -6,7 +6,7 @@ Skill Organizer web should feel sharp, technical, and deliberate.
 
 The site is not a generic SaaS landing page. It should look like a precise tool for people who already work with agent tooling, CLIs, and structured automation. The visual language should communicate confidence, clarity, and control.
 
-The current direction is a dark, high-contrast interface with cyan, violet, and amber accents. Keep that identity.
+The direction follows the Sireno website family with light and dark themes, a violet primary accent, and Skill Organizer's technical product imagery. Cyan and amber remain secondary semantic accents.
 
 ## Design Principles
 
@@ -47,15 +47,15 @@ The writing and design should assume technical literacy.
 
 ### Accents
 
-- Cyan: primary highlight, compatibility, active energy
-- Violet: organization, structure, system identity
+- Cyan: compatibility and secondary technical details
+- Violet: primary highlight, actions, organization, and system identity
 - Amber: warnings, attention, operational emphasis
 - Rose: destructive, duplicate, or error-like states
 
 ### Usage Rules
 
-- Use cyan for active and interactive emphasis
-- Use violet for structure, product identity, and organizational concepts
+- Use violet for primary actions, active emphasis, structure, and product identity
+- Use cyan for secondary technical and compatibility details
 - Use amber for CLI, system notices, and warnings
 - Use rose only for deletion, duplication, or negative states
 
@@ -63,8 +63,8 @@ The writing and design should assume technical literacy.
 
 ### Fonts
 
-- Display: `Oxanium`
-- Body: `Source Serif 4`
+- Display: `Geist`
+- Body: `Geist`
 - Code: `JetBrains Mono`
 
 ### Rules
@@ -113,7 +113,7 @@ The writing and design should assume technical literacy.
 ### Primary CTA
 
 - Rounded pill
-- Bright cyan-violet-amber gradient
+- Violet fill
 - Dark text on bright fill
 
 ### Secondary CTA
@@ -224,7 +224,7 @@ Interactive or domain-heavy sections can stay view-specific even if they are vis
 
 - build strong hierarchy with shared primitives
 - keep spacing and rhythm consistent across sections
-- preserve the dark technical visual language
+- preserve the technical visual language in both light and dark themes
 - reuse terminal and surface patterns
 - make technical content feel structured and intentional
 

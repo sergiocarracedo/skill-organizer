@@ -13,7 +13,6 @@ const {
 
 const repoUrl = 'https://github.com/sergiocarracedo/skill-organizer'
 const apiUrl = 'https://api.github.com/repos/sergiocarracedo/skill-organizer'
-const fallbackStars = '1'
 ---
 
 <a
@@ -44,11 +43,11 @@ const fallbackStars = '1'
 
   {showLabel && <span class="h-5 w-px bg-white/12" aria-hidden="true"></span>}
 
-  <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#0f1727] px-2.5 py-1 text-[0.82em] text-amber-200/94 ring-1 ring-white/8">
+  <span hidden data-github-star-badge class="items-center gap-1.5 whitespace-nowrap rounded-full bg-[#0f1727] px-2.5 py-1 text-[0.82em] text-amber-200/94 ring-1 ring-white/8">
     <svg viewBox="0 0 24 24" class="h-[0.92rem] w-[0.92rem] fill-current text-amber-300/96" aria-hidden="true">
       <path d="M12 2.75l2.855 5.786 6.386.928-4.62 4.503 1.09 6.361L12 17.325 6.29 20.328l1.09-6.361-4.62-4.503 6.386-.928L12 2.75Z"></path>
     </svg>
-    <span data-github-star-count>{fallbackStars}</span>
+    <span data-github-star-count></span>
   </span>
 </a>
 
@@ -63,6 +62,8 @@ const fallbackStars = '1'
       .querySelectorAll(`[data-github-star-button][data-github-stars-url="${apiUrl}"] [data-github-star-count]`)
       .forEach((node) => {
         node.textContent = text
+        const badge = node.closest<HTMLElement>('[data-github-star-badge]')
+        if (badge) { badge.hidden = false; badge.classList.add('inline-flex') }
       })
   }
 
@@ -99,7 +100,7 @@ const fallbackStars = '1'
         updateButtons(apiUrl, formatStarCount(payload.stargazers_count))
       })
       .catch(() => {
-        // Keep the fallback count when the public API is unavailable or rate-limited.
+        // The repository link remains usable without a count.
       })
   })
 </script>
