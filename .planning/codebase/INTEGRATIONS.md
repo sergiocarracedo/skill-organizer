@@ -90,7 +90,7 @@ Summary of every outbound network call in the project:
 | Web (browser) | `https://api.github.com/repos/sergiocarracedo/skill-organizer` | GitHub star button | none | `packages/web/src/components/GitHubStarButton.astro:14-103` |
 | Web (browser) | `https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js`, `https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js` | hero wave animation | none | `packages/web/src/views/home/hero/HeroWaves.astro:55-56` |
 
-Protocols: only **HTTPS** is used (`http.NewRequest` is never given an `http://` URL by the CLI; the npm postinstall asserts `redirect.protocol === "https:"` at `postinstall.js:107`). The web site is served via GitHub Pages at `https://skill-organizer.sergiocarracedo.es` (`packages/web/astro.config.mjs:11`, `deploy-web.yml:62-68`).
+Protocols: only **HTTPS** is used (`http.NewRequest` is never given an `http://` URL by the CLI; the npm postinstall asserts `redirect.protocol === "https:"` at `postinstall.js:107`). The web site is served via GitHub Pages at `https://skill-organizer.sireno.dev` (`packages/web/astro.config.mjs:14`, `deploy-web.yml:62-68`).
 
 The CLI also performs **in-process HTTP via `os/exec`** against the local `claude`/`codex`/`opencode`/`agent`/`antigravity-cli` binaries (see above). It does not open a TCP port of its own.
 
@@ -151,7 +151,7 @@ The CLI ships through three independent channels, all driven by the same `VERSIO
 - **Web — GitHub Pages.**
   - Built with Astro, deployed by `.github/workflows/deploy-web.yml:1-69` on push to `main` (filtered by `paths: [VERSION, packages/web/**, pnpm-lock.yaml, pnpm-workspace.yaml, package.json, .github/workflows/deploy-web.yml]`) or via `workflow_dispatch`.
   - Uses `actions/configure-pages@v5` + `actions/upload-pages-artifact@v3` + `actions/deploy-pages@v4` (`:52-68`).
-  - Published to `https://skill-organizer.sergiocarracedo.es` (CNAME at `packages/web/public/CNAME:1`, `site` in `astro.config.mjs:11`). Concurrency group `pages` with `cancel-in-progress: true` (`deploy-web.yml:25-28`).
+  - Published to `https://skill-organizer.sireno.dev` (CNAME at `packages/web/public/CNAME:1`, `site` in `astro.config.mjs:14`). Concurrency group `pages` with `cancel-in-progress: true` (`deploy-web.yml:25-28`).
   - The web build reads the repo `VERSION` and exposes it as `import.meta.env.PUBLIC_CLI_VERSION` so install snippets can show the current version (`packages/web/astro.config.mjs:8-16`).
 
 - **Release-please plumbing (not user-facing, but orchestrates the three channels above):**

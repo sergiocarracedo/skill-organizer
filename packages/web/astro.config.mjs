@@ -11,7 +11,7 @@ const cliVersion = readFileSync(
 ).trim();
 
 export default defineConfig({
-  site: "https://skill-organizer.sergiocarracedo.es",
+  site: "https://skill-organizer.sireno.dev",
   integrations: [mdx(), icon()],
   vite: {
     define: {

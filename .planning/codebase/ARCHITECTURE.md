@@ -7,7 +7,7 @@ System design for the `skill-organizer` monorepo at `/works/opensource/skill-org
 A **two-package monorepo** with one product and three delivery surfaces:
 
 1. **Go CLI** (`packages/cli/`) — a single binary (`skill-organizer`) that organizes a nested source skill tree and exposes a flat first-level target folder that agent tools read. The Go module is declared at `packages/cli/go.mod:1` (`module github.com/sergiocarracedo/skill-organizer/cli`, `go 1.24.0`). Entry point: `packages/cli/main.go:10` calling `cmd.Execute()` from `packages/cli/cmd/root.go:32`.
-2. **Static marketing / docs site** (`packages/web/`) — an Astro 6 project (`packages/web/package.json:21`) that renders at `https://skill-organizer.sergiocarracedo.es` (`packages/web/astro.config.mjs:11`). The site documents the CLI and embeds the canonical command surface that the CLI implements.
+2. **Static marketing / docs site** (`packages/web/`) — an Astro 6 project (`packages/web/package.json:21`) that renders at `https://skill-organizer.sireno.dev` (`packages/web/astro.config.mjs:14`). The site documents the CLI and embeds the canonical command surface that the CLI implements.
 3. **npm wrapper** (`packages/cli/packages/npm/`) — a small CommonJS shim that downloads the matching Go binary from the GitHub release for the user's OS/arch and spawns it. `packages/cli/packages/npm/package.json:22-24` exposes the `skill-organizer` bin; the install hook is `packages/cli/packages/npm/scripts/postinstall.js:28-76`.
 
 **Deployment model** is a 1:1 mapping per channel:
