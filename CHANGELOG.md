@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.5.0...v1.5.1) (2026-11-08)
+
+
+### Bug Fixes
+
+* improve social previews and site icons ([7cad51e](https://github.com/sergiocarracedo/skill-organizer/commit/7cad51efceda524d76160df8ce86530469fd3dd5))
+
 ## [1.5.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.4.1...v1.5.0) (2026-11-08)
 
 
