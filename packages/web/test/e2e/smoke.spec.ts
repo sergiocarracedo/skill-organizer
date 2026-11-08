@@ -31,10 +31,10 @@ test('social metadata is present on home and documentation pages', async ({ page
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
     const image = await page.locator('meta[property="og:image"]').getAttribute('content')
     await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', image!)
-    expect(image).toBe('https://skill-organizer.sireno.dev/og/skill-organizer-social.png')
-    const response = await request.get('/og/skill-organizer-social.png')
+    expect(image).toBe('https://skill-organizer.sireno.dev/og/skill-organizer-social-violet.jpg')
+    const response = await request.get('/og/skill-organizer-social-violet.jpg')
     expect(response.ok()).toBe(true)
-    expect(response.headers()['content-type']).toContain('image/png')
+    expect(response.headers()['content-type']).toContain('image/jpeg')
   }
 })
 
