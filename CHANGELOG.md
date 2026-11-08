@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0](https://github.com/sergiocarracedo/skill-organizer/compare/v1.4.1...v1.5.0) (2026-11-08)
+
+
+### Features
+
+* align website with Sireno design system ([1c8b0cd](https://github.com/sergiocarracedo/skill-organizer/commit/1c8b0cd8ab2ddd9b14f1d95be384b84c131fcb62))
+
 ## [1.4.1](https://github.com/sergiocarracedo/skill-organizer/compare/v1.4.0...v1.4.1) (2026-06-15)
 
 
